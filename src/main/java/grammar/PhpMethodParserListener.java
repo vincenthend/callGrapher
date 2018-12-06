@@ -54,9 +54,9 @@ public class PhpMethodParserListener extends PhpParserBaseListener {
   public void exitMemberAccess(PhpParser.MemberAccessContext ctx) {
     super.exitMemberAccess(ctx);
     if (ctx.actualArguments() != null) {
-//      System.out.printf("\nAnalyzing %s\n", ctx.getText());
+      //System.out.printf("\nAnalyzing %s\n", ctx.getText());
       String functionName = ctx.keyedFieldName().getText();
-      String callerName = ((PhpParser.ChainContext) ctx.parent).chainBase().getText();
+      String callerName = ((PhpParser.ChainContext) ctx.parent).getChild(0).getText();
       String className;
 
       if (callerName.equals("$this")) {
@@ -97,10 +97,14 @@ public class PhpMethodParserListener extends PhpParserBaseListener {
   }
 
   private String lookupVariableType(String varName) {
-    String type = varClass.get(varName);
-    while (type.startsWith("$")) {
-      type = varClass.get(type);
+    if(varClass.containsKey(varName)) {
+      String type = varClass.get(varName);
+      while (type.startsWith("$")) {
+        type = varClass.get(type);
+      }
+      return type;
+    } else {
+      return "unknown";
     }
-    return type;
   }
 }
