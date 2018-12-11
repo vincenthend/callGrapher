@@ -2,6 +2,7 @@ import analyzer.FileAnalyzer;
 import analyzer.FunctionAnalyzer;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,11 +54,12 @@ public class Main {
     jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
 
-    JGraphXAdapter jGraphXAdapter = new JGraphXAdapter(
-        fileAnalyzer.getProjectData().getCallGraph());
-    mxGraphComponent mxcomp = new mxGraphComponent(jGraphXAdapter);
-    mxHierarchicalLayout layout = new mxHierarchicalLayout(jGraphXAdapter);
-    layout.execute(jGraphXAdapter.getDefaultParent());
+    JGraphXAdapter jgxAdapter = new JGraphXAdapter(fileAnalyzer.getProjectData().getCallGraph());
+    mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
+
+    jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
+    mxHierarchicalLayout layout = new mxHierarchicalLayout(jgxAdapter);
+    layout.execute(jgxAdapter.getDefaultParent());
 
     jFrame.getContentPane().add(mxcomp);
     jFrame.setVisible(true);
