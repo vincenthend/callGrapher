@@ -1,37 +1,38 @@
 package model;
 
-import model.Function;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
 
 public class ProjectData {
-  public Map<String, Function> functionMap;
-  public List<Function> functionList;
+  private Map<String, Function> functionMap;
+  private Graph<Function, DefaultEdge> callGraph;
 
   public ProjectData() {
     functionMap = new HashMap<String, Function>();
-    functionList = new ArrayList<Function>();
+    callGraph = new DefaultDirectedGraph<Function, DefaultEdge>(DefaultEdge.class);
   }
 
   public void add(Function function){
-//    if(functionMap.containsKey(function.functionName)){
-//      functionMap.get(function.functionName).add(function);
-//    } else {
-//      functionList.add(function);
-//      functionMap.put(function.getCalledName(), function);
-//    }
-    functionList.add(function);
     functionMap.put(function.getCalledName(), function);
+    callGraph.addVertex(function);
+  }
+
+  public Graph<Function, DefaultEdge> getCallGraph() {
+    return callGraph;
+  }
+
+  public Map<String, Function> getFunctionMap() {
+    return functionMap;
   }
 
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    for(Function f : functionList){
+    for(Function f : callGraph.vertexSet()){
       stringBuilder.append(f.getCalledName());
       stringBuilder.append(", ");
     }

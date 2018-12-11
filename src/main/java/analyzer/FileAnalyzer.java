@@ -3,14 +3,14 @@ package analyzer;
 import grammar.PhpClassFunctionListener;
 import grammar.PhpLexer;
 import grammar.PhpParser;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 public class FileAnalyzer {
   public ProjectData projectData;
@@ -27,22 +27,8 @@ public class FileAnalyzer {
       sb.append(line);
       sb.append("\n");
     }
-    CharStream cs = CharStreams.fromString(sb.toString());
-
-    PhpClassFunctionListener listener = new PhpClassFunctionListener(projectData, cs);
-
-    // Tokenize and build parse tree
-    PhpLexer lexer = new PhpLexer(cs);
-    CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-    PhpParser parser = new PhpParser(tokens);
-    // Serialize object and Schedule
-    parser.addParseListener(listener);
-    try{
-      parser.htmlDocument();
-    } catch(Exception e){
-      System.out.println(e);
-    }
+    bufferedReader.close();
+    analyze(sb.toString());
   }
 
   public void analyze(String fileContent){

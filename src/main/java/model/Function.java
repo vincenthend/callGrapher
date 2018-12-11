@@ -1,22 +1,14 @@
 package model;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
-import com.sun.corba.se.impl.orbutil.graph.GraphImpl;
-
-import java.util.HashSet;
-
-public class Function {
+public class Function implements Comparable<Function>{
   public String functionName;
   public String code;
   public String className;
-  public HashSet<Function> connections;
-  public Function caller;
 
   public Function(String functionName, String className, String code){
     this.functionName = functionName;
     this.className = className;
     this.code = code;
-    connections = new HashSet<Function>();
   }
 
   public String getCalledName(){
@@ -29,4 +21,17 @@ public class Function {
     return sb.toString();
   }
 
+  @Override
+  public int compareTo(Function o) {
+    if(functionName.equals(o.functionName) && className.equals(o.className)){
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
+  @Override
+  public String toString() {
+    return getCalledName();
+  }
 }

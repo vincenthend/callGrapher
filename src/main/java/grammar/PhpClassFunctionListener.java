@@ -1,15 +1,13 @@
 package grammar;
 
-import grammar.PhpParser;
-import grammar.PhpParserBaseListener;
 import model.Function;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;
 
 public class PhpClassFunctionListener extends PhpParserBaseListener {
-  public ProjectData projectData;
-  public CharStream charStream;
+  private ProjectData projectData;
+  private CharStream charStream;
 
   public PhpClassFunctionListener(ProjectData projectData, CharStream charStream) {
     this.projectData = projectData;

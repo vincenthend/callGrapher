@@ -1,12 +1,9 @@
 package grammar;
 
-import grammar.PhpParser;
-import grammar.PhpParserBaseListener;
-import model.Function;
-import model.ProjectData;
-
 import java.util.HashMap;
 import java.util.Map;
+import model.Function;
+import model.ProjectData;
 
 public class PhpMethodParserListener extends PhpParserBaseListener {
   public Function function;
@@ -86,13 +83,13 @@ public class PhpMethodParserListener extends PhpParserBaseListener {
     String calledName = sb.append(functionName).toString();
 
     Function calledFunction;
-    if (!projectData.functionMap.containsKey(calledName)) {
-      calledFunction = new Function(functionName, className, "");
-      projectData.functionMap.put(calledFunction.getCalledName(), calledFunction);
+    if (!projectData.getFunctionMap().containsKey(calledName)) {
+      calledFunction = new Function(functionName, className, null);
+      projectData.add(calledFunction);
     } else {
-      calledFunction = projectData.functionMap.get(calledName);
+      calledFunction = projectData.getFunctionMap().get(calledName);
     }
-    function.connections.add(calledFunction);
+    projectData.getCallGraph().addEdge(function, calledFunction);
     System.out.printf("Connected %s with %s\n", function.getCalledName(), calledFunction.getCalledName());
   }
 
