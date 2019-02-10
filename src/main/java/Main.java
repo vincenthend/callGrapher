@@ -30,7 +30,7 @@ public class Main {
   }
 
   public static void main(String[] args) {
-    String path = "E:\\TA\\phpcallgraph-0.8.0\\test\\testfiles";
+    String path = ".\\testfile\\testfile.php";
     FileAnalyzer fileAnalyzer = new FileAnalyzer();
 
     File file = new File(path);
