@@ -1,16 +1,14 @@
 package analyzer;
 
 import grammar.PhpLexer;
-import grammar.PhpMethodParserListener;
+import grammar.PhpMethodParserVisitor;
 import grammar.PhpParser;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
 import model.Function;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 public class FunctionAnalyzer {
   private ProjectData projectData;
@@ -20,8 +18,8 @@ public class FunctionAnalyzer {
   }
 
   public void analyze(Function function) {
-    if(function.code != null) {
-      PhpMethodParserListener listener = new PhpMethodParserListener(function, projectData);
+    if (function.code != null) {
+      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor();
 
       // Read parser
       String input = "<?php " + function.code + "?>";
@@ -29,10 +27,10 @@ public class FunctionAnalyzer {
 
       // Tokenize and build parse tree
       PhpLexer lexer = new PhpLexer(cs);
-      CommonTokenStream tokens = new CommonTokenStream(lexer);
+      PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
+      ParseTree tree = parser.htmlDocument();
+      visitor.visit(tree);
 
-      PhpParser parser = new PhpParser(tokens);
-      parser.addParseListener(listener);
       try {
         parser.htmlDocument();
       } catch (Exception e) {
@@ -41,12 +39,11 @@ public class FunctionAnalyzer {
     }
   }
 
-  public void analyzeAll(){
-    Set<Function> funcSet = new TreeSet<Function>(projectData.getCallGraph().vertexSet());
-
-    Iterator<Function> iterator = funcSet.iterator();
-    while(iterator.hasNext()) {
-      analyze(iterator.next());
-    }
+  public void analyzeAll() {
+//    Set<Function> funcSet = new TreeSet<Function>(projectData.getControlFlowGraph().getGraph().vertexSet());
+//    Iterator<Function> iterator = funcSet.iterator();
+//    while(iterator.hasNext()) {
+//      analyze(iterator.next());
+//    }
   }
 }

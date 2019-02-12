@@ -54,7 +54,7 @@ public class Main {
     jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
 
-    JGraphXAdapter jgxAdapter = new JGraphXAdapter(fileAnalyzer.getProjectData().getCallGraph());
+    JGraphXAdapter jgxAdapter = new JGraphXAdapter(fileAnalyzer.getProjectData().getControlFlowGraph().getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");

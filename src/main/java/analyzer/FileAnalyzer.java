@@ -20,6 +20,7 @@ public class FileAnalyzer {
   }
 
   public void analyze(File file) throws IOException {
+    //TODO: Refactor this
     BufferedReader bufferedReader = new BufferedReader(new FileReader(file)); //read file
     StringBuilder sb = new StringBuilder();
     String line;

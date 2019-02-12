@@ -1,27 +1,21 @@
 package model;
 
+import model.statement.PhpStatement;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
 public class ProjectData {
   private Map<String, Function> functionMap;
-  private Graph<Function, DefaultEdge> callGraph;
+  private ControlFlowGraph controlFlowGraph;
 
   public ProjectData() {
     functionMap = new HashMap<String, Function>();
-    callGraph = new DefaultDirectedGraph<Function, DefaultEdge>(DefaultEdge.class);
+    controlFlowGraph = new ControlFlowGraph();
   }
 
-  public void add(Function function){
-    functionMap.put(function.getCalledName(), function);
-    callGraph.addVertex(function);
-  }
-
-  public Graph<Function, DefaultEdge> getCallGraph() {
-    return callGraph;
+  public ControlFlowGraph getControlFlowGraph() {
+    return controlFlowGraph;
   }
 
   public Map<String, Function> getFunctionMap() {
@@ -32,8 +26,8 @@ public class ProjectData {
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    for(Function f : callGraph.vertexSet()){
-      stringBuilder.append(f.getCalledName());
+    for(PhpStatement f : controlFlowGraph.getGraph().vertexSet()){
+      stringBuilder.append(f.toString());
       stringBuilder.append(", ");
     }
     stringBuilder.append("]");

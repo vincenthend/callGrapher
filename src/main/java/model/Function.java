@@ -4,6 +4,8 @@ public class Function implements Comparable<Function>{
   public String functionName;
   public String code;
   public String className;
+  public ControlFlowGraph graph;
+
 
   public Function(String functionName, String className, String code){
     this.functionName = functionName;
