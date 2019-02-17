@@ -16,6 +16,18 @@ public class PhpParserBaseListener implements PhpParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterStart(PhpParser.StartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitStart(PhpParser.StartContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterHtmlDocument(PhpParser.HtmlDocumentContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -1211,6 +1223,18 @@ public class PhpParserBaseListener implements PhpParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPostfixIncDecExpression(PhpParser.PostfixIncDecExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIncludeExpression(PhpParser.IncludeExpressionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIncludeExpression(PhpParser.IncludeExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

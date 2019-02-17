@@ -33,6 +33,7 @@ public class Main {
     String path = ".\\testfile\\testfile.php";
     FileAnalyzer fileAnalyzer = new FileAnalyzer();
 
+    // List all functions
     File file = new File(path);
     List<File> fileList = listFilesForFolder(file);
     for (File filePath : fileList) {
@@ -46,6 +47,7 @@ public class Main {
     System.out.println("==== Method list ====");
     System.out.println(fileAnalyzer.getProjectData().toString());
 
+    // Create call graph for all functions
     System.out.println("==== Call list ====");
     FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(fileAnalyzer.getProjectData());
     functionAnalyzer.analyzeAll();

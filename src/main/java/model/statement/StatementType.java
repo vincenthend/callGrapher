@@ -2,7 +2,7 @@ package model.statement;
 
 public enum StatementType {
   GENERAL,
-  ASSIGNMENT,
+  IGNORED,
   BRANCH,
   LOOP,
   FUNCTION_CALL,

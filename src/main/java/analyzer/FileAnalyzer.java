@@ -1,17 +1,22 @@
 package analyzer;
 
 import grammar.PhpClassFunctionListener;
-import grammar.PhpLexer;
-import grammar.PhpParser;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+
+import grammar.PhpLexer;
+import grammar.PhpParser;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+/**
+ * Analyzes files to find functions or methods listed in the file
+ */
 public class FileAnalyzer {
   public ProjectData projectData;
 

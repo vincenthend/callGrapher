@@ -1,6 +1,7 @@
 package model;
 
 import model.statement.PhpStatement;
+import org.jgrapht.Graphs;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +11,12 @@ public class ProjectData {
   private ControlFlowGraph controlFlowGraph;
 
   public ProjectData() {
-    functionMap = new HashMap<String, Function>();
+    functionMap = new HashMap<>();
     controlFlowGraph = new ControlFlowGraph();
+  }
+
+  public void add(Function function){
+    functionMap.put(function.getCalledName(), function);
   }
 
   public ControlFlowGraph getControlFlowGraph() {
@@ -26,11 +31,15 @@ public class ProjectData {
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    for(PhpStatement f : controlFlowGraph.getGraph().vertexSet()){
+    for(Function f : functionMap.values()){
       stringBuilder.append(f.toString());
       stringBuilder.append(", ");
     }
     stringBuilder.append("]");
     return stringBuilder.toString();
+  }
+
+  public void appendControlFlowGraph(ControlFlowGraph cfg) {
+    Graphs.addGraph(controlFlowGraph.getGraph(), cfg.getGraph());
   }
 }

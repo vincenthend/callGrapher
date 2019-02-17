@@ -8,6 +8,16 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface PhpParserListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link PhpParser#start}.
+	 * @param ctx the parse tree
+	 */
+	void enterStart(PhpParser.StartContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PhpParser#start}.
+	 * @param ctx the parse tree
+	 */
+	void exitStart(PhpParser.StartContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PhpParser#htmlDocument}.
 	 * @param ctx the parse tree
 	 */
@@ -1041,6 +1051,18 @@ public interface PhpParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPostfixIncDecExpression(PhpParser.PostfixIncDecExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code IncludeExpression}
+	 * labeled alternative in {@link PhpParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void enterIncludeExpression(PhpParser.IncludeExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code IncludeExpression}
+	 * labeled alternative in {@link PhpParser#expression}.
+	 * @param ctx the parse tree
+	 */
+	void exitIncludeExpression(PhpParser.IncludeExpressionContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code CastExpression}
 	 * labeled alternative in {@link PhpParser#expression}.

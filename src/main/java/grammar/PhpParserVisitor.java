@@ -1,3 +1,4 @@
+// Generated from E:/ITB Stuff/Tugas Akhir/callGrapher/grammar\PhpParser.g4 by ANTLR 4.7
 package grammar;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -9,6 +10,12 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * operations with no return type.
  */
 public interface PhpParserVisitor<T> extends ParseTreeVisitor<T> {
+	/**
+	 * Visit a parse tree produced by {@link PhpParser#start}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStart(PhpParser.StartContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PhpParser#htmlDocument}.
 	 * @param ctx the parse tree
@@ -626,6 +633,13 @@ public interface PhpParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPostfixIncDecExpression(PhpParser.PostfixIncDecExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code IncludeExpression}
+	 * labeled alternative in {@link PhpParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIncludeExpression(PhpParser.IncludeExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code CastExpression}
 	 * labeled alternative in {@link PhpParser#expression}.

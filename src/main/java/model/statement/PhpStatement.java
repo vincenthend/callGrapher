@@ -1,10 +1,12 @@
 package model.statement;
 
-public class PhpStatement {
+abstract public class PhpStatement {
   private StatementType statementType;
   private String statementContent;
 
-  public PhpStatement(String functionName, String className, String code) {
+  public PhpStatement(StatementType type, String code) {
+    this.statementType = type;
+    this.statementContent = code;
   }
 
   public StatementType getStatementType() {
@@ -13,5 +15,10 @@ public class PhpStatement {
 
   public String getStatementContent() {
     return statementContent;
+  }
+
+  @Override
+  public String toString() {
+    return this.statementType.toString() + ":::" + this.statementContent;
   }
 }
