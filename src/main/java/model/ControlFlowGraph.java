@@ -1,6 +1,5 @@
 package model;
 
-import model.statement.IgnoredStatement;
 import model.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
@@ -32,6 +31,10 @@ public class ControlFlowGraph {
     graph.addEdge(existing, new_vertex);
   }
 
+  public void connectExistingStatement(PhpStatement p, PhpStatement p1){
+    graph.addEdge(p, p1);
+  }
+
   public void addFirstStatement(PhpStatement a) {
     graph.addVertex(a);
     firstVertex = a;
@@ -44,10 +47,12 @@ public class ControlFlowGraph {
    * @param g
    */
   public void appendGraph(PhpStatement existing, ControlFlowGraph g){
-    Graphs.addGraph(graph, g.getGraph());
-    graph.addEdge(existing, g.firstVertex);
-    lastVertices.remove(existing);
-    lastVertices.addAll(g.lastVertices);
+    if(g != null && g.graph.vertexSet().size() != 0) {
+      Graphs.addGraph(graph, g.getGraph());
+      graph.addEdge(existing, g.firstVertex);
+      lastVertices.remove(existing);
+      lastVertices.addAll(g.lastVertices);
+    }
   }
 
   /**
@@ -56,12 +61,14 @@ public class ControlFlowGraph {
    * @param g
    */
   public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g){
-    Graphs.addGraph(graph, g.getGraph());
-    for(PhpStatement p : existing){
-      graph.addEdge(p, g.firstVertex);
-      lastVertices.remove(p);
+    if(g != null) {
+      Graphs.addGraph(graph, g.getGraph());
+      for (PhpStatement p : existing) {
+        graph.addEdge(p, g.firstVertex);
+        lastVertices.remove(p);
+      }
+      lastVertices.addAll(g.lastVertices);
     }
-    lastVertices.addAll(g.lastVertices);
   }
 
   /**
@@ -69,15 +76,21 @@ public class ControlFlowGraph {
    * @param g
    */
   public void appendGraph(ControlFlowGraph g){
-    Graphs.addGraph(graph, g.getGraph());
-    if(firstVertex == null){
-      firstVertex = g.firstVertex;
-    } else {
-      for(PhpStatement p : lastVertices){
-        graph.addEdge(p, g.firstVertex);
-        lastVertices.remove(p);
+    if(g != null) {
+      Graphs.addGraph(graph, g.getGraph());
+      if (firstVertex == null) {
+        firstVertex = g.firstVertex;
+      } else {
+        HashSet<PhpStatement> removeList = new HashSet<>();
+        if(g.firstVertex != null) {
+          for (PhpStatement p : lastVertices) {
+            graph.addEdge(p, g.firstVertex);
+            removeList.add(p);
+          }
+        }
+        lastVertices.removeAll(removeList);
       }
+      lastVertices.addAll(g.lastVertices);
     }
-    lastVertices.addAll(g.lastVertices);
   }
 }

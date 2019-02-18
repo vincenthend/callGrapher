@@ -1,9 +1,9 @@
 package model.statement;
 
 public enum StatementType {
-  GENERAL,
-  IGNORED,
   BRANCH,
-  LOOP,
+  EXPRESSION,
   FUNCTION_CALL,
+  GENERAL,
+  LOOP,
 }

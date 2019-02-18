@@ -1,8 +1,10 @@
 package grammar;
 
 import model.ControlFlowGraph;
+import model.Function;
 import model.statement.BranchStatement;
-import model.statement.GeneralStatement;
+import model.statement.ExpressionStatement;
+import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -11,14 +13,18 @@ import org.antlr.v4.runtime.misc.Interval;
 import java.util.Set;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
+  @Override
+  protected ControlFlowGraph defaultResult() {
+    return new ControlFlowGraph();
+  }
 
   @Override
   protected ControlFlowGraph aggregateResult(ControlFlowGraph aggregate, ControlFlowGraph nextResult) {
     ControlFlowGraph graph;
-    if(aggregate != null && nextResult != null){
+    if (aggregate != null && nextResult != null) {
       aggregate.appendGraph(nextResult);
       graph = aggregate;
-    } else if(aggregate == null){
+    } else if (aggregate == null) {
       graph = nextResult;
     } else {
       graph = aggregate;
@@ -26,7 +32,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     return graph;
   }
 
-  // ifStatement
   @Override
   public ControlFlowGraph visitIfStatement(PhpParser.IfStatementContext ctx) {
     System.out.println("ifStatement");
@@ -34,7 +39,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     // Add branch root
     CharStream input = ctx.start.getInputStream();
-    Interval interval = new Interval(ctx.parenthesis().start.getStartIndex(), ctx.parenthesis().stop.getStopIndex());
+    Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
     PhpStatement branchStatement = new BranchStatement(code);
     graph.addFirstStatement(branchStatement);
@@ -77,54 +82,279 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitForStatement(PhpParser.ForStatementContext ctx) {
-    System.out.println("forStatement");
-    return super.visitForStatement(ctx);
+    ControlFlowGraph init = visit(ctx.forInit());
+    ControlFlowGraph expression = visit(ctx.expressionList());
+    ControlFlowGraph update = visit(ctx.forUpdate());
+
+    ControlFlowGraph statement;
+    if(ctx.statement() != null){
+      statement = visit(ctx.statement());
+    } else {
+      statement = visit(ctx.innerStatementList());
+    }
+
+    init.appendGraph(expression);
+    init.appendGraph(statement);
+    init.appendGraph(update);
+
+    for(PhpStatement p : update.lastVertices) {
+      init.connectExistingStatement(p, init.firstVertex);
+    }
+    return init;
   }
 
   @Override
   public ControlFlowGraph visitForeachStatement(PhpParser.ForeachStatementContext ctx) {
     super.visitForeachStatement(ctx);
-    System.out.println("elseStatement");
     return super.visitForeachStatement(ctx);
   }
 
-  public ControlFlowGraph visitExpression(ParserRuleContext ctx){
+  @Override
+  public ControlFlowGraph visitWhileStatement(PhpParser.WhileStatementContext ctx) {
+    ControlFlowGraph init = visit(ctx.parenthesis());
+    ControlFlowGraph statement;
+    if(ctx.statement() != null){
+      statement = visit(ctx.statement());
+    } else {
+      statement = visit(ctx.innerStatementList());
+    }
+
+    init.appendGraph(statement);
+    for(PhpStatement p : init.lastVertices) {
+      init.connectExistingStatement(p, init.firstVertex);
+    }
+    return init;
+  }
+
+  @Override
+  public ControlFlowGraph visitDoWhileStatement(PhpParser.DoWhileStatementContext ctx) {
+    ControlFlowGraph init = visit(ctx.parenthesis());
+    ControlFlowGraph statement = visit(ctx.statement());
+
+    statement.appendGraph(init);
+    for(PhpStatement p : init.lastVertices) {
+      init.connectExistingStatement(p, statement.firstVertex);
+    }
+    return init;
+  }
+
+  @Override
+  public ControlFlowGraph visitFunctionCall(PhpParser.FunctionCallContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+    CharStream input = ctx.start.getInputStream();
+    Interval interval = new Interval(ctx.functionCallName().start.getStartIndex(), ctx.functionCallName().stop.getStopIndex());
+    String name = input.getText(interval);
+    graph.addFirstStatement(new FunctionCallStatement(new Function(name, "", "")));
+    return graph;
+  }
+
+  /* Handle Expressions */
+  private ControlFlowGraph visitExpression(ParserRuleContext ctx, String type) {
     ControlFlowGraph graph = new ControlFlowGraph();
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
     String code = input.getText(interval);
-    graph.addFirstStatement(new GeneralStatement(code));
+    graph.addFirstStatement(new ExpressionStatement(type, code));
     return graph;
   }
 
-
-  /* Handle Expressions */
-
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx);
-    return graph;
+    ControlFlowGraph childGraph = super.visitChainExpression(ctx);
+    if(ctx.chain().functionCall() == null) {
+      ControlFlowGraph graph = visitExpression(ctx, "chain");
+      graph.appendGraph(childGraph);
+      return graph;
+    } else {
+      return childGraph;
+    }
   }
 
   @Override
   public ControlFlowGraph visitComparisonExpression(PhpParser.ComparisonExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx);
-    return graph;
+    ControlFlowGraph graph = visitExpression(ctx, "comparison");
+    ControlFlowGraph childGraph = super.visitComparisonExpression(ctx);
+    childGraph.appendGraph(graph);
+    return childGraph;
   }
 
   @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx);
+    ControlFlowGraph graph = visitExpression(ctx, "assignment");
+    ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
+    childGraph.appendGraph(graph);
+    return childGraph;
+  }
+
+//  @Override
+//  public ControlFlowGraph visitScalarExpression(PhpParser.ScalarExpressionContext ctx) {
+//    ControlFlowGraph graph = visitExpression(ctx, "scalar");
+//    ControlFlowGraph childGraph = super.visitScalarExpression(ctx);
+//    graph.appendGraph(childGraph);
+//    return graph;
+//  }
+
+  @Override
+  public ControlFlowGraph visitUnaryOperatorExpression(PhpParser.UnaryOperatorExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "unaryop");
+    ControlFlowGraph childGraph = super.visitUnaryOperatorExpression(ctx);
+    graph.appendGraph(childGraph);
     return graph;
   }
 
   @Override
-  public ControlFlowGraph visitScalarExpression(PhpParser.ScalarExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx);
+  public ControlFlowGraph visitSpecialWordExpression(PhpParser.SpecialWordExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "specialword");
+    ControlFlowGraph childGraph = super.visitSpecialWordExpression(ctx);
+    graph.appendGraph(childGraph);
     return graph;
   }
 
-  //  whileStatement
+  @Override
+  public ControlFlowGraph visitArrayCreationExpression(PhpParser.ArrayCreationExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "arraycreation");
+    ControlFlowGraph childGraph = super.visitArrayCreationExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitNewExpression(PhpParser.NewExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "new");
+    ControlFlowGraph childGraph = super.visitNewExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitParenthesisExpression(PhpParser.ParenthesisExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "parenthesis");
+    ControlFlowGraph childGraph = super.visitParenthesisExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitBackQuoteStringExpression(PhpParser.BackQuoteStringExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "backquote");
+    ControlFlowGraph childGraph = super.visitBackQuoteStringExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitConditionalExpression(PhpParser.ConditionalExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "conditional");
+    ControlFlowGraph childGraph = super.visitConditionalExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "arithmetic");
+    ControlFlowGraph childGraph = super.visitArithmeticExpression(ctx);
+    childGraph.appendGraph(graph);
+    return childGraph;
+  }
+
+  @Override
+  public ControlFlowGraph visitIndexerExpression(PhpParser.IndexerExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "indexer");
+    ControlFlowGraph childGraph = super.visitIndexerExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitPrefixIncDecExpression(PhpParser.PrefixIncDecExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "incdec");
+    ControlFlowGraph childGraph = super.visitPrefixIncDecExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitLogicalExpression(PhpParser.LogicalExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "logical");
+    ControlFlowGraph childGraph = super.visitLogicalExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitPrintExpression(PhpParser.PrintExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "print");
+    ControlFlowGraph childGraph = super.visitPrintExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitPostfixIncDecExpression(PhpParser.PostfixIncDecExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "postfixincdec");
+    ControlFlowGraph childGraph = super.visitPostfixIncDecExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitIncludeExpression(PhpParser.IncludeExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "include");
+    ControlFlowGraph childGraph = super.visitIncludeExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitCastExpression(PhpParser.CastExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "cast");
+    ControlFlowGraph childGraph = super.visitCastExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitInstanceOfExpression(PhpParser.InstanceOfExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "instanceof");
+    ControlFlowGraph childGraph = super.visitInstanceOfExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitLambdaFunctionExpression(PhpParser.LambdaFunctionExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "lambda");
+    ControlFlowGraph childGraph = super.visitLambdaFunctionExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitBitwiseExpression(PhpParser.BitwiseExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "bitwise");
+    ControlFlowGraph childGraph = super.visitBitwiseExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitCloneExpression(PhpParser.CloneExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "clone");
+    ControlFlowGraph childGraph = super.visitCloneExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitYieldExpression(PhpParser.YieldExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "yield");
+    ControlFlowGraph childGraph = super.visitYieldExpression(ctx);
+    graph.appendGraph(childGraph);
+    return graph;
+  }
+
+//  whileStatement
 //  doWhileStatement
 //  forStatement
 //  switchStatement

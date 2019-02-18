@@ -4,7 +4,7 @@ abstract public class PhpStatement {
   private StatementType statementType;
   private String statementContent;
 
-  public PhpStatement(StatementType type, String code) {
+  PhpStatement(StatementType type, String code) {
     this.statementType = type;
     this.statementContent = code;
   }
@@ -19,6 +19,6 @@ abstract public class PhpStatement {
 
   @Override
   public String toString() {
-    return this.statementType.toString() + ":::" + this.statementContent;
+    return this.statementType.toString() + "::" + this.statementContent;
   }
 }

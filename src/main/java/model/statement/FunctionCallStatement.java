@@ -7,5 +7,11 @@ public class FunctionCallStatement extends PhpStatement {
 
   public FunctionCallStatement(Function function) {
     super(StatementType.FUNCTION_CALL, function.code);
+    this.function = function;
+  }
+
+  @Override
+  public String toString() {
+    return getStatementType() + "::" + function.getCalledName();
   }
 }
