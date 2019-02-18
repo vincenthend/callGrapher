@@ -25,7 +25,7 @@ public class FunctionAnalyzer {
 
   public void analyze(Function function) {
     if (function.code != null) {
-      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor();
+      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData);
 
       // Read parser
       String input = "<?php " + function.code + "?>";

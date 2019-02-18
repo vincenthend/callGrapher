@@ -2,6 +2,7 @@ package grammar;
 
 import model.ControlFlowGraph;
 import model.Function;
+import model.ProjectData;
 import model.statement.BranchStatement;
 import model.statement.ExpressionStatement;
 import model.statement.FunctionCallStatement;
@@ -10,9 +11,18 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
+  public ProjectData projectData;
+
+  public PhpMethodParserVisitor(ProjectData p) {
+    super();
+    projectData = p;
+  }
+
   @Override
   protected ControlFlowGraph defaultResult() {
     return new ControlFlowGraph();
@@ -21,10 +31,10 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   protected ControlFlowGraph aggregateResult(ControlFlowGraph aggregate, ControlFlowGraph nextResult) {
     ControlFlowGraph graph;
-    if (aggregate != null && nextResult != null) {
+    if(aggregate != null && nextResult != null){
       aggregate.appendGraph(nextResult);
       graph = aggregate;
-    } else if (aggregate == null) {
+    } else if(aggregate == null){
       graph = nextResult;
     } else {
       graph = aggregate;
@@ -59,8 +69,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     graph.appendGraph(par_statements, stat_graph);
 
     // Add root vertex
-    if (ctx.elseIfStatement().size() != 0) {
-      for (PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
+    if(ctx.elseIfStatement().size() != 0){
+      for(PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
         // Visit elseif's condition and append to previous conditions
         par_graph = visit(e.parenthesis().expression());
         graph.appendGraph(par_statements, par_graph);
@@ -70,13 +80,29 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
         stat_graph = visit(e.statement());
         graph.appendGraph(par_statements, stat_graph);
       }
+    } else if(ctx.elseIfColonStatement().size() != 0){
+      for(PhpParser.ElseIfColonStatementContext e : ctx.elseIfColonStatement()) {
+        // Visit elseif's condition and append to previous conditions
+        par_graph = visit(e.parenthesis().expression());
+        graph.appendGraph(par_statements, par_graph);
+        par_statements = par_graph.lastVertices;
+
+        // Visit block and append to conditions
+        stat_graph = visit(e.innerStatementList());
+        graph.appendGraph(par_statements, stat_graph);
+      }
     }
-    if (ctx.elseStatement() != null) {
+
+    if(ctx.elseStatement() != null){
+      stat_graph = visit(ctx.elseStatement().statement());
+      graph.appendGraph(par_statements, stat_graph);
+    } else if(ctx.elseColonStatement() != null){
       stat_graph = visit(ctx.elseStatement().statement());
       graph.appendGraph(par_statements, stat_graph);
     } else {
       graph.lastVertices.addAll(if_par_statements);
     }
+
     return graph;
   }
 
@@ -100,6 +126,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     for(PhpStatement p : update.lastVertices) {
       init.connectExistingStatement(p, init.firstVertex);
     }
+    init.lastVertices.removeAll(statement.lastVertices);
+    init.lastVertices.addAll(update.lastVertices);
     return init;
   }
 
@@ -113,6 +141,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   public ControlFlowGraph visitWhileStatement(PhpParser.WhileStatementContext ctx) {
     ControlFlowGraph init = visit(ctx.parenthesis());
     ControlFlowGraph statement;
+    Set<PhpStatement> initStatement = new HashSet<>();
+    initStatement.addAll(init.lastVertices);
     if(ctx.statement() != null){
       statement = visit(ctx.statement());
     } else {
@@ -123,6 +153,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     for(PhpStatement p : init.lastVertices) {
       init.connectExistingStatement(p, init.firstVertex);
     }
+
+    init.lastVertices.removeAll(statement.lastVertices);
+    init.lastVertices.addAll(initStatement);
     return init;
   }
 
@@ -133,9 +166,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     statement.appendGraph(init);
     for(PhpStatement p : init.lastVertices) {
-      init.connectExistingStatement(p, statement.firstVertex);
+      statement.connectExistingStatement(p, statement.firstVertex);
     }
-    return init;
+    return statement;
   }
 
   @Override
@@ -161,7 +194,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if(ctx.chain().functionCall() == null) {
+    if(ctx.chain().functionCall() == null){
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;
@@ -185,14 +218,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     childGraph.appendGraph(graph);
     return childGraph;
   }
-
-//  @Override
-//  public ControlFlowGraph visitScalarExpression(PhpParser.ScalarExpressionContext ctx) {
-//    ControlFlowGraph graph = visitExpression(ctx, "scalar");
-//    ControlFlowGraph childGraph = super.visitScalarExpression(ctx);
-//    graph.appendGraph(childGraph);
-//    return graph;
-//  }
 
   @Override
   public ControlFlowGraph visitUnaryOperatorExpression(PhpParser.UnaryOperatorExpressionContext ctx) {
@@ -230,8 +255,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   public ControlFlowGraph visitParenthesisExpression(PhpParser.ParenthesisExpressionContext ctx) {
     ControlFlowGraph graph = visitExpression(ctx, "parenthesis");
     ControlFlowGraph childGraph = super.visitParenthesisExpression(ctx);
-    graph.appendGraph(childGraph);
-    return graph;
+    childGraph.appendGraph(graph);
+    return childGraph;
   }
 
   @Override

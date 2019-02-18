@@ -1,11 +1,14 @@
 <?php
     class Foo{
         function getUser($username){
-            while($a+$b > 5){
-                while($c+$d < 4){
-                    meong();
+            if($a == (mysqli() > 5)){
+                gukguk();
+                while($a < $b){
+                    nyam();
                 }
+                meong();
             }
+            nyamm();
         }
     }
 ?>
