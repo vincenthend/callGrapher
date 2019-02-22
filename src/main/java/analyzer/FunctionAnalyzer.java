@@ -3,6 +3,7 @@ package analyzer;
 import grammar.PhpLexer;
 import grammar.PhpMethodParserVisitor;
 import grammar.PhpParser;
+import logger.Logger;
 import model.ControlFlowGraph;
 import model.Function;
 import model.ProjectData;
@@ -25,7 +26,8 @@ public class FunctionAnalyzer {
 
   public void analyze(Function function) {
     if (function.code != null) {
-      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData);
+      Logger.info("Visiting " + function.getCalledName());
+      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData, function.className);
 
       // Read parser
       String input = "<?php " + function.code + "?>";
@@ -35,7 +37,6 @@ public class FunctionAnalyzer {
       PhpLexer lexer = new PhpLexer(cs);
       PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
       ParseTree tree = parser.htmlDocument();
-      System.out.println(tree.toStringTree(parser));
       function.graph = visitor.visit(tree);
     }
   }

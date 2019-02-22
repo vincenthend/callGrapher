@@ -11,16 +11,18 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   public ProjectData projectData;
+  public Map<String, String> variableMap;
+  public String currentClass;
 
-  public PhpMethodParserVisitor(ProjectData p) {
+  public PhpMethodParserVisitor(ProjectData p, String currentClass) {
     super();
-    projectData = p;
+    this.projectData = p;
+    this.currentClass = currentClass;
+    variableMap = new HashMap<>();
   }
 
   @Override
@@ -44,7 +46,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitIfStatement(PhpParser.IfStatementContext ctx) {
-    System.out.println("ifStatement");
     ControlFlowGraph graph = new ControlFlowGraph();
 
     // Add branch root
@@ -52,7 +53,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
     PhpStatement branchStatement = new BranchStatement(code);
-    graph.addFirstStatement(branchStatement);
+    graph.addStatement(branchStatement);
 
     ControlFlowGraph par_graph;
     ControlFlowGraph stat_graph;
@@ -124,7 +125,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     init.appendGraph(update);
 
     for(PhpStatement p : update.lastVertices) {
-      init.connectExistingStatement(p, init.firstVertex);
+      init.addStatement(p, init.firstVertex);
     }
     init.lastVertices.removeAll(statement.lastVertices);
     init.lastVertices.addAll(update.lastVertices);
@@ -151,7 +152,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     init.appendGraph(statement);
     for(PhpStatement p : init.lastVertices) {
-      init.connectExistingStatement(p, init.firstVertex);
+      init.addStatement(p, init.firstVertex);
     }
 
     init.lastVertices.removeAll(statement.lastVertices);
@@ -166,7 +167,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     statement.appendGraph(init);
     for(PhpStatement p : init.lastVertices) {
-      statement.connectExistingStatement(p, statement.firstVertex);
+      statement.addStatement(p, statement.firstVertex);
     }
     return statement;
   }
@@ -177,7 +178,35 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.functionCallName().start.getStartIndex(), ctx.functionCallName().stop.getStopIndex());
     String name = input.getText(interval);
-    graph.addFirstStatement(new FunctionCallStatement(new Function(name, "", "")));
+
+    graph.addStatement(new FunctionCallStatement(new Function(name, "", "")));
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitMemberAccess(PhpParser.MemberAccessContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+    if(ctx.actualArguments() != null) {
+      PhpParser.ChainContext chain_ctx = (PhpParser.ChainContext) ctx.getParent();
+      String var_name = chain_ctx.chainBase().getText();
+      String caller_class;
+      if (var_name.equals("$this")) {
+        caller_class = this.currentClass;
+      } else {
+        caller_class = variableMap.get(var_name);
+      }
+
+      // Get function graph
+      Function function = new Function(ctx.keyedFieldName().getText(), caller_class, "");
+      if (projectData.getFunctionMap().containsKey(function.getCalledName())) {
+        function = projectData.getFunctionMap().get(function.getCalledName());
+      }
+
+      graph.addStatement(new FunctionCallStatement(function));
+    } else {
+      graph = visitExpression(ctx, "member");
+    }
+
     return graph;
   }
 
@@ -187,7 +216,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.start.getStartIndex(), ctx.stop.getStopIndex());
     String code = input.getText(interval);
-    graph.addFirstStatement(new ExpressionStatement(type, code));
+    graph.addStatement(new ExpressionStatement(type, code));
     return graph;
   }
 
@@ -216,6 +245,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph graph = visitExpression(ctx, "assignment");
     ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
     childGraph.appendGraph(graph);
+
+    String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
+    variableMap.put(ctx.chain(0).getText(), assignedType);
     return childGraph;
   }
 
@@ -249,14 +281,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitNewExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }
-
-  @Override
-  public ControlFlowGraph visitParenthesisExpression(PhpParser.ParenthesisExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx, "parenthesis");
-    ControlFlowGraph childGraph = super.visitParenthesisExpression(ctx);
-    childGraph.appendGraph(graph);
-    return childGraph;
   }
 
   @Override

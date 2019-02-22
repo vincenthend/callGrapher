@@ -24,18 +24,18 @@ public class ControlFlowGraph {
     return graph;
   }
 
-  public void connectStatement(PhpStatement existing, PhpStatement new_vertex) {
-    graph.addVertex(new_vertex);
-    lastVertices.add(new_vertex);
-    lastVertices.remove(existing);
-    graph.addEdge(existing, new_vertex);
+  public void addStatement(PhpStatement p, PhpStatement p1) {
+    if(graph.vertexSet().contains(p1)) {
+      graph.addEdge(p, p1);
+    } else {
+      graph.addVertex(p1);
+      lastVertices.add(p1);
+      lastVertices.remove(p);
+      graph.addEdge(p, p1);
+    }
   }
 
-  public void connectExistingStatement(PhpStatement p, PhpStatement p1){
-    graph.addEdge(p, p1);
-  }
-
-  public void addFirstStatement(PhpStatement a) {
+  public void addStatement(PhpStatement a) {
     graph.addVertex(a);
     firstVertex = a;
     lastVertices.add(a);

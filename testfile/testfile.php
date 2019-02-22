@@ -2,13 +2,16 @@
     class Foo{
         function getUser($username){
             if($a == (mysqli() > 5)){
-                gukguk();
                 while($a < $b){
                     nyam();
                 }
-                meong();
+                $this->zeong();
             }
             nyamm();
+        }
+
+        function zeong(){
+            gukguk();
         }
     }
 ?>
