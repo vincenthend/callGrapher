@@ -11,4 +11,11 @@ public class ExpressionStatement extends PhpStatement {
   public String toString() {
     return super.toString()+" ["+expressionType+"]";
   }
+
+  @Override
+  public ExpressionStatement clone() throws CloneNotSupportedException {
+    ExpressionStatement statement = (ExpressionStatement) super.clone();
+    statement.expressionType = this.expressionType;
+    return statement;
+  }
 }

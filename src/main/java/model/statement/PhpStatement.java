@@ -1,6 +1,6 @@
 package model.statement;
 
-abstract public class PhpStatement {
+abstract public class PhpStatement implements Cloneable {
   private StatementType statementType;
   private String statementContent;
 
@@ -20,5 +20,13 @@ abstract public class PhpStatement {
   @Override
   public String toString() {
     return "["+this.statementType.toString() + "] " + this.statementContent;
+  }
+
+  @Override
+  public PhpStatement clone() throws CloneNotSupportedException {
+    PhpStatement phpStatement = (PhpStatement) super.clone();
+    phpStatement.statementType = this.statementType;
+    phpStatement.statementContent = this.statementContent;
+    return phpStatement;
   }
 }

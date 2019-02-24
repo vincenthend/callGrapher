@@ -1,15 +1,17 @@
 package model;
 
+import logger.Logger;
+import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleDirectedWeightedGraph;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-public class ControlFlowGraph {
+public class ControlFlowGraph implements Cloneable {
   public Graph<PhpStatement, DefaultEdge> graph;
   public Set<PhpStatement> lastVertices;
   public PhpStatement firstVertex;
@@ -92,5 +94,75 @@ public class ControlFlowGraph {
       }
       lastVertices.addAll(g.lastVertices);
     }
+  }
+
+  public static void normalizeFunctionCall(ControlFlowGraph cfg){
+    // Find FunctionCallStatement
+    for(Object object : cfg.getGraph().vertexSet().toArray()){
+      PhpStatement phpStatement = (PhpStatement) object;
+      if(phpStatement instanceof FunctionCallStatement){
+        if(((FunctionCallStatement) phpStatement).getFunction().graph != null) {
+          List<PhpStatement> predList = Graphs.predecessorListOf(cfg.getGraph(), phpStatement);
+          List<PhpStatement> succList = Graphs.successorListOf(cfg.getGraph(), phpStatement);
+          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().graph;
+
+          try {
+            ControlFlowGraph functionGraphClone = functionGraph.clone();
+            normalizeFunctionCall(functionGraphClone);
+            Graphs.addGraph(cfg.graph, functionGraphClone.graph);
+
+            // Connect predecessor to first vertex
+            for (PhpStatement predStat : predList) {
+              cfg.graph.addEdge(predStat, functionGraphClone.firstVertex);
+            }
+            // Connect successors to last vertex
+            for (PhpStatement succStat : succList) {
+              for (PhpStatement lastVertex : functionGraphClone.lastVertices) {
+                cfg.graph.addEdge(lastVertex, succStat);
+              }
+            }
+            // Remove function call
+            cfg.getGraph().removeVertex(phpStatement);
+            if(cfg.lastVertices.contains(phpStatement)){
+              cfg.lastVertices.addAll(functionGraphClone.lastVertices);
+              cfg.lastVertices.remove(phpStatement);
+            }
+            if(cfg.firstVertex == phpStatement){
+              cfg.firstVertex = functionGraphClone.firstVertex;
+            }
+          } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public ControlFlowGraph clone() throws CloneNotSupportedException{
+    ControlFlowGraph cfg = (ControlFlowGraph) super.clone();
+
+    Graph<PhpStatement,DefaultEdge> graphClone = new DefaultDirectedGraph<PhpStatement, DefaultEdge>(DefaultEdge.class);
+    Map<PhpStatement,PhpStatement> map = new HashMap<>();
+    for(PhpStatement p : graph.vertexSet()){
+      PhpStatement cloneStatement = p.clone();
+      map.put(p, cloneStatement);
+      graphClone.addVertex(cloneStatement);
+    }
+
+    for(DefaultEdge e : graph.edgeSet()){
+      PhpStatement sourceStat = graph.getEdgeSource(e);
+      PhpStatement targetStat = graph.getEdgeTarget(e);
+      graphClone.addEdge(map.get(sourceStat), map.get(targetStat));
+    }
+
+    cfg.graph = graphClone;
+    cfg.firstVertex = map.get(firstVertex);
+    cfg.lastVertices = new HashSet<>();
+    for(PhpStatement l : lastVertices) {
+      cfg.lastVertices.add(map.get(l));
+    }
+
+    return cfg;
   }
 }

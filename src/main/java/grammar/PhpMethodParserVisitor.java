@@ -201,8 +201,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       if (projectData.getFunctionMap().containsKey(function.getCalledName())) {
         function = projectData.getFunctionMap().get(function.getCalledName());
       }
-
       graph.addStatement(new FunctionCallStatement(function));
+
     } else {
       graph = visitExpression(ctx, "member");
     }
@@ -223,7 +223,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if(ctx.chain().functionCall() == null){
+    if(ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() == 0){
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;

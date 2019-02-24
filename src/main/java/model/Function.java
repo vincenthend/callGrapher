@@ -1,7 +1,7 @@
 package model;
 
 public class Function implements Comparable<Function>{
-  public String functionName;
+  private String functionName;
   public String code;
   public String className;
   public ControlFlowGraph graph;

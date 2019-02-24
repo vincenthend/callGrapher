@@ -7,7 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.naming.ldap.Control;
 import javax.swing.JFrame;
+
+import logger.Logger;
+import model.ControlFlowGraph;
 import org.jgrapht.ext.JGraphXAdapter;
 
 public class Main {
@@ -56,6 +60,8 @@ public class Main {
     jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
 
+    Logger.info("Normalizing functions");
+    ControlFlowGraph.normalizeFunctionCall(fileAnalyzer.getProjectData().getControlFlowGraph());
     JGraphXAdapter jgxAdapter = new JGraphXAdapter(fileAnalyzer.getProjectData().getControlFlowGraph().getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 

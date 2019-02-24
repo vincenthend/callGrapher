@@ -10,8 +10,19 @@ public class FunctionCallStatement extends PhpStatement {
     this.function = function;
   }
 
+  public Function getFunction() {
+    return function;
+  }
+
   @Override
   public String toString() {
     return "[" + getStatementType() + "] " + function.getCalledName();
+  }
+
+  @Override
+  public FunctionCallStatement clone() throws CloneNotSupportedException {
+    FunctionCallStatement statement = (FunctionCallStatement) super.clone();
+    statement.function = function;
+    return statement;
   }
 }
