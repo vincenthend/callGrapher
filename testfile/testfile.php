@@ -1,8 +1,18 @@
 <?php
     class Foo{
+        function __construct(){
+            connnnssstru();
+        }
+
         function getUser($username){
+            $a = new Foo();
             getus();
-            $this->beong();
+            while($a < $b){
+                $this->beong();
+                if($a < 5){
+                    $this->zeong();
+                }
+            }
             nyamm();
         }
 

@@ -5,6 +5,7 @@ public class Function implements Comparable<Function>{
   public String code;
   public String className;
   public ControlFlowGraph graph;
+  public String returnedType;
 
 
   public Function(String functionName, String className, String code){

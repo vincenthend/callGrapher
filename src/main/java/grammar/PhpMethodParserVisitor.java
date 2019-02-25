@@ -233,6 +233,21 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   }
 
   @Override
+  public ControlFlowGraph visitNewExpr(PhpParser.NewExprContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+    CharStream input = ctx.start.getInputStream();
+    Interval interval = new Interval(ctx.typeRef().start.getStartIndex(), ctx.typeRef().stop.getStopIndex());
+    String name = input.getText(interval);
+
+    Function function = new Function("__construct", name, "");
+    if (projectData.getFunctionMap().containsKey(function.getCalledName())) {
+      function = projectData.getFunctionMap().get(function.getCalledName());
+    }
+    graph.addStatement(new FunctionCallStatement(function));
+    return graph;
+  }
+
+  @Override
   public ControlFlowGraph visitComparisonExpression(PhpParser.ComparisonExpressionContext ctx) {
     ControlFlowGraph graph = visitExpression(ctx, "comparison");
     ControlFlowGraph childGraph = super.visitComparisonExpression(ctx);

@@ -18,9 +18,11 @@ import java.util.Set;
 
 public class PhpAssignedTypeVisitor extends PhpParserBaseVisitor<String> {
   public ProjectData projectData;
+  public Map<String, String> tempVariableMap;
 
   public PhpAssignedTypeVisitor(ProjectData projectData) {
     this.projectData = projectData;
+    this.tempVariableMap = new HashMap<>();
   }
 
   @Override
@@ -35,6 +37,12 @@ public class PhpAssignedTypeVisitor extends PhpParserBaseVisitor<String> {
 
   @Override
   public String visitFunctionCallName(PhpParser.FunctionCallNameContext ctx) {
+    //projectData.getFunctionMap().get(ctx.)
     return super.visitFunctionCallName(ctx);
+  }
+
+  @Override
+  public String visitNewExpression(PhpParser.NewExpressionContext ctx) {
+    return ctx.newExpr().typeRef().getText();
   }
 }

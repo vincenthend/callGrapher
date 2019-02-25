@@ -12,7 +12,10 @@ import javax.swing.JFrame;
 
 import logger.Logger;
 import model.ControlFlowGraph;
+import model.statement.PhpStatement;
+import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
+import org.jgrapht.graph.DefaultEdge;
 
 public class Main {
 
@@ -34,18 +37,21 @@ public class Main {
   }
 
   public static void main(String[] args) {
+    // Parameters
     String path = ".\\testfile\\testfile.php";
-    FileAnalyzer fileAnalyzer = new FileAnalyzer();
+    boolean normalizeFunc = true;
+    String shownClass = "Foo::getUser";
 
     // List all functions
     File file = new File(path);
     List<File> fileList = listFilesForFolder(file);
+    FileAnalyzer fileAnalyzer = new FileAnalyzer();
     for (File filePath : fileList) {
-      System.out.println("Analyzing " + filePath);
+      Logger.info("Analyzing " + filePath);
       try {
         fileAnalyzer.analyze(filePath);
       } catch (IOException e) {
-        System.out.printf("File %s not found", filePath.getAbsolutePath());
+        Logger.error("File %s not found " + filePath.getAbsolutePath());
       }
     }
     System.out.println("==== Method list ====");
@@ -60,9 +66,20 @@ public class Main {
     jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
 
-    Logger.info("Normalizing functions");
-    ControlFlowGraph.normalizeFunctionCall(fileAnalyzer.getProjectData().getControlFlowGraph());
-    JGraphXAdapter jgxAdapter = new JGraphXAdapter(fileAnalyzer.getProjectData().getControlFlowGraph().getGraph());
+    ControlFlowGraph cfg;
+    if(shownClass == null) {
+      cfg = fileAnalyzer.getProjectData().getControlFlowGraph();
+    } else {
+      cfg = fileAnalyzer.getProjectData().getFunctionMap().get(shownClass).graph;
+    }
+
+
+    if(normalizeFunc) {
+      Logger.info("Normalizing functions");
+      ControlFlowGraph.normalizeFunctionCall(cfg);
+    }
+
+    JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfg.getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
