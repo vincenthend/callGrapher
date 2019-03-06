@@ -1,15 +1,16 @@
 package model;
 
-import logger.Logger;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedWeightedGraph;
-
-import java.util.*;
 
 public class ControlFlowGraph implements Cloneable {
   public Graph<PhpStatement, DefaultEdge> graph;
@@ -108,7 +109,7 @@ public class ControlFlowGraph implements Cloneable {
 
           try {
             ControlFlowGraph functionGraphClone = functionGraph.clone();
-            normalizeFunctionCall(functionGraphClone);
+            normalizeFunctionCall(functionGraph);
             Graphs.addGraph(cfg.graph, functionGraphClone.graph);
 
             // Connect predecessor to first vertex

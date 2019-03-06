@@ -2,20 +2,19 @@ import analyzer.FileAnalyzer;
 import analyzer.FunctionAnalyzer;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxConstants;
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.naming.ldap.Control;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-
 import logger.Logger;
 import model.ControlFlowGraph;
-import model.statement.PhpStatement;
-import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultEdge;
 
 public class Main {
 
@@ -38,9 +37,9 @@ public class Main {
 
   public static void main(String[] args) {
     // Parameters
-    String path = ".\\testfile\\testfile.php";
+    String path = ".\\testfile\\";
     boolean normalizeFunc = true;
-    String shownClass = "Foo::getUser";
+    String shownClass = null;
 
     // List all functions
     File file = new File(path);
@@ -62,10 +61,6 @@ public class Main {
     FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(fileAnalyzer.getProjectData());
     functionAnalyzer.analyzeAll();
 
-    JFrame jFrame = new JFrame();
-    jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    jFrame.setSize(400, 320);
-
     ControlFlowGraph cfg;
     if(shownClass == null) {
       cfg = fileAnalyzer.getProjectData().getControlFlowGraph();
@@ -79,12 +74,25 @@ public class Main {
       ControlFlowGraph.normalizeFunctionCall(cfg);
     }
 
+    Logger.info("Drawing graphs");
+    JFrame jFrame = new JFrame();
+    jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    jFrame.setSize(400, 320);
     JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfg.getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
     mxHierarchicalLayout layout = new mxHierarchicalLayout(jgxAdapter);
     layout.execute(jgxAdapter.getDefaultParent());
+
+    //Save Image
+    BufferedImage image = mxCellRenderer
+        .createBufferedImage(mxcomp.getGraph(), null, 1, Color.WHITE, true, null);
+    try {
+      ImageIO.write(image, "PNG", new File("D:\\graph.png"));
+    } catch(IOException e) {
+      e.printStackTrace();
+    }
 
     jFrame.getContentPane().add(mxcomp);
     jFrame.setVisible(true);
