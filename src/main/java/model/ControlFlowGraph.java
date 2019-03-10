@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import logger.Logger;
 import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
 import org.jgrapht.Graph;
@@ -40,7 +42,17 @@ public class ControlFlowGraph implements Cloneable {
 
   public void addStatement(PhpStatement a) {
     graph.addVertex(a);
-    firstVertex = a;
+
+    if(lastVertices.size() == 0 && firstVertex == null) {
+      firstVertex = a;
+    } else {
+      PhpStatement[] phpStatements = (PhpStatement[]) lastVertices.toArray();
+      for(PhpStatement statement : phpStatements){
+        graph.addEdge(statement, a);
+        lastVertices.remove(statement);
+      }
+    }
+
     lastVertices.add(a);
   }
 
@@ -102,14 +114,14 @@ public class ControlFlowGraph implements Cloneable {
     for(Object object : cfg.getGraph().vertexSet().toArray()){
       PhpStatement phpStatement = (PhpStatement) object;
       if(phpStatement instanceof FunctionCallStatement){
-        if(((FunctionCallStatement) phpStatement).getFunction().graph != null) {
+        if(((FunctionCallStatement) phpStatement).getFunction().getGraph() != null) {
           List<PhpStatement> predList = Graphs.predecessorListOf(cfg.getGraph(), phpStatement);
           List<PhpStatement> succList = Graphs.successorListOf(cfg.getGraph(), phpStatement);
-          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().graph;
+          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().getGraph();
 
           try {
-            ControlFlowGraph functionGraphClone = functionGraph.clone();
             normalizeFunctionCall(functionGraph);
+            ControlFlowGraph functionGraphClone = functionGraph.clone();
             Graphs.addGraph(cfg.graph, functionGraphClone.graph);
 
             // Connect predecessor to first vertex

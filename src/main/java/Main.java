@@ -39,7 +39,7 @@ public class Main {
     // Parameters
     String path = ".\\testfile\\";
     boolean normalizeFunc = true;
-    String shownClass = null;
+    String shownFunction = null;
 
     // List all functions
     File file = new File(path);
@@ -62,10 +62,10 @@ public class Main {
     functionAnalyzer.analyzeAll();
 
     ControlFlowGraph cfg;
-    if(shownClass == null) {
+    if(shownFunction == null) {
       cfg = fileAnalyzer.getProjectData().getControlFlowGraph();
     } else {
-      cfg = fileAnalyzer.getProjectData().getFunctionMap().get(shownClass).graph;
+      cfg = fileAnalyzer.getProjectData().getFunction(shownFunction).getGraph();
     }
 
 

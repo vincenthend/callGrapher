@@ -1,37 +1,57 @@
 package model;
 
-import model.statement.PhpStatement;
 import org.jgrapht.Graphs;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * PhpClass ProjectData saves data of the project (PhpClass, PhpFunction, CFG, etc)
+ */
 public class ProjectData {
-  private Map<String, Function> functionMap;
+  private Map<String, PhpFunction> functionMap;
+  private Map<String, PhpClass> classMap;
   private ControlFlowGraph controlFlowGraph;
 
   public ProjectData() {
     functionMap = new HashMap<>();
+    classMap = new HashMap<>();
     controlFlowGraph = new ControlFlowGraph();
-  }
-
-  public void add(Function function){
-    functionMap.put(function.getCalledName(), function);
   }
 
   public ControlFlowGraph getControlFlowGraph() {
     return controlFlowGraph;
   }
 
-  public Map<String, Function> getFunctionMap() {
+  public Map<String, PhpFunction> getFunctionMap() {
     return functionMap;
+  }
+
+  public Map<String, PhpClass> getClassDataMap() {
+    return classMap;
+  }
+
+  public PhpClass getClass(String className) {
+    return (classMap.containsKey(className)) ? classMap.get(className) : null;
+  }
+
+  public PhpFunction getFunction(String functionCalledName) {
+    return (functionMap.containsKey(functionCalledName)) ? functionMap.get(functionCalledName) : null;
+  }
+
+  public void addFunction(PhpFunction f) {
+    functionMap.put(f.getCalledName(), f);
+  }
+
+  public void addClass(PhpClass c) {
+    classMap.put(c.getClassName(), c);
   }
 
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
     stringBuilder.append("[");
-    for(Function f : functionMap.values()){
+    for (PhpFunction f : functionMap.values()) {
       stringBuilder.append(f.toString());
       stringBuilder.append(", ");
     }

@@ -1,7 +1,9 @@
 package grammar;
 
+import logger.Logger;
 import model.ControlFlowGraph;
-import model.Function;
+import model.PhpClass;
+import model.PhpFunction;
 import model.ProjectData;
 import model.statement.BranchStatement;
 import model.statement.ExpressionStatement;
@@ -16,9 +18,9 @@ import java.util.*;
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   public ProjectData projectData;
   public Map<String, String> variableMap;
-  public String currentClass;
+  public PhpClass currentClass;
 
-  public PhpMethodParserVisitor(ProjectData p, String currentClass) {
+  public PhpMethodParserVisitor(ProjectData p, PhpClass currentClass) {
     super();
     this.projectData = p;
     this.currentClass = currentClass;
@@ -179,34 +181,60 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.functionCallName().start.getStartIndex(), ctx.functionCallName().stop.getStopIndex());
     String name = input.getText(interval);
 
-    graph.addStatement(new FunctionCallStatement(new Function(name, "", "")));
+    graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "")));
     return graph;
   }
 
   @Override
   public ControlFlowGraph visitMemberAccess(PhpParser.MemberAccessContext ctx) {
     ControlFlowGraph graph = new ControlFlowGraph();
-    if(ctx.actualArguments() != null) {
+    if(ctx.actualArguments() != null) { // Method access by member
       PhpParser.ChainContext chain_ctx = (PhpParser.ChainContext) ctx.getParent();
       String var_name = chain_ctx.chainBase().getText();
       String caller_class;
       if (var_name.equals("$this")) {
-        caller_class = this.currentClass;
+        caller_class = this.currentClass.getClassName();
+      } else if(currentClass.getAttributeMap().containsKey(var_name)){
+        caller_class = currentClass.getAttributeMap().get(var_name).get(0);
       } else {
         caller_class = variableMap.get(var_name);
       }
 
-      // Get function graph
-      Function function = new Function(ctx.keyedFieldName().getText(), caller_class, "");
-      if (projectData.getFunctionMap().containsKey(function.getCalledName())) {
-        function = projectData.getFunctionMap().get(function.getCalledName());
+      if(chain_ctx.memberAccess().size() != 1){
+        // Find chain type
+        List<PhpParser.MemberAccessContext> memberList = chain_ctx.memberAccess();
+        int i = 0;
+        boolean stop = false;
+        while(memberList.get(i) != ctx && !stop){
+          PhpClass phpClass = projectData.getClass(caller_class);
+          if(phpClass != null){
+            //TODO : Fix Here, what if it hasn't been parsed
+            List<String> attrMap = phpClass.getAttributeMap().get("$"+memberList.get(i).keyedFieldName().getText());
+            if(attrMap != null && attrMap.size() != 0) {
+              caller_class = attrMap.get(0);
+            } else {
+              caller_class = "";
+              stop = true;
+            }
+            i++;
+          } else {
+            caller_class = "";
+            stop = true;
+          }
+        }
       }
-      graph.addStatement(new FunctionCallStatement(function));
 
-    } else {
+      // Get function graph
+      PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), caller_class, "");
+      PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
+      if (phpFunction != null) {
+        graph.addStatement(new FunctionCallStatement(phpFunction));
+      } else {
+        graph.addStatement(new FunctionCallStatement(temp_func));
+      }
+    } else { // Variable access by member
       graph = visitExpression(ctx, "member");
     }
-
     return graph;
   }
 
@@ -239,11 +267,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.typeRef().start.getStartIndex(), ctx.typeRef().stop.getStopIndex());
     String name = input.getText(interval);
 
-    Function function = new Function("__construct", name, "");
-    if (projectData.getFunctionMap().containsKey(function.getCalledName())) {
-      function = projectData.getFunctionMap().get(function.getCalledName());
+    PhpFunction temp_func = new PhpFunction("__construct", name, "");
+    PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
+    if (phpFunction == null) {
+      graph.addStatement(new FunctionCallStatement(temp_func));
     }
-    graph.addStatement(new FunctionCallStatement(function));
     return graph;
   }
 
@@ -261,8 +289,15 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
     childGraph.appendGraph(graph);
 
+    String variableName = ctx.chain(0).getText();
     String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
-    variableMap.put(ctx.chain(0).getText(), assignedType);
+    PhpClass c = currentClass;
+    //TODO : Fix if attribute is chaining
+    if(c.getAttributeMap().containsKey(variableName)){
+      c.getAttributeMap().get(variableName).add(assignedType);
+    } else {
+      variableMap.put(variableName, assignedType);
+    }
     return childGraph;
   }
 

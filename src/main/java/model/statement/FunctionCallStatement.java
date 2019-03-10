@@ -1,16 +1,16 @@
 package model.statement;
 
-import model.Function;
+import model.PhpFunction;
 
 public class FunctionCallStatement extends PhpStatement {
-  Function function;
+  PhpFunction function;
 
-  public FunctionCallStatement(Function function) {
-    super(StatementType.FUNCTION_CALL, function.code);
+  public FunctionCallStatement(PhpFunction function) {
+    super(StatementType.FUNCTION_CALL, function.getCode());
     this.function = function;
   }
 
-  public Function getFunction() {
+  public PhpFunction getFunction() {
     return function;
   }
 

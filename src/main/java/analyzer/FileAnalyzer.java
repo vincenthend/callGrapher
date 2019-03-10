@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import grammar.PhpLexer;
 import grammar.PhpParser;
+import logger.Logger;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -51,7 +52,7 @@ public class FileAnalyzer {
     try{
       parser.htmlDocument();
     } catch(Exception e){
-      System.out.println("[ERROR] "+e);
+      Logger.error(e.getMessage());
     }
   }
 
