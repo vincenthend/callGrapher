@@ -1,4 +1,4 @@
-import analyzer.FileAnalyzer;
+import analyzer.ClassAnalyzer;
 import analyzer.FunctionAnalyzer;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
+import javax.swing.*;
+
 import logger.Logger;
 import model.ControlFlowGraph;
+import model.ProjectData;
 import org.jgrapht.ext.JGraphXAdapter;
 
 public class Main {
@@ -41,31 +43,33 @@ public class Main {
     boolean normalizeFunc = true;
     String shownFunction = null;
 
+    ProjectData projectData = new ProjectData();
+    ClassAnalyzer classAnalyzer = new ClassAnalyzer(projectData);
+
     // List all functions
     File file = new File(path);
     List<File> fileList = listFilesForFolder(file);
-    FileAnalyzer fileAnalyzer = new FileAnalyzer();
     for (File filePath : fileList) {
       Logger.info("Analyzing " + filePath);
       try {
-        fileAnalyzer.analyze(filePath);
+        classAnalyzer.analyze(filePath);
       } catch (IOException e) {
         Logger.error("File %s not found " + filePath.getAbsolutePath());
       }
     }
     System.out.println("==== Method list ====");
-    System.out.println(fileAnalyzer.getProjectData().toString());
+    System.out.println(projectData.toString());
 
-    // Create call graph for all functions
-    System.out.println("==== Call list ====");
-    FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(fileAnalyzer.getProjectData());
+    // Create control flow graph for all functions
+    Logger.info("Generating control flow graph");
+    FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(projectData);
     functionAnalyzer.analyzeAll();
 
     ControlFlowGraph cfg;
     if(shownFunction == null) {
-      cfg = fileAnalyzer.getProjectData().getControlFlowGraph();
+      cfg = classAnalyzer.getProjectData().getCombinedControlFlowGraph();
     } else {
-      cfg = fileAnalyzer.getProjectData().getFunction(shownFunction).getGraph();
+      cfg = classAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
     }
 
 
@@ -76,7 +80,7 @@ public class Main {
 
     Logger.info("Drawing graphs");
     JFrame jFrame = new JFrame();
-    jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
     JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfg.getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);

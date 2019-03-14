@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import logger.Logger;
 import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
 import org.jgrapht.Graph;
@@ -114,10 +113,10 @@ public class ControlFlowGraph implements Cloneable {
     for(Object object : cfg.getGraph().vertexSet().toArray()){
       PhpStatement phpStatement = (PhpStatement) object;
       if(phpStatement instanceof FunctionCallStatement){
-        if(((FunctionCallStatement) phpStatement).getFunction().getGraph() != null) {
+        if(((FunctionCallStatement) phpStatement).getFunction().getControlFlowGraph() != null) {
           List<PhpStatement> predList = Graphs.predecessorListOf(cfg.getGraph(), phpStatement);
           List<PhpStatement> succList = Graphs.successorListOf(cfg.getGraph(), phpStatement);
-          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().getGraph();
+          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().getControlFlowGraph();
 
           try {
             normalizeFunctionCall(functionGraph);

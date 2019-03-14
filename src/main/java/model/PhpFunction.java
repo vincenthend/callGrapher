@@ -7,7 +7,7 @@ public class PhpFunction implements Comparable<PhpFunction>{
   private String functionName;
   private String code;
   private String className;
-  private ControlFlowGraph graph;
+  private ControlFlowGraph controlFlowGraph;
   public String returnedType;
 
 
@@ -25,8 +25,8 @@ public class PhpFunction implements Comparable<PhpFunction>{
     return className;
   }
 
-  public ControlFlowGraph getGraph() {
-    return graph;
+  public ControlFlowGraph getControlFlowGraph() {
+    return controlFlowGraph;
   }
 
   public String getCalledName(){
@@ -39,8 +39,8 @@ public class PhpFunction implements Comparable<PhpFunction>{
     return sb.toString();
   }
 
-  public void setGraph(ControlFlowGraph graph) {
-    this.graph = graph;
+  public void setControlFlowGraph(ControlFlowGraph controlFlowGraph) {
+    this.controlFlowGraph = controlFlowGraph;
   }
 
   @Override

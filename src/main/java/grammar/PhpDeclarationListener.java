@@ -11,14 +11,14 @@ import java.util.LinkedList;
 
 
 /**
- * PhpClass PhpClassFunctionListener listens for ANTLR event and add what had been found
+ * PhpClass PhpDeclarationListener listens for ANTLR event and add what had been found
  * into project data (PhpClass, PhpFunction, Attribute)
  */
-public class PhpClassFunctionListener extends PhpParserBaseListener {
+public class PhpDeclarationListener extends PhpParserBaseListener {
   private ProjectData projectData;
   private CharStream charStream;
 
-  public PhpClassFunctionListener(ProjectData projectData, CharStream charStream) {
+  public PhpDeclarationListener(ProjectData projectData, CharStream charStream) {
     this.projectData = projectData;
     this.charStream = charStream;
   }

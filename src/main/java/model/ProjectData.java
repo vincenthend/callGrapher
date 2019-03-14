@@ -11,16 +11,10 @@ import java.util.Map;
 public class ProjectData {
   private Map<String, PhpFunction> functionMap;
   private Map<String, PhpClass> classMap;
-  private ControlFlowGraph controlFlowGraph;
 
   public ProjectData() {
     functionMap = new HashMap<>();
     classMap = new HashMap<>();
-    controlFlowGraph = new ControlFlowGraph();
-  }
-
-  public ControlFlowGraph getControlFlowGraph() {
-    return controlFlowGraph;
   }
 
   public Map<String, PhpFunction> getFunctionMap() {
@@ -47,6 +41,14 @@ public class ProjectData {
     classMap.put(c.getClassName(), c);
   }
 
+  public ControlFlowGraph getCombinedControlFlowGraph() {
+    ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+    for (PhpFunction phpFunction : functionMap.values()) {
+      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().graph);
+    }
+    return controlFlowGraph;
+  }
+
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
@@ -57,9 +59,5 @@ public class ProjectData {
     }
     stringBuilder.append("]");
     return stringBuilder.toString();
-  }
-
-  public void appendControlFlowGraph(ControlFlowGraph cfg) {
-    Graphs.addGraph(controlFlowGraph.getGraph(), cfg.getGraph());
   }
 }

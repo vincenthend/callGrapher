@@ -1,6 +1,6 @@
 package analyzer;
 
-import grammar.PhpClassFunctionListener;
+import grammar.PhpDeclarationListener;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,11 +18,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 /**
  * Analyzes files to find functions or methods listed in the file
  */
-public class FileAnalyzer {
-  public ProjectData projectData;
+public class ClassAnalyzer {
+  private ProjectData projectData;
 
-  public FileAnalyzer(){
-    projectData = new ProjectData();
+  public ClassAnalyzer(ProjectData projectData){
+    this.projectData = projectData;
   }
 
   public void analyze(File file) throws IOException {
@@ -40,7 +40,7 @@ public class FileAnalyzer {
 
   public void analyze(String fileContent){
     CharStream cs = CharStreams.fromString(fileContent);
-    PhpClassFunctionListener listener = new PhpClassFunctionListener(projectData, cs);
+    PhpDeclarationListener listener = new PhpDeclarationListener(projectData, cs);
 
     // Tokenize and build parse tree
     PhpLexer lexer = new PhpLexer(cs);

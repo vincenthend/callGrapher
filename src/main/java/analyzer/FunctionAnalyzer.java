@@ -11,7 +11,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -35,17 +34,14 @@ public class FunctionAnalyzer {
       PhpLexer lexer = new PhpLexer(cs);
       PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
       ParseTree tree = parser.htmlDocument();
-      function.setGraph(visitor.visit(tree));
+      function.setControlFlowGraph(visitor.visit(tree));
     }
   }
 
   public void analyzeAll() {
     Set<PhpFunction> funcSet = new TreeSet<PhpFunction>(projectData.getFunctionMap().values());
-    Iterator<PhpFunction> iterator = funcSet.iterator();
-    while (iterator.hasNext()) {
-      PhpFunction f = iterator.next();
+    for (PhpFunction f : funcSet) {
       analyze(f);
-      projectData.appendControlFlowGraph(f.getGraph());
     }
   }
 }
