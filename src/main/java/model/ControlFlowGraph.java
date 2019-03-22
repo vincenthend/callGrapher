@@ -12,6 +12,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.DepthFirstIterator;
+import org.jgrapht.traverse.GraphIterator;
 
 public class ControlFlowGraph implements Cloneable {
   public Graph<PhpStatement, DefaultEdge> graph;
@@ -28,6 +30,11 @@ public class ControlFlowGraph implements Cloneable {
     return graph;
   }
 
+  /**
+   * Adds statement p1 after p.
+   * @param p statement before
+   * @param p1 statement after
+   */
   public void addStatement(PhpStatement p, PhpStatement p1) {
     if(graph.vertexSet().contains(p1)) {
       graph.addEdge(p, p1);
@@ -56,9 +63,9 @@ public class ControlFlowGraph implements Cloneable {
   }
 
   /**
-   * Append ControlFlowGraph to all
-   * @param existing
-   * @param g
+   * Append ControlFlowGraph to an existing statement.
+   * @param existing appended statement
+   * @param g appended CFG
    */
   public void appendGraph(PhpStatement existing, ControlFlowGraph g){
     if(g != null && g.graph.vertexSet().size() != 0) {
@@ -70,9 +77,9 @@ public class ControlFlowGraph implements Cloneable {
   }
 
   /**
-   * Append ControlFlowGraph to all
-   * @param existing
-   * @param g
+   * Append ControlFlowGraph to a list of statement
+   * @param existing appended statmeents
+   * @param g appended CFG
    */
   public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g){
     if(g != null) {
@@ -86,8 +93,8 @@ public class ControlFlowGraph implements Cloneable {
   }
 
   /**
-   * Append ControlFlowGraph to ControlFlowGraph
-   * @param g
+   * Append a ControlFlowGraph to this ControlFlowGraph
+   * @param g appended CFG
    */
   public void appendGraph(ControlFlowGraph g){
     if(g != null) {
@@ -108,45 +115,13 @@ public class ControlFlowGraph implements Cloneable {
     }
   }
 
-  public static void normalizeFunctionCall(ControlFlowGraph cfg){
+  public void normalizeControlFlowGraph(){
     // Find FunctionCallStatement
-    for(Object object : cfg.getGraph().vertexSet().toArray()){
-      PhpStatement phpStatement = (PhpStatement) object;
-      if(phpStatement instanceof FunctionCallStatement){
-        if(((FunctionCallStatement) phpStatement).getFunction().getControlFlowGraph() != null) {
-          List<PhpStatement> predList = Graphs.predecessorListOf(cfg.getGraph(), phpStatement);
-          List<PhpStatement> succList = Graphs.successorListOf(cfg.getGraph(), phpStatement);
-          ControlFlowGraph functionGraph = ((FunctionCallStatement) phpStatement).getFunction().getControlFlowGraph();
-
-          try {
-            normalizeFunctionCall(functionGraph);
-            ControlFlowGraph functionGraphClone = functionGraph.clone();
-            Graphs.addGraph(cfg.graph, functionGraphClone.graph);
-
-            // Connect predecessor to first vertex
-            for (PhpStatement predStat : predList) {
-              cfg.graph.addEdge(predStat, functionGraphClone.firstVertex);
-            }
-            // Connect successors to last vertex
-            for (PhpStatement succStat : succList) {
-              for (PhpStatement lastVertex : functionGraphClone.lastVertices) {
-                cfg.graph.addEdge(lastVertex, succStat);
-              }
-            }
-            // Remove function call
-            cfg.getGraph().removeVertex(phpStatement);
-            if(cfg.lastVertices.contains(phpStatement)){
-              cfg.lastVertices.addAll(functionGraphClone.lastVertices);
-              cfg.lastVertices.remove(phpStatement);
-            }
-            if(cfg.firstVertex == phpStatement){
-              cfg.firstVertex = functionGraphClone.firstVertex;
-            }
-          } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-          }
-        }
-      }
+    GraphIterator<PhpStatement, DefaultEdge> iterator = new DepthFirstIterator<PhpStatement, DefaultEdge> (graph);
+    while(iterator.hasNext()){
+      PhpStatement statement = iterator.next();
+      Graphs.successorListOf(graph, statement);
+      iterator.next();
     }
   }
 

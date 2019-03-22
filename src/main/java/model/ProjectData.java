@@ -41,14 +41,6 @@ public class ProjectData {
     classMap.put(c.getClassName(), c);
   }
 
-  public ControlFlowGraph getCombinedControlFlowGraph() {
-    ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
-    for (PhpFunction phpFunction : functionMap.values()) {
-      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().graph);
-    }
-    return controlFlowGraph;
-  }
-
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
@@ -59,5 +51,19 @@ public class ProjectData {
     }
     stringBuilder.append("]");
     return stringBuilder.toString();
+  }
+
+  public ControlFlowGraph getCombinedControlFlowGraph() {
+    ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+    for (PhpFunction phpFunction : functionMap.values()) {
+      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().graph);
+    }
+    return controlFlowGraph;
+  }
+
+  public void normalizeControlFlowGraph(){
+    for (PhpFunction phpFunction : functionMap.values()){
+      phpFunction.getControlFlowGraph().normalizeControlFlowGraph();
+    }
   }
 }

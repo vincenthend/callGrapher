@@ -75,7 +75,7 @@ public class Main {
 
     if(normalizeFunc) {
       Logger.info("Normalizing functions");
-      ControlFlowGraph.normalizeFunctionCall(cfg);
+      projectData.normalizeControlFlowGraph();
     }
 
     Logger.info("Drawing graphs");
