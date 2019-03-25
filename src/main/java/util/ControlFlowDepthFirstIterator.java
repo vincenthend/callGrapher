@@ -14,6 +14,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   private Stack<PhpStatement> statementStack;
   private Stack<Integer> intersectionStack;
   private PhpStatement currentStatement;
+  private int intersectionSize;
 
 
   public ControlFlowDepthFirstIterator(ControlFlowGraph cfg) {
@@ -45,16 +46,16 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   public PhpStatement next() {
     currentStatement = statementStack.pop();
 
-    int size = intersectionSize();
-    if(size > 1){
-      intersectionStack.push(size);
+    intersectionSize = intersectionSize();
+    if(intersectionSize > 1){
+      intersectionStack.push(intersectionSize);
     }
 
     // Prevent generation on unfinished branches
     if(!isEndOfBranch()) {
       generateStatementSet();
     } else {
-      size = intersectionStack.pop();
+      int size = intersectionStack.pop();
       if(size > 1){
         intersectionStack.push(size - 1);
       } else {
@@ -65,11 +66,11 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   }
 
   public boolean isEndOfBranch() {
-    List<PhpStatement> pred = Graphs.predecessorListOf(controlFlowGraph, currentStatement);
-    return pred.size() == 1 && Graphs.successorListOf(controlFlowGraph, pred.get(0)).size() > 1;
+    List<PhpStatement> succ = Graphs.successorListOf(controlFlowGraph, currentStatement);
+    return succ.size() == 1 && Graphs.predecessorListOf(controlFlowGraph, succ.get(0)).size() > 1;
   }
 
-  public int intersectionSize() {
+  private int intersectionSize() {
     int nbIntersection = 0;
     List<PhpStatement> succList = Graphs.successorListOf(controlFlowGraph, currentStatement);
     for (PhpStatement succStatement : succList) {
@@ -78,5 +79,13 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
       }
     }
     return nbIntersection;
+  }
+
+  public int getIntersectionSize() {
+    return intersectionSize;
+  }
+
+  public int peekIntersectionStack(){
+    return intersectionStack.peek();
   }
 }

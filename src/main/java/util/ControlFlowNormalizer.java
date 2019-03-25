@@ -42,6 +42,9 @@ public class ControlFlowNormalizer {
   }
 
   public void normalize() {
+    Stack<Map<String, Set<String>>> originalVarStack = new Stack<>();
+    Stack<Integer> intersectionStack = new Stack<>();
+
     ControlFlowGraph cfg = currentFunction.getControlFlowGraph();
     ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(cfg);
     while (iterator.hasNext()) {
@@ -81,11 +84,31 @@ public class ControlFlowNormalizer {
         }
       }
 
-      int intersectionSize = iterator.intersectionSize();
+      int intersectionSize = iterator.getIntersectionSize();
+
       if (intersectionSize > 1) {
         // Push intersectionSize
-        for (int i = 0; i < intersectionSize - 1; i++) {
+        for (int i = 0; i < intersectionSize; i++) {
           variableListStack.push(copyVariableStack(currentVariableList)); //TODO
+        }
+        originalVarStack.push(currentVariableList);
+        currentVariableList = variableListStack.peek();
+        intersectionStack.push(intersectionSize);
+      }
+      if (iterator.isEndOfBranch()) {
+        // Merge current list with the original
+        Map<String, Set<String>> origVarList = originalVarStack.peek();
+        for (String key : origVarList.keySet()) {
+          origVarList.get(key).addAll(currentVariableList.get(key));
+        }
+
+        int size = intersectionStack.pop();
+        if (size > 1) {
+          intersectionStack.push(size - 1);
+          variableListStack.pop();
+          currentVariableList = variableListStack.peek();
+        } else {
+          currentVariableList = originalVarStack.pop();
         }
       }
     }
@@ -204,7 +227,7 @@ public class ControlFlowNormalizer {
         String paramContent = contentIterator.next();
         if (paramContent.startsWith("$")) {
           Set<String> paramType = getVariableType(paramContent);
-          if(paramType != null) {
+          if (paramType != null) {
             varType.addAll(paramType);
           }
         } else {
