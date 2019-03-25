@@ -7,7 +7,7 @@ public class AssignmentStatement extends PhpStatement {
   public AssignmentStatement(String assignedVariable, String assignedType, String code) {
     super(StatementType.ASSIGNMENT, code);
     this.assignedVariable = assignedVariable;
-    this.assignedType = assignedVariable;
+    this.assignedType = assignedType;
   }
 
   @Override

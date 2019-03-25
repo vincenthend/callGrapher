@@ -7,6 +7,7 @@ import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 
@@ -39,8 +40,19 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       Interval interval = new Interval (ctx.methodBody().start.getStartIndex(), ctx.methodBody().stop.getStopIndex());
       String code = charStream.getText(interval);
 
+      // Parse parameter
+      LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
+      for (PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()){
+        String varName = formctx.variableInitializer().VarName().getText();
+        if(formctx.variableInitializer().constantInititalizer() != null){
+          parameters.put(varName, formctx.variableInitializer().constantInititalizer().getText());
+        } else {
+          parameters.put(varName, null);
+        }
+      }
+
       // Add function to project data
-      PhpFunction function = new PhpFunction(functionName, className, code);
+      PhpFunction function = new PhpFunction(functionName, className, code, parameters);
       projectData.addFunction(function);
       c.getFunctionMap().put(functionName,function);
 
@@ -63,8 +75,19 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
     Interval interval = new Interval (ctx.blockStatement().start.getStartIndex(), ctx.blockStatement().stop.getStopIndex());
     String code = charStream.getText(interval);
 
+    // Parse parameter
+    LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
+    for (PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()){
+      String varName = formctx.variableInitializer().VarName().getText();
+      if(formctx.variableInitializer().constantInititalizer() != null){
+        parameters.put(varName, formctx.variableInitializer().constantInititalizer().getText());
+      } else {
+        parameters.put(varName, null);
+      }
+    }
+
     // Add function to project data
-    PhpFunction function = new PhpFunction(functionName, null, code);
+    PhpFunction function = new PhpFunction(functionName, null, code, parameters);
     projectData.addFunction(function);
 
     Logger.info("PhpFunction "+function.getCalledName()+" found");

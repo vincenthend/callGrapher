@@ -65,17 +65,16 @@ public class Main {
     FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(projectData);
     functionAnalyzer.analyzeAll();
 
+    if(normalizeFunc) {
+      Logger.info("Normalizing functions");
+      projectData.normalizeControlFlowGraph();
+    }
+
     ControlFlowGraph cfg;
     if(shownFunction == null) {
       cfg = classAnalyzer.getProjectData().getCombinedControlFlowGraph();
     } else {
       cfg = classAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
-    }
-
-
-    if(normalizeFunc) {
-      Logger.info("Normalizing functions");
-      projectData.normalizeControlFlowGraph();
     }
 
     Logger.info("Drawing graphs");

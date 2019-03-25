@@ -2,16 +2,32 @@ package model.statement;
 
 import model.PhpFunction;
 
-public class FunctionCallStatement extends PhpStatement {
-  PhpFunction function;
+import java.util.LinkedList;
+import java.util.List;
 
-  public FunctionCallStatement(PhpFunction function) {
+public class FunctionCallStatement extends PhpStatement {
+  private PhpFunction function;
+  private String callerVariable;
+  private List<String> parameterList;
+
+  public FunctionCallStatement(PhpFunction function, List<String> parameterList, String callerVariable) {
     super(StatementType.FUNCTION_CALL, function.getCode());
     this.function = function;
+    this.parameterList = new LinkedList<>();
+    this.parameterList.addAll(parameterList);
+    this.callerVariable = callerVariable;
   }
 
   public PhpFunction getFunction() {
     return function;
+  }
+
+  public String getCallerVariable() {
+    return callerVariable;
+  }
+
+  public List<String> getParameterMap() {
+    return parameterList;
   }
 
   @Override

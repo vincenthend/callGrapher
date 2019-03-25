@@ -1,8 +1,12 @@
 package model;
 
+import logger.Logger;
 import org.jgrapht.Graphs;
+import util.ControlFlowNormalizer;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,11 +14,13 @@ import java.util.Map;
  */
 public class ProjectData {
   private Map<String, PhpFunction> functionMap;
+  private List<PhpFunction> normalizedFunctions;
   private Map<String, PhpClass> classMap;
 
   public ProjectData() {
     functionMap = new HashMap<>();
     classMap = new HashMap<>();
+    normalizedFunctions = new LinkedList<>();
   }
 
   public Map<String, PhpFunction> getFunctionMap() {
@@ -26,11 +32,11 @@ public class ProjectData {
   }
 
   public PhpClass getClass(String className) {
-    return (classMap.containsKey(className)) ? classMap.get(className) : null;
+    return classMap.getOrDefault(className, null);
   }
 
   public PhpFunction getFunction(String functionCalledName) {
-    return (functionMap.containsKey(functionCalledName)) ? functionMap.get(functionCalledName) : null;
+    return functionMap.getOrDefault(functionCalledName, null);
   }
 
   public void addFunction(PhpFunction f) {
@@ -55,15 +61,24 @@ public class ProjectData {
 
   public ControlFlowGraph getCombinedControlFlowGraph() {
     ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
-    for (PhpFunction phpFunction : functionMap.values()) {
+    for (PhpFunction phpFunction : normalizedFunctions) {
       Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().graph);
     }
     return controlFlowGraph;
   }
 
   public void normalizeControlFlowGraph(){
+    normalizedFunctions.clear();
     for (PhpFunction phpFunction : functionMap.values()){
-      phpFunction.getControlFlowGraph().normalizeControlFlowGraph();
+      try {
+        Logger.info("Normalizing "+phpFunction.getCalledName());
+        PhpFunction normalizedFunc = phpFunction.clone();
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
+        normalizer.normalize();
+        normalizedFunctions.add(normalizedFunc);
+      } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+      }
     }
   }
 }

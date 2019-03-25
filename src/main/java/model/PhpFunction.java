@@ -1,20 +1,26 @@
 package model;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * PhpClass PhpFunction, contains data about a function
  */
-public class PhpFunction implements Comparable<PhpFunction>{
+public class PhpFunction implements Comparable<PhpFunction>, Cloneable{
   private String functionName;
   private String code;
   private String className;
+  private Map<String, String> parameters;
   private ControlFlowGraph controlFlowGraph;
-  public String returnedType;
 
 
-  public PhpFunction(String functionName, String className, String code){
+  public PhpFunction(String functionName, String className, String code, Map<String, String> parameters){
     this.functionName = functionName;
     this.className = className;
     this.code = code;
+    this.parameters = parameters;
   }
 
   public String getCode() {
@@ -27,6 +33,14 @@ public class PhpFunction implements Comparable<PhpFunction>{
 
   public ControlFlowGraph getControlFlowGraph() {
     return controlFlowGraph;
+  }
+
+  public String getFunctionName(){
+    return functionName;
+  }
+
+  public Map<String, String> getParameters() {
+    return parameters;
   }
 
   public String getCalledName(){
@@ -55,5 +69,12 @@ public class PhpFunction implements Comparable<PhpFunction>{
   @Override
   public String toString() {
     return getCalledName();
+  }
+
+  @Override
+  public PhpFunction clone() throws CloneNotSupportedException {
+    PhpFunction cloned = new PhpFunction(functionName, className, code, parameters);
+    cloned.controlFlowGraph = controlFlowGraph.clone();
+    return cloned;
   }
 }

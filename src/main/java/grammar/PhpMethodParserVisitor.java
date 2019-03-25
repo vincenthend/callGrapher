@@ -5,10 +5,7 @@ import model.ControlFlowGraph;
 import model.PhpClass;
 import model.PhpFunction;
 import model.ProjectData;
-import model.statement.BranchStatement;
-import model.statement.ExpressionStatement;
-import model.statement.FunctionCallStatement;
-import model.statement.PhpStatement;
+import model.statement.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
@@ -17,14 +14,12 @@ import java.util.*;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   public ProjectData projectData;
-  public Map<String, String> variableMap;
   public PhpClass currentClass;
 
   public PhpMethodParserVisitor(ProjectData p, PhpClass currentClass) {
     super();
     this.projectData = p;
     this.currentClass = currentClass;
-    variableMap = new HashMap<>();
   }
 
   @Override
@@ -181,7 +176,14 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.functionCallName().start.getStartIndex(), ctx.functionCallName().stop.getStopIndex());
     String name = input.getText(interval);
 
-    graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "")));
+    // Get Arguments
+    List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
+    List<String> args = new LinkedList<>();
+    for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+      args.add(argCtx.getText());
+    }
+
+    graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "", null), args, null));
     return graph;
   }
 
@@ -191,47 +193,17 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     if(ctx.actualArguments() != null) { // Method access by member
       PhpParser.ChainContext chain_ctx = (PhpParser.ChainContext) ctx.getParent();
       String var_name = chain_ctx.chainBase().getText();
-      String caller_class;
-      if (var_name.equals("$this")) {
-        caller_class = this.currentClass.getClassName();
-      } else if(currentClass.getAttributeMap().containsKey(var_name)){
-        caller_class = currentClass.getAttributeMap().get(var_name).get(0);
-      } else {
-        caller_class = variableMap.get(var_name);
-      }
 
-      if(chain_ctx.memberAccess().size() != 1){
-        // Find chain type
-        List<PhpParser.MemberAccessContext> memberList = chain_ctx.memberAccess();
-        int i = 0;
-        boolean stop = false;
-        while(memberList.get(i) != ctx && !stop){
-          PhpClass phpClass = projectData.getClass(caller_class);
-          if(phpClass != null){
-            //TODO : Fix Here, what if it hasn't been parsed
-            List<String> attrMap = phpClass.getAttributeMap().get("$"+memberList.get(i).keyedFieldName().getText());
-            if(attrMap != null && attrMap.size() != 0) {
-              caller_class = attrMap.get(0);
-            } else {
-              caller_class = "";
-              stop = true;
-            }
-            i++;
-          } else {
-            caller_class = "";
-            stop = true;
-          }
-        }
+      // Get Arguments
+      List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
+      List<String> args = new LinkedList<>();
+      for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+        args.add(argCtx.getText());
       }
 
       // Get function graph
-      PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), caller_class, "");
-      PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
-      if (phpFunction != null) {
-        graph.addStatement(new FunctionCallStatement(phpFunction));
-      } else {
-        graph.addStatement(new FunctionCallStatement(temp_func));
-      }
+      PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), null, "", null);
+      graph.addStatement(new FunctionCallStatement(temp_func, args, var_name));
     } else { // Variable access by member
       graph = visitExpression(ctx, "member");
     }
@@ -267,10 +239,17 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.typeRef().start.getStartIndex(), ctx.typeRef().stop.getStopIndex());
     String name = input.getText(interval);
 
-    PhpFunction temp_func = new PhpFunction("__construct", name, "");
+    // Get Arguments
+    List<PhpParser.ActualArgumentContext> argsCtx = ctx.arguments().actualArgument();
+    List<String> args = new LinkedList<>();
+    for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+      args.add(argCtx.getText());
+    }
+
+    PhpFunction temp_func = new PhpFunction("__construct", name, "", null);
     PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
     if (phpFunction == null) {
-      graph.addStatement(new FunctionCallStatement(temp_func));
+      graph.addStatement(new FunctionCallStatement(temp_func, args, null));
     }
     return graph;
   }
@@ -285,19 +264,15 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx, "assignment");
-    ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
-    childGraph.appendGraph(graph);
-
     String variableName = ctx.chain(0).getText();
     String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
     PhpClass c = currentClass;
-    //TODO : Fix if attribute is chaining
-    if(c.getAttributeMap().containsKey(variableName)){
-      c.getAttributeMap().get(variableName).add(assignedType);
-    } else {
-      variableMap.put(variableName, assignedType);
-    }
+
+    ControlFlowGraph graph = new ControlFlowGraph();
+    graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));
+    ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
+    childGraph.appendGraph(graph);
+
     return childGraph;
   }
 
