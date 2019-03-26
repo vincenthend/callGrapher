@@ -1,5 +1,5 @@
-import analyzer.ClassAnalyzer;
-import analyzer.FunctionAnalyzer;
+import analyzer.DeclarationAnalyzer;
+import analyzer.FlowAnalyzer;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
@@ -44,7 +44,7 @@ public class Main {
     String shownFunction = null;
 
     ProjectData projectData = new ProjectData();
-    ClassAnalyzer classAnalyzer = new ClassAnalyzer(projectData);
+    DeclarationAnalyzer declarationAnalyzer = new DeclarationAnalyzer(projectData);
 
     // List all functions
     File file = new File(path);
@@ -52,7 +52,7 @@ public class Main {
     for (File filePath : fileList) {
       Logger.info("Analyzing " + filePath);
       try {
-        classAnalyzer.analyze(filePath);
+        declarationAnalyzer.analyze(filePath);
       } catch (IOException e) {
         Logger.error("File %s not found " + filePath.getAbsolutePath());
       }
@@ -62,8 +62,8 @@ public class Main {
 
     // Create control flow graph for all functions
     Logger.info("Generating control flow graph");
-    FunctionAnalyzer functionAnalyzer = new FunctionAnalyzer(projectData);
-    functionAnalyzer.analyzeAll();
+    FlowAnalyzer flowAnalyzer = new FlowAnalyzer(projectData);
+    flowAnalyzer.analyzeAll();
 
     if(normalizeFunc) {
       Logger.info("Normalizing functions");
@@ -72,9 +72,9 @@ public class Main {
 
     ControlFlowGraph cfg;
     if(shownFunction == null) {
-      cfg = classAnalyzer.getProjectData().getCombinedControlFlowGraph();
+      cfg = declarationAnalyzer.getProjectData().getCombinedControlFlowGraph();
     } else {
-      cfg = classAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
+      cfg = declarationAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
     }
 
     Logger.info("Drawing graphs");
