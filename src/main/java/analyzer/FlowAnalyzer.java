@@ -14,10 +14,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class FunctionAnalyzer {
+public class FlowAnalyzer {
   private ProjectData projectData;
 
-  public FunctionAnalyzer(ProjectData projectData) {
+  public FlowAnalyzer(ProjectData projectData) {
     this.projectData = projectData;
   }
 

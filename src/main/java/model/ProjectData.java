@@ -74,7 +74,7 @@ public class ProjectData {
         Logger.info("Normalizing "+phpFunction.getCalledName());
         PhpFunction normalizedFunc = phpFunction.clone();
         ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
-        normalizer.normalize();
+        normalizer.normalize();//TODO Refactor this to move to functionMap
         normalizedFunctions.add(normalizedFunc);
       } catch (CloneNotSupportedException e) {
         e.printStackTrace();

@@ -18,10 +18,10 @@ import org.antlr.v4.runtime.CommonTokenStream;
 /**
  * Analyzes files to find functions or methods listed in the file
  */
-public class ClassAnalyzer {
+public class DeclarationAnalyzer {
   private ProjectData projectData;
 
-  public ClassAnalyzer(ProjectData projectData){
+  public DeclarationAnalyzer(ProjectData projectData){
     this.projectData = projectData;
   }
 
