@@ -18,13 +18,13 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
 
 
   public ControlFlowDepthFirstIterator(ControlFlowGraph cfg) {
-    this.controlFlowGraph = cfg.graph;
+    this.controlFlowGraph = cfg.getGraph();
     this.seenVertex = new HashSet<>();
     this.statementStack = new Stack<>();
     this.intersectionStack = new Stack<>();
 
-    statementStack.push(cfg.firstVertex);
-    seenVertex.add(cfg.firstVertex);
+    statementStack.push(cfg.getFirstVertex());
+    seenVertex.add(cfg.getFirstVertex());
   }
 
   @Override
@@ -62,12 +62,17 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
         generateStatementSet();
       }
     }
+
+    System.out.println(currentStatement);
+    System.out.println("Stack : "+statementStack);
+    System.out.println("Int : "+intersectionSize);
+    System.out.println("IntStack : "+intersectionStack);
     return currentStatement;
   }
 
   public boolean isEndOfBranch() {
     List<PhpStatement> succ = Graphs.successorListOf(controlFlowGraph, currentStatement);
-    return succ.size() == 1 && Graphs.predecessorListOf(controlFlowGraph, succ.get(0)).size() > 1;
+    return succ.size() == 1 && Graphs.predecessorListOf(controlFlowGraph, succ.get(0)).size() > 1 && !seenVertex.containsAll(succ);
   }
 
   private int intersectionSize() {

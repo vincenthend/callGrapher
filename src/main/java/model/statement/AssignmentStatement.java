@@ -3,11 +3,13 @@ package model.statement;
 public class AssignmentStatement extends PhpStatement {
   private String assignedVariable;
   private String assignedType;
+  private boolean assignEach;
 
   public AssignmentStatement(String assignedVariable, String assignedType, String code) {
     super(StatementType.ASSIGNMENT, code);
     this.assignedVariable = assignedVariable;
     this.assignedType = assignedType;
+    this.assignEach = false;
   }
 
   @Override
@@ -37,5 +39,13 @@ public class AssignmentStatement extends PhpStatement {
 
   public void setAssignedType(String assignedType) {
     this.assignedType = assignedType;
+  }
+
+  public boolean isAssignEach() {
+    return assignEach;
+  }
+
+  public void setAssignEach(boolean assignEach) {
+    this.assignEach = assignEach;
   }
 }

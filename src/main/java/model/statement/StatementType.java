@@ -5,6 +5,7 @@ public enum StatementType {
   EXPRESSION,
   ASSIGNMENT,
   FUNCTION_CALL,
-  GENERAL,
+  BREAK,
+  CONTINUE,
   LOOP,
 }

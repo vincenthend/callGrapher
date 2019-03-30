@@ -16,9 +16,9 @@ import org.jgrapht.traverse.DepthFirstIterator;
 import org.jgrapht.traverse.GraphIterator;
 
 public class ControlFlowGraph implements Cloneable {
-  public Graph<PhpStatement, DefaultEdge> graph;
-  public Set<PhpStatement> lastVertices;
-  public PhpStatement firstVertex;
+  private Graph<PhpStatement, DefaultEdge> graph;
+  private Set<PhpStatement> lastVertices;
+  private PhpStatement firstVertex;
 
   public ControlFlowGraph() {
     graph = new DefaultDirectedGraph<PhpStatement, DefaultEdge>(DefaultEdge.class);
@@ -28,6 +28,14 @@ public class ControlFlowGraph implements Cloneable {
 
   public Graph<PhpStatement, DefaultEdge> getGraph() {
     return graph;
+  }
+
+  public Set<PhpStatement> getLastVertices() {
+    return lastVertices;
+  }
+
+  public PhpStatement getFirstVertex() {
+    return firstVertex;
   }
 
   /**
@@ -52,7 +60,7 @@ public class ControlFlowGraph implements Cloneable {
     if(lastVertices.size() == 0 && firstVertex == null) {
       firstVertex = a;
     } else {
-      PhpStatement[] phpStatements = (PhpStatement[]) lastVertices.toArray();
+      PhpStatement[] phpStatements = lastVertices.toArray(new PhpStatement[lastVertices.size()]);
       for(PhpStatement statement : phpStatements){
         graph.addEdge(statement, a);
         lastVertices.remove(statement);

@@ -144,8 +144,8 @@ public class ControlFlowNormalizer {
           cfg.getGraph().removeEdge(statement, succ);
         }
         Graphs.addGraph(cfg.getGraph(), funcCfg.getGraph());
-        cfg.getGraph().addEdge(statement, funcCfg.firstVertex);
-        for (PhpStatement lastVert : funcCfg.lastVertices) {
+        cfg.getGraph().addEdge(statement, funcCfg.getFirstVertex());
+        for (PhpStatement lastVert : funcCfg.getLastVertices()) {
           for (PhpStatement succ : succList) {
             cfg.getGraph().addEdge(lastVert, succ);
           }

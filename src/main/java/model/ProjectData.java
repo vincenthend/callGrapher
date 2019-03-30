@@ -59,10 +59,20 @@ public class ProjectData {
     return stringBuilder.toString();
   }
 
-  public ControlFlowGraph getCombinedControlFlowGraph() {
+  public ControlFlowGraph getCombinedNormalizedControlFlowGraph() {
     ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
     for (PhpFunction phpFunction : normalizedFunctions) {
-      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().graph);
+      System.out.println(phpFunction.getControlFlowGraph().getFirstVertex());
+      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().getGraph());
+    }
+    return controlFlowGraph;
+  }
+
+  public ControlFlowGraph getCombinedControlFlowGraph() {
+    ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
+    for (PhpFunction phpFunction : functionMap.values()) {
+      System.out.println(phpFunction.getControlFlowGraph().getFirstVertex());
+      Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().getGraph());
     }
     return controlFlowGraph;
   }

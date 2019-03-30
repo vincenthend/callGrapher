@@ -1,6 +1,5 @@
 package grammar;
 
-import logger.Logger;
 import model.ControlFlowGraph;
 import model.PhpClass;
 import model.PhpFunction;
@@ -9,12 +8,18 @@ import model.statement.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.DepthFirstIterator;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
-  public ProjectData projectData;
-  public PhpClass currentClass;
+  private ProjectData projectData;
+  private PhpClass currentClass;
 
   public PhpMethodParserVisitor(ProjectData p, PhpClass currentClass) {
     super();
@@ -30,10 +35,10 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   protected ControlFlowGraph aggregateResult(ControlFlowGraph aggregate, ControlFlowGraph nextResult) {
     ControlFlowGraph graph;
-    if(aggregate != null && nextResult != null){
+    if (aggregate != null && nextResult != null) {
       aggregate.appendGraph(nextResult);
       graph = aggregate;
-    } else if(aggregate == null){
+    } else if (aggregate == null) {
       graph = nextResult;
     } else {
       graph = aggregate;
@@ -58,7 +63,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     // Visit conditions and append to branch
     par_graph = visit(ctx.parenthesis().expression());
-    par_statements = par_graph.lastVertices;
+    par_statements = par_graph.getLastVertices();
     graph.appendGraph(branchStatement, par_graph);
     Set<PhpStatement> if_par_statements = par_statements;
 
@@ -67,23 +72,23 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     graph.appendGraph(par_statements, stat_graph);
 
     // Add root vertex
-    if(ctx.elseIfStatement().size() != 0){
-      for(PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
+    if (ctx.elseIfStatement().size() != 0) {
+      for (PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
         // Visit elseif's condition and append to previous conditions
         par_graph = visit(e.parenthesis().expression());
         graph.appendGraph(par_statements, par_graph);
-        par_statements = par_graph.lastVertices;
+        par_statements = par_graph.getLastVertices();
 
         // Visit block and append to conditions
         stat_graph = visit(e.statement());
         graph.appendGraph(par_statements, stat_graph);
       }
-    } else if(ctx.elseIfColonStatement().size() != 0){
-      for(PhpParser.ElseIfColonStatementContext e : ctx.elseIfColonStatement()) {
+    } else if (ctx.elseIfColonStatement().size() != 0) {
+      for (PhpParser.ElseIfColonStatementContext e : ctx.elseIfColonStatement()) {
         // Visit elseif's condition and append to previous conditions
         par_graph = visit(e.parenthesis().expression());
         graph.appendGraph(par_statements, par_graph);
-        par_statements = par_graph.lastVertices;
+        par_statements = par_graph.getLastVertices();
 
         // Visit block and append to conditions
         stat_graph = visit(e.innerStatementList());
@@ -91,14 +96,14 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       }
     }
 
-    if(ctx.elseStatement() != null){
+    if (ctx.elseStatement() != null) {
       stat_graph = visit(ctx.elseStatement().statement());
       graph.appendGraph(par_statements, stat_graph);
-    } else if(ctx.elseColonStatement() != null){
+    } else if (ctx.elseColonStatement() != null) {
       stat_graph = visit(ctx.elseStatement().statement());
       graph.appendGraph(par_statements, stat_graph);
     } else {
-      graph.lastVertices.addAll(if_par_statements);
+      graph.getLastVertices().addAll(if_par_statements);
     }
 
     return graph;
@@ -111,7 +116,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph update = visit(ctx.forUpdate());
 
     ControlFlowGraph statement;
-    if(ctx.statement() != null){
+    if (ctx.statement() != null) {
       statement = visit(ctx.statement());
     } else {
       statement = visit(ctx.innerStatementList());
@@ -121,18 +126,47 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     init.appendGraph(statement);
     init.appendGraph(update);
 
-    for(PhpStatement p : update.lastVertices) {
-      init.addStatement(p, init.firstVertex);
+    for (PhpStatement p : update.getLastVertices()) {
+      init.addStatement(p, init.getFirstVertex());
     }
-    init.lastVertices.removeAll(statement.lastVertices);
-    init.lastVertices.addAll(update.lastVertices);
+    init.getLastVertices().removeAll(statement.getLastVertices());
+    init.getLastVertices().addAll(update.getLastVertices());
+
+    reduceBreakContinueStatement(init);
     return init;
   }
 
   @Override
   public ControlFlowGraph visitForeachStatement(PhpParser.ForeachStatementContext ctx) {
-    super.visitForeachStatement(ctx);
-    return super.visitForeachStatement(ctx);
+    //TODO
+    ControlFlowGraph cfg = new ControlFlowGraph();
+
+    String array = ctx.chain(0).getText();
+    String key = null;
+    String value;
+    PhpStatement keyAssignment;
+    PhpStatement valueAssignment;
+    if (ctx.chain().size() == 3) {
+      key = ctx.chain(1).getText();
+      value = ctx.chain(2).getText();
+    } else {
+      value = ctx.chain(1).getText();
+    }
+    valueAssignment = new AssignmentStatement(value, array, value + "=" + array);
+    cfg.addStatement(valueAssignment);
+    if (key != null) {
+      keyAssignment = new AssignmentStatement(key, "string", key + "= key");
+      cfg.addStatement(keyAssignment);
+    }
+
+    ControlFlowGraph statement = visit(ctx.statement());
+    cfg.appendGraph(statement);
+    for (PhpStatement p : statement.getLastVertices()) {
+      cfg.addStatement(p, cfg.getFirstVertex());
+    }
+
+    reduceBreakContinueStatement(cfg);
+    return cfg;
   }
 
   @Override
@@ -140,20 +174,22 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph init = visit(ctx.parenthesis());
     ControlFlowGraph statement;
     Set<PhpStatement> initStatement = new HashSet<>();
-    initStatement.addAll(init.lastVertices);
-    if(ctx.statement() != null){
+    initStatement.addAll(init.getLastVertices());
+    if (ctx.statement() != null) {
       statement = visit(ctx.statement());
     } else {
       statement = visit(ctx.innerStatementList());
     }
 
     init.appendGraph(statement);
-    for(PhpStatement p : init.lastVertices) {
-      init.addStatement(p, init.firstVertex);
+    for (PhpStatement p : init.getLastVertices()) {
+      init.addStatement(p, init.getFirstVertex());
     }
 
-    init.lastVertices.removeAll(statement.lastVertices);
-    init.lastVertices.addAll(initStatement);
+    init.getLastVertices().removeAll(statement.getLastVertices());
+    init.getLastVertices().addAll(initStatement);
+
+    reduceBreakContinueStatement(init);
     return init;
   }
 
@@ -163,10 +199,57 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph statement = visit(ctx.statement());
 
     statement.appendGraph(init);
-    for(PhpStatement p : init.lastVertices) {
-      statement.addStatement(p, statement.firstVertex);
+    for (PhpStatement p : init.getLastVertices()) {
+      statement.addStatement(p, statement.getFirstVertex());
     }
+
+    reduceBreakContinueStatement(statement);
     return statement;
+  }
+
+  @Override
+  public ControlFlowGraph visitContinueStatement(PhpParser.ContinueStatementContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+    graph.addStatement(new ContinueStatement());
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitBreakStatement(PhpParser.BreakStatementContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+    graph.addStatement(new BreakStatement());
+    return graph;
+  }
+
+  private void reduceBreakContinueStatement(ControlFlowGraph loopGraph) {
+    DepthFirstIterator<PhpStatement, DefaultEdge> iterator = new DepthFirstIterator<PhpStatement, DefaultEdge>(loopGraph.getGraph());
+    List<PhpStatement> removeList = new LinkedList<>();
+    while (iterator.hasNext()) {
+      PhpStatement statement = iterator.next();
+      if (statement.getStatementType() == StatementType.BREAK) {
+        // Add statement to removeList
+        List<PhpStatement> predStatements = Graphs.predecessorListOf(loopGraph.getGraph(), statement);
+        removeList.add(statement);
+        // Add all predecessor as last vertices
+        loopGraph.getLastVertices().addAll(predStatements);
+      } else if (statement.getStatementType() == StatementType.CONTINUE){
+        // Remove break statement edges
+        List<PhpStatement> predStatements = Graphs.predecessorListOf(loopGraph.getGraph(), statement);
+        removeList.add(statement);
+        for (PhpStatement pred: predStatements) {
+          loopGraph.addStatement(pred, loopGraph.getFirstVertex());
+        }
+      }
+    }
+    loopGraph.getGraph().removeAllVertices(removeList);
+  }
+
+  @Override
+  public ControlFlowGraph visitReturnStatement(PhpParser.ReturnStatementContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "return");
+    ControlFlowGraph childGraph = super.visitReturnStatement(ctx);
+    childGraph.appendGraph(graph);
+    return childGraph;
   }
 
   @Override
@@ -179,7 +262,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     // Get Arguments
     List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
     List<String> args = new LinkedList<>();
-    for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+    for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
       args.add(argCtx.getText());
     }
 
@@ -190,14 +273,23 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitMemberAccess(PhpParser.MemberAccessContext ctx) {
     ControlFlowGraph graph = new ControlFlowGraph();
-    if(ctx.actualArguments() != null) { // Method access by member
-      PhpParser.ChainContext chain_ctx = (PhpParser.ChainContext) ctx.getParent();
-      String var_name = chain_ctx.chainBase().getText();
+    if (ctx.actualArguments() != null) { // Method access by member
+      PhpParser.ChainContext parent_ctx = (PhpParser.ChainContext) ctx.getParent();
+      String var_name;
+      if (parent_ctx.chainBase() != null) {
+        var_name = parent_ctx.chainBase().getText();
+      } else if (parent_ctx.functionCall() != null) {
+        var_name = parent_ctx.functionCall().functionCallName().getText();
+      } else if (parent_ctx.newExpr() != null) {
+        var_name = parent_ctx.newExpr().typeRef().getText();
+      } else {
+        var_name = parent_ctx.getText();
+      }
 
       // Get Arguments
       List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
       List<String> args = new LinkedList<>();
-      for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+      for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
         args.add(argCtx.getText());
       }
 
@@ -223,7 +315,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if(ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() == 0){
+    if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() == 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;
@@ -242,7 +334,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     // Get Arguments
     List<PhpParser.ActualArgumentContext> argsCtx = ctx.arguments().actualArgument();
     List<String> args = new LinkedList<>();
-    for(PhpParser.ActualArgumentContext argCtx : argsCtx){
+    for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
       args.add(argCtx.getText());
     }
 
@@ -264,9 +356,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
-    String variableName = ctx.chain(0).getText();
     String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
-    PhpClass c = currentClass;
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));
@@ -428,7 +518,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     return graph;
   }
 
-//  whileStatement
+  //  whileStatement
 //  doWhileStatement
 //  forStatement
 //  switchStatement

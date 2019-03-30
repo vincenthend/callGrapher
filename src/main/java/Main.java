@@ -1,81 +1,21 @@
-import analyzer.DeclarationAnalyzer;
-import analyzer.FlowAnalyzer;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxConstants;
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-
 import logger.Logger;
 import model.ControlFlowGraph;
-import model.ProjectData;
 import org.jgrapht.ext.JGraphXAdapter;
+
+import javax.swing.*;
 
 public class Main {
 
-  private static List<File> listFilesForFolder(final File file) {
-    List<File> l = new ArrayList<File>();
-    if (file.isDirectory()) {
-      File[] files = file.listFiles();
-      if (files != null) {
-        for (final File fileEntry : files) {
-          l.addAll(listFilesForFolder((fileEntry)));
-        }
-      }
-    } else {
-      if (file.getName().endsWith("php")) {
-        l.add(file);
-      }
-    }
-    return l;
-  }
-
   public static void main(String[] args) {
     // Parameters
-    String path = ".\\testfile\\";
+    // String path = "..\\phpmyadmin\\libraries\\classes\\Navigation\\NavigationTree.php";
+    String path = ".\\testfile\\file4.php";
     boolean normalizeFunc = true;
-    String shownFunction = null;
-
-    ProjectData projectData = new ProjectData();
-    DeclarationAnalyzer declarationAnalyzer = new DeclarationAnalyzer(projectData);
-
-    // List all functions
-    File file = new File(path);
-    List<File> fileList = listFilesForFolder(file);
-    for (File filePath : fileList) {
-      Logger.info("Analyzing " + filePath);
-      try {
-        declarationAnalyzer.analyze(filePath);
-      } catch (IOException e) {
-        Logger.error("File %s not found " + filePath.getAbsolutePath());
-      }
-    }
-    System.out.println("==== Method list ====");
-    System.out.println(projectData.toString());
-
-    // Create control flow graph for all functions
-    Logger.info("Generating control flow graph");
-    FlowAnalyzer flowAnalyzer = new FlowAnalyzer(projectData);
-    flowAnalyzer.analyzeAll();
-
-    if(normalizeFunc) {
-      Logger.info("Normalizing functions");
-      projectData.normalizeControlFlowGraph();
-    }
-
-    ControlFlowGraph cfg;
-    if(shownFunction == null) {
-      cfg = declarationAnalyzer.getProjectData().getCombinedControlFlowGraph();
-    } else {
-      cfg = declarationAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
-    }
+    String shownFunction = "SQLConnector::runQuery";
+    ControlFlowGraph cfg = CallGraphAnalyzer.analyzeCallGraph(path, normalizeFunc, null);
 
     Logger.info("Drawing graphs");
     JFrame jFrame = new JFrame();
@@ -87,17 +27,9 @@ public class Main {
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
     mxHierarchicalLayout layout = new mxHierarchicalLayout(jgxAdapter);
     layout.execute(jgxAdapter.getDefaultParent());
-
-    //Save Image
-    BufferedImage image = mxCellRenderer
-        .createBufferedImage(mxcomp.getGraph(), null, 1, Color.WHITE, true, null);
-    try {
-      ImageIO.write(image, "PNG", new File("D:\\graph.png"));
-    } catch(IOException e) {
-      e.printStackTrace();
-    }
-
     jFrame.getContentPane().add(mxcomp);
     jFrame.setVisible(true);
+
+    // ControlFlowExporter.exportSVG(cfg, "D:\\");
   }
 }
