@@ -11,10 +11,10 @@ public class Main {
 
   public static void main(String[] args) {
     // Parameters
-    // String path = "..\\phpmyadmin\\libraries\\classes\\Navigation\\NavigationTree.php";
-    String path = ".\\testfile\\file4.php";
+    String path = "..\\phpmyadmin\\libraries\\classes\\Navigation\\NavigationTree.php";
+//     String path = ".\\testfile\\file4.php";
     boolean normalizeFunc = true;
-    String shownFunction = "SQLConnector::runQuery";
+    String shownFunction = "NavigationTree::__construct";
     ControlFlowGraph cfg = CallGraphAnalyzer.analyzeCallGraph(path, normalizeFunc, null);
 
     Logger.info("Drawing graphs");

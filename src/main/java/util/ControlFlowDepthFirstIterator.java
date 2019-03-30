@@ -71,8 +71,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   }
 
   public boolean isEndOfBranch() {
-    List<PhpStatement> succ = Graphs.successorListOf(controlFlowGraph, currentStatement);
-    return succ.size() == 1 && Graphs.predecessorListOf(controlFlowGraph, succ.get(0)).size() > 1 && !seenVertex.containsAll(succ);
+    return currentStatement.isEndOfBranch();
   }
 
   private int intersectionSize() {

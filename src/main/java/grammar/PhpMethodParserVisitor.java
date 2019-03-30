@@ -81,6 +81,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
         // Visit block and append to conditions
         stat_graph = visit(e.statement());
+        for (PhpStatement lastVert : stat_graph.getLastVertices()) {
+          lastVert.setEndOfBranch(true);
+        }
         graph.appendGraph(par_statements, stat_graph);
       }
     } else if (ctx.elseIfColonStatement().size() != 0) {
@@ -92,15 +95,24 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
         // Visit block and append to conditions
         stat_graph = visit(e.innerStatementList());
+        for (PhpStatement lastVert : stat_graph.getLastVertices()) {
+          lastVert.setEndOfBranch(true);
+        }
         graph.appendGraph(par_statements, stat_graph);
       }
     }
 
     if (ctx.elseStatement() != null) {
       stat_graph = visit(ctx.elseStatement().statement());
+      for (PhpStatement lastVert : stat_graph.getLastVertices()) {
+        lastVert.setEndOfBranch(true);
+      }
       graph.appendGraph(par_statements, stat_graph);
     } else if (ctx.elseColonStatement() != null) {
       stat_graph = visit(ctx.elseStatement().statement());
+      for (PhpStatement lastVert : stat_graph.getLastVertices()) {
+        lastVert.setEndOfBranch(true);
+      }
       graph.appendGraph(par_statements, stat_graph);
     } else {
       graph.getLastVertices().addAll(if_par_statements);
@@ -242,6 +254,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       }
     }
     loopGraph.getGraph().removeAllVertices(removeList);
+    loopGraph.getLastVertices().removeAll(removeList);
   }
 
   @Override
