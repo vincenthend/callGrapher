@@ -63,10 +63,6 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
       }
     }
 
-    System.out.println(currentStatement);
-    System.out.println("Stack : "+statementStack);
-    System.out.println("Int : "+intersectionSize);
-    System.out.println("IntStack : "+intersectionStack);
     return currentStatement;
   }
 

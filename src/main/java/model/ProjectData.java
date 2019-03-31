@@ -39,6 +39,16 @@ public class ProjectData {
     return functionMap.getOrDefault(functionCalledName, null);
   }
 
+  public PhpFunction getNormalizedFunction(String functionCalledName) {
+    PhpFunction retFunc = null;
+    for(PhpFunction phpFunction : normalizedFunctions){
+      if(phpFunction.getCalledName().equals(functionCalledName)){
+        retFunc = phpFunction;
+      }
+    }
+    return retFunc;
+  }
+
   public void addFunction(PhpFunction f) {
     functionMap.put(f.getCalledName(), f);
   }
@@ -62,7 +72,6 @@ public class ProjectData {
   public ControlFlowGraph getCombinedNormalizedControlFlowGraph() {
     ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
     for (PhpFunction phpFunction : normalizedFunctions) {
-      System.out.println(phpFunction.getControlFlowGraph().getFirstVertex());
       Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().getGraph());
     }
     return controlFlowGraph;
@@ -71,7 +80,6 @@ public class ProjectData {
   public ControlFlowGraph getCombinedControlFlowGraph() {
     ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
     for (PhpFunction phpFunction : functionMap.values()) {
-      System.out.println(phpFunction.getControlFlowGraph().getFirstVertex());
       Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().getGraph());
     }
     return controlFlowGraph;

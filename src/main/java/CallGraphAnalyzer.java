@@ -2,7 +2,9 @@ import analyzer.DeclarationAnalyzer;
 import analyzer.FlowAnalyzer;
 import logger.Logger;
 import model.ControlFlowGraph;
+import model.PhpFunction;
 import model.ProjectData;
+import org.jgrapht.Graphs;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class CallGraphAnalyzer {
     return analyzeCallGraph(filePaths, normalizeFunction, null);
   }
 
-  public static ControlFlowGraph analyzeCallGraph(String folder, boolean normalizeFunction, String shownFunction){
+  public static ControlFlowGraph analyzeCallGraph(String folder, boolean normalizeFunction, List<String> shownFunction){
     List<String> filePaths = new LinkedList<String>();
     filePaths.add(folder);
     return analyzeCallGraph(filePaths, normalizeFunction, shownFunction);
@@ -44,7 +46,7 @@ public class CallGraphAnalyzer {
     return analyzeCallGraph(filePaths, normalizeFunction, null);
   }
 
-  public static ControlFlowGraph analyzeCallGraph(List<String> filePaths, boolean normalizeFunction, String shownFunction){
+  public static ControlFlowGraph analyzeCallGraph(List<String> filePaths, boolean normalizeFunction, List<String> shownFunction){
     ProjectData projectData = new ProjectData();
     DeclarationAnalyzer declarationAnalyzer = new DeclarationAnalyzer(projectData);
     List<File> fileList = new ArrayList<>();
@@ -84,7 +86,16 @@ public class CallGraphAnalyzer {
         cfg = declarationAnalyzer.getProjectData().getCombinedControlFlowGraph();
       }
     } else {
-      cfg = declarationAnalyzer.getProjectData().getFunction(shownFunction).getControlFlowGraph();
+      cfg = new ControlFlowGraph();
+      for (String functionName: shownFunction) {
+        PhpFunction phpFunction;
+        if(normalizeFunction) {
+          phpFunction = declarationAnalyzer.getProjectData().getNormalizedFunction(functionName);
+        } else {
+          phpFunction = declarationAnalyzer.getProjectData().getFunction(functionName);
+        }
+        Graphs.addGraph(cfg.getGraph(), phpFunction.getControlFlowGraph().getGraph());
+      }
     }
     return cfg;
   }

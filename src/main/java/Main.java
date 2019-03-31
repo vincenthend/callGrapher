@@ -6,16 +6,20 @@ import model.ControlFlowGraph;
 import org.jgrapht.ext.JGraphXAdapter;
 
 import javax.swing.*;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Main {
 
   public static void main(String[] args) {
     // Parameters
-    String path = "..\\phpmyadmin\\libraries\\classes\\Navigation\\NavigationTree.php";
+    String path = "..\\phpmyadmin\\db_central_columns.php";
 //     String path = ".\\testfile\\file4.php";
     boolean normalizeFunc = true;
-    String shownFunction = "NavigationTree::__construct";
-    ControlFlowGraph cfg = CallGraphAnalyzer.analyzeCallGraph(path, normalizeFunc, null);
+    List<String> shownFunction = new LinkedList<>();
+    shownFunction.add("NavigationTree::groupNode");
+
+    ControlFlowGraph cfg = CallGraphAnalyzer.analyzeCallGraph(path, normalizeFunc, shownFunction);
 
     Logger.info("Drawing graphs");
     JFrame jFrame = new JFrame();
@@ -30,6 +34,6 @@ public class Main {
     jFrame.getContentPane().add(mxcomp);
     jFrame.setVisible(true);
 
-    // ControlFlowExporter.exportSVG(cfg, "D:\\");
+    ControlFlowExporter.exportSVG(cfg, "D:\\");
   }
 }
