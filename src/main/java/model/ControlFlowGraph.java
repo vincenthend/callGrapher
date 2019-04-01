@@ -90,7 +90,7 @@ public class ControlFlowGraph implements Cloneable {
    * @param g appended CFG
    */
   public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g){
-    if(g != null) {
+    if(g != null && g.firstVertex != null) {
       Graphs.addGraph(graph, g.getGraph());
       for (PhpStatement p : existing) {
         graph.addEdge(p, g.firstVertex);

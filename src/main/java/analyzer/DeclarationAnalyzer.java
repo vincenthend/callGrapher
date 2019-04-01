@@ -35,12 +35,12 @@ public class DeclarationAnalyzer {
       sb.append("\n");
     }
     bufferedReader.close();
-    analyze(sb.toString());
+    analyze(sb.toString(), file.getName());
   }
 
-  public void analyze(String fileContent){
+  public void analyze(String fileContent, String filename){
     CharStream cs = CharStreams.fromString(fileContent);
-    PhpDeclarationListener listener = new PhpDeclarationListener(projectData, cs);
+    PhpDeclarationListener listener = new PhpDeclarationListener(projectData, cs, filename);
 
     // Tokenize and build parse tree
     PhpLexer lexer = new PhpLexer(cs);

@@ -59,10 +59,18 @@ public class PhpFunction implements Comparable<PhpFunction>, Cloneable{
 
   @Override
   public int compareTo(PhpFunction o) {
-    if(functionName.equals(o.functionName) && className.equals(o.className)){
-      return 0;
+    if(className == null || o.className == null){
+      if(functionName.equals(o.functionName) && className == o.className){
+        return 0;
+      } else {
+        return 1;
+      }
     } else {
-      return 1;
+      if(functionName.equals(o.functionName) && className.equals(o.className)){
+        return 0;
+      } else {
+        return 1;
+      }
     }
   }
 

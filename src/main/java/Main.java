@@ -13,11 +13,14 @@ public class Main {
 
   public static void main(String[] args) {
     // Parameters
-    String path = "..\\phpmyadmin\\db_central_columns.php";
-//     String path = ".\\testfile\\file4.php";
+    List<String> path = new LinkedList<>();
+    path.add("..\\phpmyadmin\\sql.php");
+    path.add("..\\phpmyadmin\\libraries/classes/Operations.php");
+//    String path = "..\\phpmyadmin\\libraries\\Theme.php";
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("NavigationTree::groupNode");
+    shownFunction.add("Operations::getDeleteDataOrTablelink");
+    shownFunction.add("sql.php::main");
 
     ControlFlowGraph cfg = CallGraphAnalyzer.analyzeCallGraph(path, normalizeFunc, shownFunction);
 

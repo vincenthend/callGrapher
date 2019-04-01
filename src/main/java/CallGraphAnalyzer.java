@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class CallGraphAnalyzer {
   private static List<File> listFilesForFolder(final File file) {
@@ -67,19 +68,35 @@ public class CallGraphAnalyzer {
     }
     System.out.println("==== Method list ====");
     System.out.println(projectData.toString());
+    System.out.println();
 
     // Create control flow graph for all functions
     Logger.info("Generating control flow graph");
     FlowAnalyzer flowAnalyzer = new FlowAnalyzer(projectData);
     flowAnalyzer.analyzeAll();
 
+    // Reduce function if empty
+    Map<String, PhpFunction> functionMap = projectData.getFunctionMap();
+    List<String> removeList = new ArrayList<>();
+    for(Map.Entry<String, PhpFunction> functionEntry : functionMap.entrySet()){
+      if(functionEntry.getValue().getControlFlowGraph().getFirstVertex() == null){
+        Logger.info("Function "+functionEntry.getValue().getCalledName()+" is empty, removing...");
+        removeList.add(functionEntry.getValue().getCalledName());
+      }
+    }
+    for(String removeItem : removeList) {
+      projectData.getFunctionMap().remove(removeItem);
+    }
+
+    // Normalize functions
     if(normalizeFunction) {
       Logger.info("Normalizing functions");
       projectData.normalizeControlFlowGraph();
     }
 
+    // Append graph for viewing
     ControlFlowGraph cfg;
-    if(shownFunction == null) {
+    if(shownFunction.isEmpty()) {
       if(normalizeFunction) {
         cfg = declarationAnalyzer.getProjectData().getCombinedNormalizedControlFlowGraph();
       } else {

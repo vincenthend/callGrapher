@@ -18,17 +18,29 @@ import java.util.LinkedList;
 public class PhpDeclarationListener extends PhpParserBaseListener {
   private ProjectData projectData;
   private CharStream charStream;
+  private StringBuilder unattachedCode;
+  private String filename;
 
-  public PhpDeclarationListener(ProjectData projectData, CharStream charStream) {
+  public PhpDeclarationListener(ProjectData projectData, CharStream charStream, String filename) {
     this.projectData = projectData;
     this.charStream = charStream;
+    this.filename = filename;
+    this.unattachedCode = new StringBuilder();
+  }
+
+  @Override
+  public void exitTopStatement(PhpParser.TopStatementContext ctx) {
+    if(ctx.statement() != null){
+      Interval interval = new Interval(ctx.statement().start.getStartIndex(), ctx.statement().stop.getStopIndex());
+      unattachedCode.append(charStream.getText(interval));
+    }
   }
 
   @Override
   public void exitClassStatement(PhpParser.ClassStatementContext ctx) {
     super.exitClassStatement(ctx);
 
-    String className = ((PhpParser.ClassDeclarationContext)ctx.parent).identifier().getText();
+    String className = ((PhpParser.ClassDeclarationContext) ctx.parent).identifier().getText();
     PhpClass c = projectData.getClass(className);
     if(c == null){
       c = new PhpClass(className);
@@ -37,12 +49,12 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
     if(ctx.Function() != null){ // Method declaration
       // Get PhpFunction data
       String functionName = ctx.identifier().getText();
-      Interval interval = new Interval (ctx.methodBody().start.getStartIndex(), ctx.methodBody().stop.getStopIndex());
+      Interval interval = new Interval(ctx.methodBody().start.getStartIndex(), ctx.methodBody().stop.getStopIndex());
       String code = charStream.getText(interval);
 
       // Parse parameter
       LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
-      for (PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()){
+      for(PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()) {
         String varName = formctx.variableInitializer().VarName().getText();
         if(formctx.variableInitializer().constantInititalizer() != null){
           parameters.put(varName, formctx.variableInitializer().constantInititalizer().getText());
@@ -54,14 +66,14 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       // Add function to project data
       PhpFunction function = new PhpFunction(functionName, className, code, parameters);
       projectData.addFunction(function);
-      c.getFunctionMap().put(functionName,function);
+      c.getFunctionMap().put(functionName, function);
 
-      Logger.info("Function Member "+function.getCalledName()+" found");
+      Logger.info("Function Member " + function.getCalledName() + " found");
     } else if(ctx.variableInitializer().size() != 0){
-      for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()){
-        c.getAttributeMap().put(varContext.getText(),new LinkedList<>());
+      for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()) {
+        c.getAttributeMap().put(varContext.getText(), new LinkedList<>());
 
-        Logger.info("Attribute Member "+className+"::"+varContext.getText()+" found");
+        Logger.info("Attribute Member " + className + "::" + varContext.getText() + " found");
       }
     }
   }
@@ -72,12 +84,12 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
 
     // Get PhpFunction data
     String functionName = ctx.identifier().getText();
-    Interval interval = new Interval (ctx.blockStatement().start.getStartIndex(), ctx.blockStatement().stop.getStopIndex());
+    Interval interval = new Interval(ctx.blockStatement().start.getStartIndex(), ctx.blockStatement().stop.getStopIndex());
     String code = charStream.getText(interval);
 
     // Parse parameter
     LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
-    for (PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()){
+    for(PhpParser.FormalParameterContext formctx : ctx.formalParameterList().formalParameter()) {
       String varName = formctx.variableInitializer().VarName().getText();
       if(formctx.variableInitializer().constantInititalizer() != null){
         parameters.put(varName, formctx.variableInitializer().constantInititalizer().getText());
@@ -90,6 +102,14 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
     PhpFunction function = new PhpFunction(functionName, null, code, parameters);
     projectData.addFunction(function);
 
-    Logger.info("PhpFunction "+function.getCalledName()+" found");
+    Logger.info("PhpFunction " + function.getCalledName() + " found");
+  }
+
+  @Override
+  public void exitHtmlDocument(PhpParser.HtmlDocumentContext ctx) {
+    Logger.info("Found main function in "+filename);
+    if(unattachedCode.toString().length() != 0){
+      projectData.addFunction(new PhpFunction(filename+"::main", null, unattachedCode.toString(), null));
+    }
   }
 }
