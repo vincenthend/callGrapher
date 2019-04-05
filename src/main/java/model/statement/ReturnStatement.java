@@ -7,11 +7,6 @@ public class ReturnStatement extends PhpStatement {
     this.returnedVar = returnedVar;
   }
 
-  @Override
-  public String toString() {
-    return super.toString()+" "+ returnedVar;
-  }
-
   public String getReturnedVar() {
     return returnedVar;
   }

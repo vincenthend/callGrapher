@@ -83,7 +83,9 @@ public class ControlFlowNormalizer {
         }
       } else if (statement.getStatementType() == StatementType.RETURN) {
         ReturnStatement returnStatement = (ReturnStatement) statement;
-        returnType.addAll(getVariableType(returnStatement.getReturnedVar()));
+        if(returnStatement.getReturnedVar() != null && getVariableType(returnStatement.getReturnedVar()) != null){
+          returnType.addAll(getVariableType(returnStatement.getReturnedVar()));
+        }
       }
 
       int intersectionSize = iterator.getIntersectionSize();

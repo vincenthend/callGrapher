@@ -1,7 +1,12 @@
 <?php
     class SQLConnector{
         function runQuery($query){
-            $a = moo($a)->moo();
+
+        if ($node->type != Node::CONTAINER
+            || !$GLOBALS['cfg']['NavigationTreeEnableExpansion']
+        ) {
+            return;
+        }
         }
     }
 ?>

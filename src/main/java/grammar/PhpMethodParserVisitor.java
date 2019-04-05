@@ -259,7 +259,12 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitReturnStatement(PhpParser.ReturnStatementContext ctx) {
-    PhpStatement returnStatement = new ReturnStatement(ctx.expression().getText());
+    PhpStatement returnStatement;
+    if(ctx.expression() != null){
+      returnStatement = new ReturnStatement(ctx.expression().getText());
+    } else {
+      returnStatement = new ReturnStatement("");
+    }
     ControlFlowGraph childGraph = super.visitReturnStatement(ctx);
     childGraph.addStatement(returnStatement);
     return childGraph;
@@ -348,12 +353,14 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     String name = input.getText(interval);
 
     // Get Arguments
-    List<PhpParser.ActualArgumentContext> argsCtx = ctx.arguments().actualArgument();
     List<String> args = new LinkedList<>();
-    for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
-      args.add(argCtx.getText());
-      ControlFlowGraph argCfg = visit(argCtx);
-      graph.appendGraph(argCfg);
+    if(ctx.arguments() != null){
+      List<PhpParser.ActualArgumentContext> argsCtx = ctx.arguments().actualArgument();
+      for(PhpParser.ActualArgumentContext argCtx : argsCtx) {
+        args.add(argCtx.getText());
+        ControlFlowGraph argCfg = visit(argCtx);
+        graph.appendGraph(argCfg);
+      }
     }
 
     PhpFunction temp_func = new PhpFunction("__construct", name, "", null);
@@ -374,8 +381,15 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
-    String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
-    System.out.println(assignedType);
+    ParserRuleContext assigneeContext = null;
+    if(ctx.expression() != null){
+      assigneeContext = ctx.expression();
+    } else if (ctx.chain().size() != 0){
+      assigneeContext = ctx.chain(0);
+    } else if (ctx.newExpr() != null){
+      assigneeContext = ctx.newExpr();
+    }
+    String assignedType = new PhpAssignedTypeVisitor(projectData).visit(assigneeContext);
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));

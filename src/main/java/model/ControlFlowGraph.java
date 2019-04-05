@@ -8,6 +8,7 @@ import java.util.Set;
 
 import model.statement.FunctionCallStatement;
 import model.statement.PhpStatement;
+import model.statement.StatementType;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -62,8 +63,10 @@ public class ControlFlowGraph implements Cloneable {
     } else {
       PhpStatement[] phpStatements = lastVertices.toArray(new PhpStatement[lastVertices.size()]);
       for(PhpStatement statement : phpStatements){
-        graph.addEdge(statement, a);
-        lastVertices.remove(statement);
+        if(statement.getStatementType() != StatementType.RETURN){
+          graph.addEdge(statement, a);
+          lastVertices.remove(statement);
+        }
       }
     }
 
@@ -113,23 +116,15 @@ public class ControlFlowGraph implements Cloneable {
         HashSet<PhpStatement> removeList = new HashSet<>();
         if(g.firstVertex != null) {
           for (PhpStatement p : lastVertices) {
-            graph.addEdge(p, g.firstVertex);
-            removeList.add(p);
+            if(p.getStatementType() != StatementType.RETURN){
+              graph.addEdge(p, g.firstVertex);
+              removeList.add(p);
+            }
           }
         }
         lastVertices.removeAll(removeList);
       }
       lastVertices.addAll(g.lastVertices);
-    }
-  }
-
-  public void normalizeControlFlowGraph(){
-    // Find FunctionCallStatement
-    GraphIterator<PhpStatement, DefaultEdge> iterator = new DepthFirstIterator<PhpStatement, DefaultEdge> (graph);
-    while(iterator.hasNext()){
-      PhpStatement statement = iterator.next();
-      Graphs.successorListOf(graph, statement);
-      iterator.next();
     }
   }
 
