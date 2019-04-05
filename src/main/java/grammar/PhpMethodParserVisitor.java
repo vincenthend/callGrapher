@@ -335,7 +335,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
-    System.out.println(ctx.getText());
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
     if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");

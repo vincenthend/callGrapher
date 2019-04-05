@@ -17,4 +17,9 @@ public class ReturnStatement extends PhpStatement {
     statement.returnedVar = this.returnedVar;
     return statement;
   }
+
+  @Override
+  public String toString() {
+    return super.toString()+" "+returnedVar;
+  }
 }

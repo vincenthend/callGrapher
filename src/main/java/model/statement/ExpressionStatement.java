@@ -9,7 +9,7 @@ public class ExpressionStatement extends PhpStatement {
 
   @Override
   public String toString() {
-    return super.toString()+" ["+expressionType+"]";
+    return super.toString()+" "+getStatementContent()+" ["+expressionType+"]";
   }
 
   @Override

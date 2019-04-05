@@ -12,7 +12,7 @@ abstract public class PhpStatement implements Cloneable {
 
   @Override
   public String toString() {
-    return "["+this.statementType.toString() + "] " + this.statementContent;
+    return "["+this.statementType.toString() + "]";
   }
 
   @Override

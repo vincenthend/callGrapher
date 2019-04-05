@@ -32,7 +32,7 @@ public class FunctionCallStatement extends PhpStatement {
 
   @Override
   public String toString() {
-    return "[" + getStatementType() + "] " + function.getCalledName();
+    return super.toString() + " " + function.getCalledName();
   }
 
   @Override
