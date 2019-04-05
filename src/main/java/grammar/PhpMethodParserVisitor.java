@@ -335,8 +335,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
+    System.out.println(ctx.getText());
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() == 0) {
+    if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;
@@ -384,8 +385,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ParserRuleContext assigneeContext = null;
     if(ctx.expression() != null){
       assigneeContext = ctx.expression();
-    } else if (ctx.chain().size() != 0){
-      assigneeContext = ctx.chain(0);
+    } else if (ctx.chain().size() > 1){
+      assigneeContext = ctx.chain(1);
     } else if (ctx.newExpr() != null){
       assigneeContext = ctx.newExpr();
     }
@@ -393,10 +394,12 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));
-    ControlFlowGraph childGraph = super.visitAssignmentExpression(ctx);
-    childGraph.appendGraph(graph);
+//    ControlFlowGraph assignedGraph = visit(ctx.chain(0));
+    ControlFlowGraph assigneeGraph = visit(assigneeContext);
+//    assignedGraph.appendGraph(assigneeGraph);
+    assigneeGraph.appendGraph(graph);
 
-    return childGraph;
+    return assigneeGraph;
   }
 
   @Override
