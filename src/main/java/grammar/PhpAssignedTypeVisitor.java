@@ -21,7 +21,11 @@ public class PhpAssignedTypeVisitor extends PhpParserBaseVisitor<String> {
 
   @Override
   public String visitMemberAccess(PhpParser.MemberAccessContext ctx) {
-    return "$"+ctx.getParent().getText();
+    if(ctx.getParent().getText().startsWith("$")){
+      return ctx.getParent().getText();
+    } else {
+      return "$"+ctx.getParent().getText();
+    }
   }
 
   @Override

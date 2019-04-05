@@ -14,7 +14,7 @@ public class AssignmentStatement extends PhpStatement {
 
   @Override
   public String toString() {
-    return super.toString()+" "+assignedVariable;
+    return super.toString()+" "+assignedVariable+" = "+assignedType;
   }
 
   @Override
