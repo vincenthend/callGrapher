@@ -1,12 +1,10 @@
 package util;
 
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import model.ControlFlowGraph;
 import model.PhpFunction;
 import model.ProjectData;
-import model.statement.AssignmentStatement;
-import model.statement.FunctionCallStatement;
-import model.statement.PhpStatement;
-import model.statement.StatementType;
+import model.statement.*;
 import org.jgrapht.Graphs;
 
 import java.util.*;
@@ -41,9 +39,11 @@ public class ControlFlowNormalizer {
     }
   }
 
-  public void normalize() {
+  // General normalizer
+  public Set<String> normalize() {
     Stack<Map<String, Set<String>>> originalVarStack = new Stack<>();
     Stack<Integer> intersectionStack = new Stack<>();
+    Set<String> returnType = new HashSet<>();
 
     ControlFlowGraph cfg = currentFunction.getControlFlowGraph();
     ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(cfg);
@@ -66,7 +66,6 @@ public class ControlFlowNormalizer {
             finishedTypeStack.push(assignedType);
           }
         }
-
         addVariableType(assignment.getAssignedVariable(), finishedTypeStack);
       } else if (statement.getStatementType() == StatementType.FUNCTION_CALL) {
         // Replace / append function call
@@ -82,6 +81,9 @@ public class ControlFlowNormalizer {
         } else {
           normalizeFuncCall(null, (FunctionCallStatement) statement, cfg);
         }
+      } else if (statement.getStatementType() == StatementType.RETURN) {
+        ReturnStatement returnStatement = (ReturnStatement) statement;
+        returnType.addAll(getVariableType(returnStatement.getReturnedVar()));
       }
 
       int intersectionSize = iterator.getIntersectionSize();
@@ -112,8 +114,10 @@ public class ControlFlowNormalizer {
         }
       }
     }
+    return returnType;
   }
 
+  // Normalizer for function call
   private void normalizeFuncCall(String type, FunctionCallStatement statement, ControlFlowGraph cfg) {
     try {
       String functionName;
@@ -134,8 +138,13 @@ public class ControlFlowNormalizer {
         f = f.clone();
         Map<String, Set<String>> functionVariables = remapVariables(statement, f);
         ControlFlowNormalizer norm = new ControlFlowNormalizer(f, functionVariables, projectData);
-        //TODO: Return statement
-        norm.normalize();
+
+        //Get function return type and add to variable type
+        Set<String> functionReturn = norm.normalize();
+        if(functionReturn != null){
+          addVariableType(f.getCalledName(), functionReturn);
+        }
+
         ControlFlowGraph funcCfg = f.getControlFlowGraph();
 
         //Append CFG

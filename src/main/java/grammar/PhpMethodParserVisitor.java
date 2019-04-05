@@ -259,9 +259,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitReturnStatement(PhpParser.ReturnStatementContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx, "return");
+    PhpStatement returnStatement = new ReturnStatement(ctx.expression().getText());
     ControlFlowGraph childGraph = super.visitReturnStatement(ctx);
-    childGraph.appendGraph(graph);
+    childGraph.addStatement(returnStatement);
     return childGraph;
   }
 
@@ -277,6 +277,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     List<String> args = new LinkedList<>();
     for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
       args.add(argCtx.getText());
+      ControlFlowGraph argCfg = visit(argCtx);
+      graph.appendGraph(argCfg);
     }
 
     graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "", null), args, null));
@@ -298,12 +300,13 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       } else {
         var_name = parent_ctx.getText();
       }
-
       // Get Arguments
       List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
       List<String> args = new LinkedList<>();
       for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
         args.add(argCtx.getText());
+        ControlFlowGraph argCfg = visit(argCtx);
+        graph.appendGraph(argCfg);
       }
 
       // Get function graph
@@ -349,6 +352,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     List<String> args = new LinkedList<>();
     for (PhpParser.ActualArgumentContext argCtx : argsCtx) {
       args.add(argCtx.getText());
+      ControlFlowGraph argCfg = visit(argCtx);
+      graph.appendGraph(argCfg);
     }
 
     PhpFunction temp_func = new PhpFunction("__construct", name, "", null);
@@ -370,6 +375,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
     String assignedType = new PhpAssignedTypeVisitor(projectData).visit(ctx.expression());
+    System.out.println(assignedType);
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));

@@ -21,13 +21,12 @@ public class PhpAssignedTypeVisitor extends PhpParserBaseVisitor<String> {
 
   @Override
   public String visitMemberAccess(PhpParser.MemberAccessContext ctx) {
-    return super.visitMemberAccess(ctx);
+    return "$"+ctx.getParent().getText();
   }
 
   @Override
   public String visitFunctionCallName(PhpParser.FunctionCallNameContext ctx) {
-    //projectData.getFunctionMap().get(ctx.)
-    return super.visitFunctionCallName(ctx);
+    return "$"+ctx.getText();
   }
 
   @Override

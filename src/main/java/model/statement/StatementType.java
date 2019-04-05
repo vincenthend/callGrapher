@@ -6,6 +6,6 @@ public enum StatementType {
   ASSIGNMENT,
   FUNCTION_CALL,
   BREAK,
+  RETURN,
   CONTINUE,
-  LOOP,
 }
