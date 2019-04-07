@@ -1,6 +1,7 @@
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxConstants;
+import com.mxgraph.view.mxStylesheet;
 import logger.Logger;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
@@ -26,12 +27,16 @@ public class Main {
 //    path.add("../phpmyadmin/libraries/classes/Response.php");
 //    path.add("../phpmyadmin/libraries/classes/Util.php");
 //    path.add("../phpmyadmin/libraries/classes/Url.php");
-    path.add("./testfile/file4.php");
+    path.add("./testfile/file1.php");
+    path.add("./testfile/file2.php");
+    path.add("./testfile/file3.php");
+//    path.add("./testfile/file4.php");
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
 //    shownFunction.add("NavigationTree::groupNode");
-    shownFunction.add("SQLConnector::runQuery");
+    shownFunction.add("UserController::showProfile");
+//    shownFunction.add("SQLConnector::runQuery");
 
     ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();
     analyzer.analyzeControlFlowGraph(path);
@@ -42,7 +47,7 @@ public class Main {
 
     // Translate to block graph
     ControlFlowGraphTranslator translator = new ControlFlowGraphTranslator();
-    ControlFlowBlockGraph blockGraph = translator.translate(analyzer.getProjectData().getFunction(shownFunction.get(0)).getControlFlowGraph());
+    ControlFlowBlockGraph blockGraph = translator.translate(analyzer.getProjectData().getNormalizedFunction((shownFunction.get(0))).getControlFlowGraph());
 
     ControlFlowGraph cfg = analyzer.getCombinedControlFlowGraph(shownFunction);
     ControlFlowBlockGraph cfbg = blockGraph;
@@ -52,9 +57,10 @@ public class Main {
     jFrame.setSize(400, 320);
 //    JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfg.getGraph());
     JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfbg.getGraph());
-    mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
+    mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
+
     mxHierarchicalLayout layout = new mxHierarchicalLayout(jgxAdapter);
 
     layout.execute(jgxAdapter.getDefaultParent());

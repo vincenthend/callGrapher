@@ -1,5 +1,6 @@
 package grammar;
 
+import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
 import model.php.PhpClass;
 import model.php.PhpFunction;
@@ -54,23 +55,24 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
-    PhpStatement branchStatement = new BranchStatement(code);
-    graph.addStatement(branchStatement);
+    graph.addStatement(new BranchStatement(code));
+    graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
 
     ControlFlowGraph par_graph;
     ControlFlowGraph stat_graph;
-    Set<PhpStatement> par_statements;
 
-    // Visit conditions and append to branch
+    // Visit conditions and append branch conditions
     par_graph = visit(ctx.parenthesis().expression());
-    par_statements = par_graph.getLastVertices();
-    graph.appendGraph(branchStatement, par_graph);
-    Set<PhpStatement> if_par_statements = par_statements;
+    graph.appendGraph(par_graph);
 
-    // Visit block and append to conditions
+    PhpStatement branch_point = new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT);
+    graph.addStatement(branch_point);
+
+    // Visit statement block and append to conditions
     stat_graph = visit(ctx.statement());
-    graph.appendGraph(par_statements, stat_graph);
+    graph.appendGraph(stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
 
+    //TODO Refactor this
     for (PhpStatement lastVert :graph.getLastVertices()) {
       lastVert.setEndOfBranch(true);
     }
@@ -79,30 +81,36 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     if (ctx.elseIfStatement().size() != 0) {
       for (PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
         // Visit elseif's condition and append to previous conditions
-        par_graph = visit(e.parenthesis().expression());
-        graph.appendGraph(par_statements, par_graph);
-        par_statements = par_graph.getLastVertices();
+        par_graph = new ControlFlowGraph();
+        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
+        par_graph.appendGraph(visit(e.parenthesis().expression()));
+        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
 
         // Visit block and append to conditions
         stat_graph = visit(e.statement());
         for (PhpStatement lastVert : stat_graph.getLastVertices()) {
           lastVert.setEndOfBranch(true);
         }
-        graph.appendGraph(par_statements, stat_graph);
+        par_graph.appendGraph(stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
+
+        graph.appendGraph(branch_point, par_graph);
       }
     } else if (ctx.elseIfColonStatement().size() != 0) {
       for (PhpParser.ElseIfColonStatementContext e : ctx.elseIfColonStatement()) {
         // Visit elseif's condition and append to previous conditions
-        par_graph = visit(e.parenthesis().expression());
-        graph.appendGraph(par_statements, par_graph);
-        par_statements = par_graph.getLastVertices();
+        par_graph = new ControlFlowGraph();
+        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
+        par_graph.appendGraph(visit(e.parenthesis().expression()));
+        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
 
         // Visit block and append to conditions
         stat_graph = visit(e.innerStatementList());
         for (PhpStatement lastVert : stat_graph.getLastVertices()) {
           lastVert.setEndOfBranch(true);
         }
-        graph.appendGraph(par_statements, stat_graph);
+        par_graph.appendGraph(stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
+
+        graph.appendGraph(branch_point, par_graph);
       }
     }
 
@@ -111,15 +119,19 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       for (PhpStatement lastVert : stat_graph.getLastVertices()) {
         lastVert.setEndOfBranch(true);
       }
-      graph.appendGraph(par_statements, stat_graph);
+      graph.appendGraph(branch_point, stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
     } else if (ctx.elseColonStatement() != null) {
       stat_graph = visit(ctx.elseStatement().statement());
       for (PhpStatement lastVert : stat_graph.getLastVertices()) {
         lastVert.setEndOfBranch(true);
       }
-      graph.appendGraph(par_statements, stat_graph);
-    } else {
-      graph.getLastVertices().addAll(if_par_statements);
+      graph.appendGraph(branch_point, stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
+    }
+
+    graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_END));
+
+    if(ctx.elseStatement() == null && ctx.elseColonStatement() == null){
+      graph.getLastVertices().add(branch_point);
     }
 
     return graph;
@@ -142,8 +154,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     init.appendGraph(statement);
     init.appendGraph(update);
 
+    // connect loop to first statement
     for (PhpStatement p : update.getLastVertices()) {
-      init.addStatement(p, init.getFirstVertex());
+      init.addStatement(p, init.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);
     }
     init.getLastVertices().removeAll(statement.getLastVertices());
     init.getLastVertices().addAll(update.getLastVertices());
@@ -154,7 +167,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitForeachStatement(PhpParser.ForeachStatementContext ctx) {
-    //TODO
     ControlFlowGraph cfg = new ControlFlowGraph();
 
     String array = ctx.chain(0).getText();
@@ -177,8 +189,10 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
     ControlFlowGraph statement = visit(ctx.statement());
     cfg.appendGraph(statement);
+
+    // connect loop to first statement
     for (PhpStatement p : statement.getLastVertices()) {
-      cfg.addStatement(p, cfg.getFirstVertex());
+      cfg.addStatement(p, cfg.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);
     }
 
     reduceBreakContinueStatement(cfg);
@@ -196,10 +210,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     } else {
       statement = visit(ctx.innerStatementList());
     }
-
     init.appendGraph(statement);
+
+    // connect loop to first statement
     for (PhpStatement p : init.getLastVertices()) {
-      init.addStatement(p, init.getFirstVertex());
+      init.addStatement(p, init.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);
     }
 
     init.getLastVertices().removeAll(statement.getLastVertices());
@@ -213,10 +228,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   public ControlFlowGraph visitDoWhileStatement(PhpParser.DoWhileStatementContext ctx) {
     ControlFlowGraph init = visit(ctx.parenthesis());
     ControlFlowGraph statement = visit(ctx.statement());
-
     statement.appendGraph(init);
+
+    // connect loop to first statement
     for (PhpStatement p : init.getLastVertices()) {
-      statement.addStatement(p, statement.getFirstVertex());
+      statement.addStatement(p, statement.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);
     }
 
     reduceBreakContinueStatement(statement);
@@ -339,7 +355,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
-    ControlFlowGraph childGraph = visitExpression(ctx, "chain");
+    ControlFlowGraph childGraph = super.visitChainExpression(ctx);
     if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);

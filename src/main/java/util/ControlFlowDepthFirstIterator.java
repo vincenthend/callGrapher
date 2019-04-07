@@ -1,20 +1,25 @@
 package util;
 
+import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
+import model.graph.block.statement.BranchStatement;
 import model.graph.block.statement.PhpStatement;
+import model.graph.block.statement.StatementType;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultEdge;
 
 import java.util.*;
 
+import static model.graph.ControlFlowEdge.ControlFlowEdgeType.BRANCH;
+import static model.graph.block.statement.BranchStatement.BranchStatementType.BRANCH_POINT;
+
 public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
-  private Graph<PhpStatement, DefaultEdge> controlFlowGraph;
+  private Graph<PhpStatement, ControlFlowEdge> controlFlowGraph;
   private Set<PhpStatement> seenVertex;
   private Stack<PhpStatement> statementStack;
   private Stack<Integer> intersectionStack;
   private PhpStatement currentStatement;
-  private int intersectionSize;
+  private int branchSize;
 
 
   public ControlFlowDepthFirstIterator(ControlFlowGraph cfg) {
@@ -33,22 +38,31 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   }
 
   private void generateStatementSet() {
+//    System.out.print("[[generate]]");
     List<PhpStatement> succList = Graphs.successorListOf(controlFlowGraph, currentStatement);
     for (PhpStatement succStatement : succList) {
-      if (!seenVertex.contains(succStatement)) {
-        statementStack.push(succStatement);
+      if (currentStatement.getStatementType() == StatementType.BRANCH && ((BranchStatement)currentStatement).getType() == BRANCH_POINT) {
+        if (!seenVertex.contains(succStatement) && controlFlowGraph.getEdge(currentStatement, succStatement).getEdgeType() == BRANCH) {
+          statementStack.push(succStatement);
+          seenVertex.add(succStatement);
+        }
+      } else {
+        if (!seenVertex.contains(succStatement)) {
+          statementStack.push(succStatement);
+          seenVertex.add(succStatement);
+        }
       }
     }
-    seenVertex.addAll(succList);
   }
 
   @Override
   public PhpStatement next() {
     currentStatement = statementStack.pop();
-    System.out.print("DFS : "+currentStatement);
-    intersectionSize = updateIntersectionSize();
-    if (intersectionSize > 1) {
-      intersectionStack.push(intersectionSize);
+    branchSize = updateBranchSize();
+//    System.out.print("DFS : " + currentStatement);
+//    System.out.print(" " + isEndOfBranch() + "("+branchSize+") ");
+    if (branchSize >= 1) {
+      intersectionStack.push(branchSize);
     }
 
     // Prevent generation on unfinished branches
@@ -56,6 +70,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
       generateStatementSet();
     } else {
       int size = intersectionStack.pop();
+//      System.out.print("~"+size+" ");
       if (size > 1) {
         intersectionStack.push(size - 1);
       } else {
@@ -63,32 +78,38 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
       }
     }
 
-    System.out.println(" - stack : "+statementStack);
-    System.out.println("Intersection : "+intersectionStack);
+//    System.out.println(" - stack : " + statementStack);
+//    System.out.println("Intersection : " + intersectionStack);
 
     return currentStatement;
   }
 
   public boolean isEndOfBranch() {
-    return currentStatement.isEndOfBranch();
+    boolean isEnd;
+    List<PhpStatement> succList = Graphs.successorListOf(controlFlowGraph, currentStatement);
+    if (succList.size() == 1 && succList.get(0).getStatementType() == StatementType.BRANCH) {
+      BranchStatement branchStatement = (BranchStatement) succList.get(0);
+      return branchStatement.getType() == BranchStatement.BranchStatementType.BRANCH_END;
+    }
+    return false;
   }
 
-  private int updateIntersectionSize() {
+  private int updateBranchSize() {
     int nbIntersection = 0;
     List<PhpStatement> succList = Graphs.successorListOf(controlFlowGraph, currentStatement);
     for (PhpStatement succStatement : succList) {
-      if (!seenVertex.contains(succStatement)) {
+      if (controlFlowGraph.getEdge(currentStatement, succStatement).getEdgeType() == BRANCH) {
         nbIntersection += 1;
       }
     }
     return nbIntersection;
   }
 
-  public int getIntersectionSize() {
-    return intersectionSize;
+  public int getBranchSize() {
+    return branchSize;
   }
 
-  public PhpStatement peek(){
+  public PhpStatement peek() {
     return statementStack.peek();
   }
 }

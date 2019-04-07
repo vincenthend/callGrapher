@@ -3,10 +3,10 @@ package model.graph.block.statement;
 import model.graph.block.PhpBasicBlock;
 
 abstract public class PhpStatement implements Cloneable {
-  private StatementType statementType;
-  private String statementContent;
-  private boolean endOfBranch;
-  private PhpBasicBlock basicBlock;
+  protected StatementType statementType;
+  protected String statementContent;
+  protected boolean endOfBranch; //TODO Remove this
+  protected PhpBasicBlock basicBlock;
 
   PhpStatement(StatementType type, String code) {
     this.statementType = type;

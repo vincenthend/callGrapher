@@ -1,5 +1,6 @@
 package util;
 
+import logger.Logger;
 import model.graph.ControlFlowGraph;
 import model.php.PhpFunction;
 import model.ProjectData;
@@ -90,9 +91,9 @@ public class ControlFlowNormalizer {
         }
       }
 
-      int intersectionSize = iterator.getIntersectionSize();
+      int intersectionSize = iterator.getBranchSize();
 
-      if (intersectionSize > 1) {
+      if (intersectionSize >= 1) {
         // Push intersectionSize
         for (int i = 0; i < intersectionSize; i++) {
           variableListStack.push(copyVariableStack(currentVariableList)); //TODO

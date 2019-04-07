@@ -42,7 +42,7 @@ public class ProjectData {
   }
 
   public PhpFunction getNormalizedFunction(String functionCalledName) {
-    return functionMap.getOrDefault(functionCalledName, null);
+    return normalizedFunctions.getOrDefault(functionCalledName, null);
   }
 
   public void addFunction(PhpFunction f) {

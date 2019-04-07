@@ -25,11 +25,11 @@ public class ControlFlowGraphTranslator {
     PhpBasicBlock closedBlock = null;
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
-      System.out.println(statement + " : " + iterator.getIntersectionSize() + " end : " + iterator.isEndOfBranch());
+      System.out.println(statement + " : " + iterator.getBranchSize() + " end : " + iterator.isEndOfBranch());
       blockGraphFactory.addStatement(statement);
 
       // Handle branching
-      int intersectionSize = iterator.getIntersectionSize();
+      int intersectionSize = iterator.getBranchSize();
       if (intersectionSize > 1) {
         closedBlock = blockGraphFactory.closeBlock();
         blockGraphFactory.openBlock(closedBlock);
