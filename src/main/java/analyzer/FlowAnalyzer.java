@@ -36,10 +36,6 @@ public class FlowAnalyzer {
       PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
       ParseTree tree = parser.htmlDocument();
       function.setControlFlowGraph(visitor.visit(tree));
-      for(PhpStatement statement : function.getControlFlowGraph().getLastVertices()){
-        System.out.println(statement);
-        statement.setEndOfBranch(true);
-      }
     }
   }
 

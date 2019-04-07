@@ -49,7 +49,7 @@ public class ControlFlowNormalizer {
     Set<String> returnType = new HashSet<>();
 
     ControlFlowGraph cfg = currentFunction.getControlFlowGraph();
-    ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(cfg);
+    ControlFlowDIYIterator iterator = new ControlFlowDIYIterator(cfg);
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
       if (statement.getStatementType() == StatementType.ASSIGNMENT) {

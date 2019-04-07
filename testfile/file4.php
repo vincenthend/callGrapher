@@ -1,17 +1,15 @@
 <?php
     class SQLConnector{
         function runQuery($query){
-            x();
+            a();
             while(true){
-                if (a()) {
+                if (b()) {
                     foo();
                 } else {
-                    if (b()) {
-                        bar();
-                    }
+                    break;
                 }
-                c();
             }
+            c();
         }
     }
 ?>

@@ -23,7 +23,7 @@ public class ControlFlowGraph implements Cloneable {
     lastVertices = new HashSet<>();
   }
 
-  public Graph getGraph() {
+  public Graph<PhpStatement, ControlFlowEdge> getGraph() {
     return graph;
   }
 

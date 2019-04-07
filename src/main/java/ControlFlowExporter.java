@@ -4,6 +4,7 @@ import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxRectangle;
 import logger.Logger;
+import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
 import model.graph.block.statement.PhpStatement;
 import org.jgrapht.Graph;
@@ -33,7 +34,7 @@ public class ControlFlowExporter {
   public static void exportPNG(ControlFlowGraph cfg, String path) {
     //Save Image
     Logger.info("Exporting graph, please wait...");
-    JGraphXAdapter<PhpStatement, DefaultEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
+    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
@@ -69,7 +70,7 @@ public class ControlFlowExporter {
 
   public static void exportSVG(ControlFlowGraph cfg, String path) {
     Logger.info("Exporting graph, please wait...");
-    JGraphXAdapter<PhpStatement, DefaultEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
+    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
@@ -94,7 +95,7 @@ public class ControlFlowExporter {
   public static void exportDot(ControlFlowGraph cfg, String path) {
     //Save Image
     Logger.info("Exporting graph, please wait...");
-    Graph<PhpStatement, DefaultEdge> graph = cfg.getGraph();
+    Graph<PhpStatement, ControlFlowEdge> graph = cfg.getGraph();
     ComponentNameProvider<PhpStatement> vertexIdProvider = new ComponentNameProvider<PhpStatement>() {
       @Override
       public String getName(PhpStatement p) {
@@ -107,7 +108,7 @@ public class ControlFlowExporter {
         return phpStatement.toString();
       }
     };
-    GraphExporter<PhpStatement, DefaultEdge> exporter = new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
+    GraphExporter<PhpStatement, ControlFlowEdge> exporter = new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
     try {
       FileWriter fileWriter = new FileWriter(new File(path + "graph.dot"));
       exporter.exportGraph(graph, fileWriter);

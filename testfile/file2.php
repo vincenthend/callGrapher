@@ -6,8 +6,6 @@ class UserController {
       $dm = null;
       if($a == 1){
           $dm = new DataModel();
-      } else {
-          $dm = new DataMoodle();
       }
     $userdata = $dm->getUserData($username, $connection);
     showview('template.php', $userdata);

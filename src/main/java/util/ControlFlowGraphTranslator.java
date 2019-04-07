@@ -19,7 +19,7 @@ public class ControlFlowGraphTranslator {
    */
   public ControlFlowBlockGraph translate(ControlFlowGraph cfg) {
     ControlFlowBlockGraphFactory blockGraphFactory = new ControlFlowBlockGraphFactory();
-    ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(cfg);
+    ControlFlowDIYIterator iterator = new ControlFlowDIYIterator(cfg);
 
     Logger.info("Translating to block graph");
     PhpBasicBlock closedBlock = null;
