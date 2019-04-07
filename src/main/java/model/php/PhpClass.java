@@ -1,4 +1,4 @@
-package model;
+package model.php;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,10 +1,9 @@
 package util;
 
-import com.sun.org.apache.bcel.internal.generic.RETURN;
-import model.ControlFlowGraph;
-import model.PhpFunction;
+import model.graph.ControlFlowGraph;
+import model.php.PhpFunction;
 import model.ProjectData;
-import model.statement.*;
+import model.graph.block.statement.*;
 import org.jgrapht.Graphs;
 
 import java.util.*;
@@ -39,7 +38,10 @@ public class ControlFlowNormalizer {
     }
   }
 
-  // General normalizer
+  /**
+   * Normalizes a function by tracking assignment.
+   * @return Set of possible return value
+   */
   public Set<String> normalize() {
     Stack<Map<String, Set<String>>> originalVarStack = new Stack<>();
     Stack<Integer> intersectionStack = new Stack<>();
@@ -119,7 +121,12 @@ public class ControlFlowNormalizer {
     return returnType;
   }
 
-  // Normalizer for function call
+  /**
+   * Normalize function call statement by finding the appropriate function and normalizing it.
+   * @param type possible type of function
+   * @param statement function call statement
+   * @param cfg current cfg
+   */
   private void normalizeFuncCall(String type, FunctionCallStatement statement, ControlFlowGraph cfg) {
     try {
       String functionName;

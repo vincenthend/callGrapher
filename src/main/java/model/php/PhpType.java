@@ -1,4 +1,4 @@
-package model;
+package model.php;
 
 public class PhpType implements Comparable<PhpType>{
   String typeName;

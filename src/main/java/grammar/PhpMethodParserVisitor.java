@@ -1,10 +1,10 @@
 package grammar;
 
-import model.ControlFlowGraph;
-import model.PhpClass;
-import model.PhpFunction;
+import model.graph.ControlFlowGraph;
+import model.php.PhpClass;
+import model.php.PhpFunction;
 import model.ProjectData;
-import model.statement.*;
+import model.graph.block.statement.*;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
@@ -70,6 +70,10 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     // Visit block and append to conditions
     stat_graph = visit(ctx.statement());
     graph.appendGraph(par_statements, stat_graph);
+
+    for (PhpStatement lastVert :graph.getLastVertices()) {
+      lastVert.setEndOfBranch(true);
+    }
 
     // Add root vertex
     if (ctx.elseIfStatement().size() != 0) {
@@ -335,7 +339,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
-    ControlFlowGraph childGraph = super.visitChainExpression(ctx);
+    ControlFlowGraph childGraph = visitExpression(ctx, "chain");
     if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);

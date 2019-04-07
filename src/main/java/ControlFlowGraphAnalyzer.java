@@ -1,8 +1,8 @@
 import analyzer.DeclarationAnalyzer;
 import analyzer.FlowAnalyzer;
 import logger.Logger;
-import model.ControlFlowGraph;
-import model.PhpFunction;
+import model.graph.ControlFlowGraph;
+import model.php.PhpFunction;
 import model.ProjectData;
 import org.jgrapht.Graphs;
 
@@ -13,8 +13,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class CallGraphAnalyzer {
-  private static List<File> listFilesForFolder(final File file) {
+public class ControlFlowGraphAnalyzer {
+  private boolean normalized = false;
+  private ProjectData projectData;
+
+  private List<File> listFilesForFolder(final File file) {
     List<File> l = new ArrayList<>();
     if (file.isDirectory()) {
       File[] files = file.listFiles();
@@ -31,24 +34,15 @@ public class CallGraphAnalyzer {
     return l;
   }
 
-  public static ControlFlowGraph analyzeCallGraph(String folder, boolean normalizeFunction){
+  public void analyzeControlFlowGraph(String folder){
     List<String> filePaths = new LinkedList<String>();
     filePaths.add(folder);
-    return analyzeCallGraph(filePaths, normalizeFunction, null);
+    analyzeControlFlowGraph(filePaths);
   }
 
-  public static ControlFlowGraph analyzeCallGraph(String folder, boolean normalizeFunction, List<String> shownFunction){
-    List<String> filePaths = new LinkedList<String>();
-    filePaths.add(folder);
-    return analyzeCallGraph(filePaths, normalizeFunction, shownFunction);
-  }
-
-  public static ControlFlowGraph analyzeCallGraph(List<String> filePaths, boolean normalizeFunction){
-    return analyzeCallGraph(filePaths, normalizeFunction, null);
-  }
-
-  public static ControlFlowGraph analyzeCallGraph(List<String> filePaths, boolean normalizeFunction, List<String> shownFunction){
-    ProjectData projectData = new ProjectData();
+  //TODO : Refactor this function
+  public void analyzeControlFlowGraph(List<String> filePaths){
+    projectData = new ProjectData();
     DeclarationAnalyzer declarationAnalyzer = new DeclarationAnalyzer(projectData);
     List<File> fileList = new ArrayList<>();
 
@@ -66,6 +60,7 @@ public class CallGraphAnalyzer {
         Logger.error("File %s not found " + file.getAbsolutePath());
       }
     }
+
     System.out.println("==== Method list ====");
     System.out.println(projectData.toString());
     System.out.println();
@@ -87,33 +82,55 @@ public class CallGraphAnalyzer {
     for(String removeItem : removeList) {
       projectData.getFunctionMap().remove(removeItem);
     }
+  }
 
+  /**
+   * Normalize control flow graph to replace all function call with function's CFG.
+   * @param functionList function to be normalized, null to normalize all.
+   */
+  public void normalizeFunction(List<String> functionList){
+    normalized = true;
     // Normalize functions
-    if(normalizeFunction) {
-      Logger.info("Normalizing functions");
-      projectData.normalizeControlFlowGraph();
+    Logger.info("Normalizing functions");
+    if(!functionList.isEmpty()) {
+      projectData.normalizeFunctions(functionList);
+    } else {
+      projectData.normalizeFunctions();
     }
+  }
 
+  // TODO : Deprecate later
+  /**
+   * Append list of functions to get combined control graph for display.
+   * @param shownFunction functions to be shown
+   * @return list of functions to be shown
+   */
+  public ControlFlowGraph getCombinedControlFlowGraph(List<String> shownFunction){
     // Append graph for viewing
     ControlFlowGraph cfg;
     if(shownFunction.isEmpty()) {
-      if(normalizeFunction) {
-        cfg = declarationAnalyzer.getProjectData().getCombinedNormalizedControlFlowGraph();
+      if(normalized) {
+        cfg = projectData.getCombinedNormalizedControlFlowGraph();
       } else {
-        cfg = declarationAnalyzer.getProjectData().getCombinedControlFlowGraph();
+        cfg = projectData.getCombinedControlFlowGraph();
       }
     } else {
       cfg = new ControlFlowGraph();
       for (String functionName: shownFunction) {
         PhpFunction phpFunction;
-        if(normalizeFunction) {
-          phpFunction = declarationAnalyzer.getProjectData().getNormalizedFunction(functionName);
+        if(normalized) {
+          phpFunction = projectData.getNormalizedFunction(functionName);
         } else {
-          phpFunction = declarationAnalyzer.getProjectData().getFunction(functionName);
+          phpFunction = projectData.getFunction(functionName);
         }
         Graphs.addGraph(cfg.getGraph(), phpFunction.getControlFlowGraph().getGraph());
       }
     }
+
     return cfg;
+  }
+
+  public ProjectData getProjectData() {
+    return projectData;
   }
 }

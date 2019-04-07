@@ -1,6 +1,6 @@
-package model.statement;
+package model.graph.block.statement;
 
-import model.PhpFunction;
+import model.php.PhpFunction;
 
 import java.util.LinkedList;
 import java.util.List;

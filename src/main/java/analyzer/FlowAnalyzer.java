@@ -4,7 +4,8 @@ import grammar.PhpLexer;
 import grammar.PhpMethodParserVisitor;
 import grammar.PhpParser;
 import logger.Logger;
-import model.PhpFunction;
+import model.graph.block.statement.PhpStatement;
+import model.php.PhpFunction;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -35,6 +36,10 @@ public class FlowAnalyzer {
       PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
       ParseTree tree = parser.htmlDocument();
       function.setControlFlowGraph(visitor.visit(tree));
+      for(PhpStatement statement : function.getControlFlowGraph().getLastVertices()){
+        System.out.println(statement);
+        statement.setEndOfBranch(true);
+      }
     }
   }
 

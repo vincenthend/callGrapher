@@ -1,11 +1,13 @@
 package model;
 
 import logger.Logger;
+import model.graph.ControlFlowGraph;
+import model.php.PhpClass;
+import model.php.PhpFunction;
 import org.jgrapht.Graphs;
 import util.ControlFlowNormalizer;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,13 +16,13 @@ import java.util.Map;
  */
 public class ProjectData {
   private Map<String, PhpFunction> functionMap;
-  private List<PhpFunction> normalizedFunctions;
+  private Map<String, PhpFunction> normalizedFunctions;
   private Map<String, PhpClass> classMap;
 
   public ProjectData() {
     functionMap = new HashMap<>();
     classMap = new HashMap<>();
-    normalizedFunctions = new LinkedList<>();
+    normalizedFunctions = new HashMap<>();
   }
 
   public Map<String, PhpFunction> getFunctionMap() {
@@ -40,13 +42,7 @@ public class ProjectData {
   }
 
   public PhpFunction getNormalizedFunction(String functionCalledName) {
-    PhpFunction retFunc = null;
-    for(PhpFunction phpFunction : normalizedFunctions){
-      if(phpFunction.getCalledName().equals(functionCalledName)){
-        retFunc = phpFunction;
-      }
-    }
-    return retFunc;
+    return functionMap.getOrDefault(functionCalledName, null);
   }
 
   public void addFunction(PhpFunction f) {
@@ -71,7 +67,7 @@ public class ProjectData {
 
   public ControlFlowGraph getCombinedNormalizedControlFlowGraph() {
     ControlFlowGraph controlFlowGraph = new ControlFlowGraph();
-    for (PhpFunction phpFunction : normalizedFunctions) {
+    for (PhpFunction phpFunction : normalizedFunctions.values()) {
       Graphs.addGraph(controlFlowGraph.getGraph(), phpFunction.getControlFlowGraph().getGraph());
     }
     return controlFlowGraph;
@@ -85,15 +81,29 @@ public class ProjectData {
     return controlFlowGraph;
   }
 
-  public void normalizeControlFlowGraph(){
-    normalizedFunctions.clear();
+  public void normalizeFunctions(){
     for (PhpFunction phpFunction : functionMap.values()){
       try {
         Logger.info("Normalizing "+phpFunction.getCalledName());
         PhpFunction normalizedFunc = phpFunction.clone();
         ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
-        normalizer.normalize();//TODO Refactor this to move to functionMap
-        normalizedFunctions.add(normalizedFunc);
+        normalizer.normalize();
+        normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
+      } catch (CloneNotSupportedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void normalizeFunctions(List<String> functionNames){
+    for (String functionName : functionNames){
+      try {
+        PhpFunction function = getFunction(functionName);
+        Logger.info("Normalizing "+function.getCalledName());
+        PhpFunction normalizedFunc = function.clone();
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
+        normalizer.normalize();
+        normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } catch (CloneNotSupportedException e) {
         e.printStackTrace();
       }

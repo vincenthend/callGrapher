@@ -1,4 +1,4 @@
-package model.statement;
+package model.graph.block.statement;
 
 public class ContinueStatement extends PhpStatement {
   public ContinueStatement() {

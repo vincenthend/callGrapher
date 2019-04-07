@@ -1,23 +1,19 @@
-package model;
+package model.graph;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import model.statement.FunctionCallStatement;
-import model.statement.PhpStatement;
-import model.statement.StatementType;
+import model.graph.block.statement.PhpStatement;
+import model.graph.block.statement.StatementType;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.DepthFirstIterator;
-import org.jgrapht.traverse.GraphIterator;
 
 public class ControlFlowGraph implements Cloneable {
-  private Graph<PhpStatement, DefaultEdge> graph;
+  private Graph<PhpStatement,DefaultEdge> graph;
   private Set<PhpStatement> lastVertices;
   private PhpStatement firstVertex;
 
@@ -27,7 +23,7 @@ public class ControlFlowGraph implements Cloneable {
     lastVertices = new HashSet<>();
   }
 
-  public Graph<PhpStatement, DefaultEdge> getGraph() {
+  public Graph getGraph() {
     return graph;
   }
 

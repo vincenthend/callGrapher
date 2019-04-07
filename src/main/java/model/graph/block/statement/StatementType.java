@@ -1,4 +1,4 @@
-package model.statement;
+package model.graph.block.statement;
 
 public enum StatementType {
   BRANCH,

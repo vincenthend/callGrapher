@@ -1,8 +1,8 @@
 package grammar;
 
 import logger.Logger;
-import model.PhpClass;
-import model.PhpFunction;
+import model.php.PhpClass;
+import model.php.PhpFunction;
 import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;

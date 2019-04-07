@@ -1,4 +1,4 @@
-package model.statement;
+package model.graph.block.statement;
 
 public class ExpressionStatement extends PhpStatement {
   private String expressionType;

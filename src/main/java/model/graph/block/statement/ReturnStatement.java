@@ -1,4 +1,4 @@
-package model.statement;
+package model.graph.block.statement;
 
 public class ReturnStatement extends PhpStatement {
   private String returnedVar;

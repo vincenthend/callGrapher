@@ -1,7 +1,7 @@
 package util;
 
-import model.ControlFlowGraph;
-import model.statement.PhpStatement;
+import model.graph.ControlFlowGraph;
+import model.graph.block.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
@@ -45,23 +45,26 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   @Override
   public PhpStatement next() {
     currentStatement = statementStack.pop();
-
-    intersectionSize = intersectionSize();
-    if(intersectionSize > 1){
+    System.out.print("DFS : "+currentStatement);
+    intersectionSize = updateIntersectionSize();
+    if (intersectionSize > 1) {
       intersectionStack.push(intersectionSize);
     }
 
     // Prevent generation on unfinished branches
-    if(!isEndOfBranch()) {
+    if (!isEndOfBranch()) {
       generateStatementSet();
     } else {
       int size = intersectionStack.pop();
-      if(size > 1){
+      if (size > 1) {
         intersectionStack.push(size - 1);
       } else {
         generateStatementSet();
       }
     }
+
+    System.out.println(" - stack : "+statementStack);
+    System.out.println("Intersection : "+intersectionStack);
 
     return currentStatement;
   }
@@ -70,7 +73,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
     return currentStatement.isEndOfBranch();
   }
 
-  private int intersectionSize() {
+  private int updateIntersectionSize() {
     int nbIntersection = 0;
     List<PhpStatement> succList = Graphs.successorListOf(controlFlowGraph, currentStatement);
     for (PhpStatement succStatement : succList) {
@@ -85,7 +88,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
     return intersectionSize;
   }
 
-  public int peekIntersectionStack(){
-    return intersectionStack.peek();
+  public PhpStatement peek(){
+    return statementStack.peek();
   }
 }

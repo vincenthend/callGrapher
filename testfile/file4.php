@@ -1,7 +1,15 @@
 <?php
     class SQLConnector{
         function runQuery($query){
-            $key->separator = $node->separator;
+            x();
+            if (a()) {
+                foo();
+            } else {
+                if (b()) {
+                    bar();
+                }
+            }
+            c();
         }
     }
 ?>
