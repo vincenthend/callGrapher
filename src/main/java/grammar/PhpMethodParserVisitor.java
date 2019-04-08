@@ -320,9 +320,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       // Get function graph
       PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), null, "", null);
       graph.addStatement(new FunctionCallStatement(temp_func, args, var_name));
-    } else { // Variable access by member
+    }/* else { // Variable access by member
       graph = visitExpression(ctx, "member");
-    }
+    }*/
     return graph;
   }
 
@@ -339,7 +339,12 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
+    int memberSize = ctx.chain().memberAccess().size();
+    boolean hasArgs = false;
+    if(memberSize != 0){
+      hasArgs = ctx.chain().memberAccess(memberSize-1).actualArguments() != null;
+    }
+    if (ctx.chain().chainBase() != null && hasArgs) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;
