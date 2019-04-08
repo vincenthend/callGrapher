@@ -9,31 +9,24 @@ import org.jgrapht.alg.lca.TarjanLCAFinder;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class ControlFlowGraphDominators {
-  ControlFlowGraph cfg;
-  Graph<PhpStatement, DefaultEdge> tree;
-  List<PhpStatement> vertexList;
-  Map<PhpStatement, Integer> vertexId;
-  Map<PhpStatement, Integer> parent;
+public class ControlFlowGraphDominators implements Iterable<PhpStatement>{
+  private ControlFlowGraph cfg;
+  private Graph<PhpStatement, DefaultEdge> tree;
+  private List<PhpStatement> vertexList;
+  private Map<PhpStatement, Integer> vertexId;
+  private Map<PhpStatement, Integer> parent;
 
-  public static Graph<PhpStatement, DefaultEdge> computeDominatorGraph(ControlFlowGraph cfg) {
-    ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(cfg);
-//    cfgd.traverseGraph();
-    cfgd.compute();
-    return cfgd.tree;
-  }
-
-  private ControlFlowGraphDominators(ControlFlowGraph cfg) {
+  public ControlFlowGraphDominators(ControlFlowGraph cfg) {
     this.cfg = cfg;
     vertexList = new ArrayList<>();
     vertexId = new HashMap<>();
     parent = new HashMap<>();
     tree = new DefaultDirectedGraph<PhpStatement, DefaultEdge>(DefaultEdge.class);
+
+    traverseGraph();
+    compute();
   }
 
   private void traverseGraph() {
@@ -97,5 +90,14 @@ public class ControlFlowGraphDominators {
     TarjanLCAFinder<PhpStatement, DefaultEdge> lcaFinder
       = new TarjanLCAFinder<PhpStatement, DefaultEdge>(tree, cfg.getFirstVertex());
     return vertexId.getOrDefault(lcaFinder.getLCA(parent, u), -99);
+  }
+
+  public Graph<PhpStatement, DefaultEdge> getTree() {
+    return tree;
+  }
+
+  @Override
+  public Iterator<PhpStatement> iterator() {
+    return new ControlFlowDominatorIterator(this, cfg.getFirstVertex());
   }
 }

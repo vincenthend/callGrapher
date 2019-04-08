@@ -2,11 +2,11 @@
     class SQLConnector{
         function runQuery($query){
             a();
-            while(true){
+            while($a){
                 if (b()) {
                     foo();
                 } else {
-                    break;
+                    bar();
                 }
             }
             c();

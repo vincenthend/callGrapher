@@ -10,17 +10,18 @@ import model.graph.block.statement.StatementType;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultEdge;
 
 public class ControlFlowGraph implements Cloneable {
   private Graph<PhpStatement,ControlFlowEdge> graph;
   private Set<PhpStatement> lastVertices;
   private PhpStatement firstVertex;
+  private int maxId;
 
   public ControlFlowGraph() {
     graph = new DefaultDirectedGraph<PhpStatement, ControlFlowEdge>(ControlFlowEdge.class);
     firstVertex = null;
     lastVertices = new HashSet<>();
+    maxId = 0;
   }
 
   public Graph<PhpStatement, ControlFlowEdge> getGraph() {
@@ -36,12 +37,12 @@ public class ControlFlowGraph implements Cloneable {
   }
 
   /**
-   * Adds statement p1 after p.
+   * Adds statement p1 after p. P1 may have existed
    * @param p statement before
    * @param p1 statement after
    */
   public void addStatement(PhpStatement p, PhpStatement p1) {
-    addStatement(p, p1, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
+    addStatement(p, p1, ControlFlowEdge.ControlFlowEdgeType.GENERAL);;
   }
 
   public void addStatement(PhpStatement p, PhpStatement p1, ControlFlowEdge.ControlFlowEdgeType type) {
@@ -50,17 +51,24 @@ public class ControlFlowGraph implements Cloneable {
       graph.addVertex(p1);
       lastVertices.add(p1);
       lastVertices.remove(p);
+      p1.setStatementId(maxId);
+      maxId += 1;
     }
     graph.addEdge(p, p1, edge);
   }
 
+  /**
+   * Add statement after last vertices. Statement haven't existed in the graph.
+   * @param a added statement
+   */
   public void addStatement(PhpStatement a) {
     addStatement(a, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
   }
 
   public void addStatement(PhpStatement a, ControlFlowEdge.ControlFlowEdgeType type) {
     graph.addVertex(a);
-
+    a.setStatementId(maxId);
+    maxId += 1;
     if(lastVertices.size() == 0 && firstVertex == null) {
       firstVertex = a;
     } else {
@@ -88,6 +96,13 @@ public class ControlFlowGraph implements Cloneable {
 
   public void appendGraph(PhpStatement existing, ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
     if(g != null && g.graph.vertexSet().size() != 0) {
+      // Take care of ID
+      Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
+      for(PhpStatement phpStatement : vertexSet){
+        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      }
+      maxId += vertexSet.size();
+
       Graphs.addGraph(graph, g.getGraph());
       ControlFlowEdge edge = new ControlFlowEdge(type);
       graph.addEdge(existing, g.firstVertex, edge);
@@ -107,6 +122,13 @@ public class ControlFlowGraph implements Cloneable {
 
   public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
     if(g != null && g.firstVertex != null) {
+      // Take care of ID
+      Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
+      for(PhpStatement phpStatement : vertexSet){
+        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      }
+      maxId += vertexSet.size();
+
       Graphs.addGraph(graph, g.getGraph());
       for (PhpStatement p : existing) {
         ControlFlowEdge edge = new ControlFlowEdge(type);
@@ -127,6 +149,13 @@ public class ControlFlowGraph implements Cloneable {
 
   public void appendGraph(ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
     if(g != null) {
+      // Take care of ID
+      Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
+      for(PhpStatement phpStatement : vertexSet){
+        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      }
+      maxId += vertexSet.size();
+
       Graphs.addGraph(graph, g.getGraph());
       if (firstVertex == null) {
         firstVertex = g.firstVertex;

@@ -18,14 +18,18 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
 
 
   public ControlFlowDepthFirstIterator(ControlFlowGraph cfg) {
-    this.controlFlowGraph = cfg.getGraph();
+    this(cfg.getGraph(), cfg.getFirstVertex());
+  }
+
+  public ControlFlowDepthFirstIterator(Graph<PhpStatement, ControlFlowEdge> cfg, PhpStatement root) {
+    this.controlFlowGraph = cfg;
     this.seenVertex = new HashSet<>();
     this.statementStack = new Stack<>();
     this.parentStack = new Stack<>();
     this.currentParent = null;
 
-    statementStack.push(cfg.getFirstVertex());
-    seenVertex.add(cfg.getFirstVertex());
+    statementStack.push(root);
+    seenVertex.add(root);
   }
 
   @Override
