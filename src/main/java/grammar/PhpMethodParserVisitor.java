@@ -56,7 +56,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
     graph.addStatement(new BranchStatement(code));
-//    graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
 
     ControlFlowGraph par_graph;
     ControlFlowGraph stat_graph;
@@ -65,8 +64,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     par_graph = visit(ctx.parenthesis().expression());
     graph.appendGraph(par_graph);
 
-    PhpStatement branch_point = new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT);
-    graph.addStatement(branch_point);
+    PhpStatement branch_point = graph.getLastVertices().iterator().next();
+//    PhpStatement branch_point = new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT);
+//    graph.addStatement(branch_point);
 
     // Visit statement block and append to conditions
     stat_graph = visit(ctx.statement());
@@ -79,9 +79,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       for (PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
         // Visit elseif's condition and append to previous conditions
         par_graph = new ControlFlowGraph();
-//        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
         par_graph.appendGraph(visit(e.parenthesis().expression()));
-        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
+//        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
 
         // Visit block and append to conditions
         stat_graph = visit(e.statement());
@@ -95,7 +94,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
         par_graph = new ControlFlowGraph();
 //        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_CONDITION));
         par_graph.appendGraph(visit(e.parenthesis().expression()));
-        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
+//        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
 
         // Visit block and append to conditions
         stat_graph = visit(e.innerStatementList());
@@ -340,7 +339,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   @Override
   public ControlFlowGraph visitChainExpression(PhpParser.ChainExpressionContext ctx) {
     ControlFlowGraph childGraph = super.visitChainExpression(ctx);
-    if (ctx.chain().chainBase() != null) {
+    if (ctx.chain().chainBase() != null && ctx.chain().memberAccess().size() != 0) {
       ControlFlowGraph graph = visitExpression(ctx, "chain");
       graph.appendGraph(childGraph);
       return graph;
@@ -376,14 +375,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
   }
 
   @Override
-  public ControlFlowGraph visitComparisonExpression(PhpParser.ComparisonExpressionContext ctx) {
-    ControlFlowGraph graph = visitExpression(ctx, "comparison");
-    ControlFlowGraph childGraph = super.visitComparisonExpression(ctx);
-    childGraph.appendGraph(graph);
-    return childGraph;
-  }
-
-  @Override
   public ControlFlowGraph visitAssignmentExpression(PhpParser.AssignmentExpressionContext ctx) {
     ParserRuleContext assigneeContext = null;
     if(ctx.expression() != null){
@@ -405,7 +396,18 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     return assigneeGraph;
   }
 
+/*
+
+
   @Override
+  public ControlFlowGraph visitComparisonExpression(PhpParser.ComparisonExpressionContext ctx) {
+    ControlFlowGraph graph = visitExpression(ctx, "comparison");
+    ControlFlowGraph childGraph = super.visitComparisonExpression(ctx);
+    childGraph.appendGraph(graph);
+    return childGraph;
+  }
+
+@Override
   public ControlFlowGraph visitUnaryOperatorExpression(PhpParser.UnaryOperatorExpressionContext ctx) {
     ControlFlowGraph graph = visitExpression(ctx, "unaryop");
     ControlFlowGraph childGraph = super.visitUnaryOperatorExpression(ctx);
@@ -419,7 +421,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitSpecialWordExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }
+  }*/
 
   @Override
   public ControlFlowGraph visitArrayCreationExpression(PhpParser.ArrayCreationExpressionContext ctx) {
@@ -437,7 +439,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     return graph;
   }
 
-  @Override
+/*  @Override
   public ControlFlowGraph visitBackQuoteStringExpression(PhpParser.BackQuoteStringExpressionContext ctx) {
     ControlFlowGraph graph = visitExpression(ctx, "backquote");
     ControlFlowGraph childGraph = super.visitBackQuoteStringExpression(ctx);
@@ -452,6 +454,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     graph.appendGraph(childGraph);
     return graph;
   }
+
 
   @Override
   public ControlFlowGraph visitArithmeticExpression(PhpParser.ArithmeticExpressionContext ctx) {
@@ -555,7 +558,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitYieldExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }
+  }*/
 
   //  whileStatement
 //  doWhileStatement

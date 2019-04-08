@@ -19,17 +19,25 @@ public class Main {
   public static void main(String[] args) {
     // Parameters
     List<String> path = new LinkedList<>();
-    path.add("../phpmyadmin/libraries/Theme.php");
-//    path.add("./testfile/file1.php");
-//    path.add("./testfile/file2.php");
-//    path.add("./testfile/file3.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/NavigationTree.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/Node.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeDatabase.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTable.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTableContainer.php");
+//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeViewContainer.php");
+//    path.add("../phpmyadmin/libraries/classes/RecentFavoriteTable.php");
+//    path.add("../phpmyadmin/libraries/classes/Response.php");
+//    path.add("../phpmyadmin/libraries/classes/Util.php");
+//    path.add("../phpmyadmin/libraries/classes/Url.php");
+    path.add("./testfile/file1.php");
+    path.add("./testfile/file2.php");
+    path.add("./testfile/file3.php");
 //    path.add("./testfile/file4.php");
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("Theme::getFontSize");
 //    shownFunction.add("NavigationTree::groupNode");
-//    shownFunction.add("UserController::showProfile");
+    shownFunction.add("UserController::showProfile");
 //    shownFunction.add("SQLConnector::runQuery");
 
     ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();

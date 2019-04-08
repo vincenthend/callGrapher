@@ -1,18 +1,9 @@
 package util;
 
-import model.graph.ControlFlowEdge;
-import model.graph.ControlFlowGraph;
-import model.graph.block.statement.BranchStatement;
 import model.graph.block.statement.PhpStatement;
-import model.graph.block.statement.StatementType;
-import org.jgrapht.Graph;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.*;
-
-import static model.graph.ControlFlowEdge.ControlFlowEdgeType.BRANCH;
-import static model.graph.block.statement.BranchStatement.BranchStatementType.BRANCH_POINT;
 
 public class ControlFlowDominatorIterator implements Iterator<PhpStatement> {
   private ControlFlowGraphDominators dominatorGraph;
@@ -35,7 +26,7 @@ public class ControlFlowDominatorIterator implements Iterator<PhpStatement> {
     return !statementStack.isEmpty();
   }
 
-  private void generateStatementSet(){
+  private void generateStatementSet() {
     Set<DefaultEdge> succList = dominatorGraph.getTree().outgoingEdgesOf(currentStatement);
     PriorityQueue<PhpStatement> newStatement = new PriorityQueue<>(new Comparator<PhpStatement>() {
       @Override
@@ -51,16 +42,16 @@ public class ControlFlowDominatorIterator implements Iterator<PhpStatement> {
       }
     });
 
-    for(DefaultEdge edge : succList){
+    for(DefaultEdge edge : succList) {
       PhpStatement statement = dominatorGraph.getTree().getEdgeTarget(edge);
-      if(!seenVertex.contains(statement)) {
+      if(!seenVertex.contains(statement)){
         newStatement.add(statement);
         seenVertex.add(statement);
       }
     }
 
     Iterator<PhpStatement> stIterator = newStatement.iterator();
-    while(stIterator.hasNext()){
+    while(stIterator.hasNext()) {
       statementStack.push(stIterator.next());
     }
   }
