@@ -116,7 +116,6 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     if(ctx.elseStatement() == null && ctx.elseColonStatement() == null){
       graph.getLastVertices().add(branch_point);
     }
-
     return graph;
   }
 
@@ -138,11 +137,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     init.appendGraph(update);
 
     // connect loop to first statement
-    for (PhpStatement p : update.getLastVertices()) {
+    for (PhpStatement p : init.getLastVertices()) {
       init.addStatement(p, init.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);
     }
-    init.getLastVertices().removeAll(statement.getLastVertices());
-    init.getLastVertices().addAll(update.getLastVertices());
+//    init.getLastVertices().removeAll(init.getLastVertices());
+//    init.getLastVertices().addAll(init.getLastVertices());
 
     reduceBreakContinueStatement(init);
     return init;

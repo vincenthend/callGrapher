@@ -40,7 +40,7 @@ public class ControlFlowGraphDominators implements Iterable<PhpStatement>{
       vertexId.put(statement, num);
 
       // Get parent ID
-      if (cfg.getGraph().incomingEdgesOf(statement).size() > 0) {
+      if (statement != cfg.getFirstVertex()) {
         parent.put(statement, vertexId.get(iterator.getParent()));
       } else {
         parent.put(statement, -1);
@@ -66,20 +66,22 @@ public class ControlFlowGraphDominators implements Iterable<PhpStatement>{
       changed = false;
       for (int i = 0; i < vertexList.size(); i++) {
         PhpStatement v = vertexList.get(i);
-        for (ControlFlowEdge edge : cfg.getGraph().incomingEdgesOf(v)) {
-          PhpStatement u = cfg.getGraph().getEdgeSource(edge);
+        if(v != cfg.getFirstVertex()) {
+          for (ControlFlowEdge edge : cfg.getGraph().incomingEdgesOf(v)) {
+            PhpStatement u = cfg.getGraph().getEdgeSource(edge);
 
-          int parentId = parent.get(v);
-          // If there is no common ancestor of U and parent, change parent
-          int nca = nearestCommonAncestor(u, vertexList.get(parentId));
-          if(nca == -99){
-            System.out.println("error");
-          }
-          if (vertexId.get(u) != parentId && parentId != nca) {
-            tree.removeEdge(vertexList.get(parentId), v);
-            parent.put(v, nca);
-            tree.addEdge(vertexList.get(nca), v);
-            changed = true;
+            int parentId = parent.get(v);
+            // If there is no common ancestor of U and parent, change parent
+            int nca = nearestCommonAncestor(u, vertexList.get(parentId));
+            if (nca == -99) {
+              System.out.println("error");
+            }
+            if (vertexId.get(u) != parentId && parentId != nca) {
+              tree.removeEdge(vertexList.get(parentId), v);
+              parent.put(v, nca);
+              tree.addEdge(vertexList.get(nca), v);
+              changed = true;
+            }
           }
         }
       }
