@@ -97,7 +97,7 @@ public class ControlFlowGraphDominators implements Iterable<PhpStatement>{
   }
 
   @Override
-  public Iterator<PhpStatement> iterator() {
+  public ControlFlowDominatorIterator iterator() {
     return new ControlFlowDominatorIterator(this, cfg.getFirstVertex());
   }
 }

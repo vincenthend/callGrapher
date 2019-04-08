@@ -4,11 +4,13 @@ import model.graph.block.PhpBasicBlock;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.block.statement.PhpStatement;
 
-public class ControlFlowBlockGraphFactory {
+import java.util.List;
+
+public class ControlFlowBlockGraphBuilder {
   private ControlFlowBlockGraph blockGraph;
   private PhpBasicBlock lastBlock;
 
-  public ControlFlowBlockGraphFactory(){
+  public ControlFlowBlockGraphBuilder(){
     blockGraph = new ControlFlowBlockGraph();
     lastBlock = new PhpBasicBlock();
     blockGraph.getGraph().addVertex(lastBlock);
@@ -32,7 +34,6 @@ public class ControlFlowBlockGraphFactory {
    * @return the closed block
    */
   public PhpBasicBlock closeBlock(){
-    System.out.println("close");
     PhpBasicBlock returnedBlock = lastBlock;
     lastBlock = null;
 
@@ -45,7 +46,6 @@ public class ControlFlowBlockGraphFactory {
    * @return the opened block
    */
   public void openBlock(PhpBasicBlock rootBlock){
-    System.out.println("open");
     lastBlock = new PhpBasicBlock();
     blockGraph.getGraph().addVertex(lastBlock);
     blockGraph.getGraph().addEdge(rootBlock, lastBlock);
@@ -56,8 +56,7 @@ public class ControlFlowBlockGraphFactory {
    * @param rootBlocks root basic block connected to the new block
    * @return the opened block
    */
-  public void openBlock(Iterable<PhpBasicBlock> rootBlocks){
-    System.out.println("open");
+  public void openBlock(List<PhpBasicBlock> rootBlocks){
     lastBlock = new PhpBasicBlock();
     blockGraph.getGraph().addVertex(lastBlock);
     for(PhpBasicBlock block : rootBlocks){
@@ -69,6 +68,14 @@ public class ControlFlowBlockGraphFactory {
     for(PhpBasicBlock block : blocks){
       blockGraph.getGraph().addEdge(rootBlock, block);
     }
+  }
+
+  public void connectBasicBlock(PhpBasicBlock rootBlock, PhpBasicBlock block){
+    blockGraph.getGraph().addEdge(rootBlock, block);
+  }
+
+  public PhpBasicBlock getLastBlock() {
+    return lastBlock;
   }
 
   public boolean isClosed(){

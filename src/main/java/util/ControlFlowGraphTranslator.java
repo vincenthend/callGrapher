@@ -2,64 +2,60 @@ package util;
 
 import logger.Logger;
 import model.graph.ControlFlowBlockGraph;
+import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
 import model.graph.block.PhpBasicBlock;
 import model.graph.block.statement.PhpStatement;
 import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ControlFlowGraphTranslator {
+  private ControlFlowGraph cfg;
+  private ControlFlowGraphDominators dominators;
+
+  public ControlFlowGraphTranslator(ControlFlowGraph cfg) {
+    this.cfg = cfg;
+    this.dominators = new ControlFlowGraphDominators(cfg);
+  }
+
   /**
    * Translate a CFG into a CFBlockGraph.
-   * @param cfg CFG to be translated
    * @return result of translations
    */
-  public ControlFlowBlockGraph translate(ControlFlowGraph cfg) {
-    ControlFlowBlockGraphFactory blockGraphFactory = new ControlFlowBlockGraphFactory();
-    ControlFlowDIYIterator iterator = new ControlFlowDIYIterator(cfg);
+  public ControlFlowBlockGraph translate() {
+    ControlFlowBlockGraphBuilder blockGraphFactory = new ControlFlowBlockGraphBuilder();
+    ControlFlowDominatorIterator iterator = dominators.iterator();
 
     Logger.info("Translating to block graph");
-    PhpBasicBlock closedBlock = null;
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
-      System.out.println(statement + " : " + iterator.getBranchSize() + " end : " + iterator.isEndOfBranch());
       blockGraphFactory.addStatement(statement);
-
-      // Handle branching
-      int intersectionSize = iterator.getBranchSize();
-      if (intersectionSize > 1) {
-        closedBlock = blockGraphFactory.closeBlock();
-        blockGraphFactory.openBlock(closedBlock);
-      }
-
-      // Close block and open a new block based from parent's basic block
-      if (iterator.isEndOfBranch()) {
+      if(dominators.getTree().outgoingEdgesOf(statement).size() != 1){
         blockGraphFactory.closeBlock();
-        System.out.println("is End of Branch " + statement);
-        if(iterator.hasNext() && blockGraphFactory.isClosed()) {
-          blockGraphFactory.openBlock(collectParentBasicBlock(cfg, iterator.peek()));
+        if(iterator.peek() != null){
+          // Get next basic block
+          Iterator<ControlFlowEdge> edgeIterator = cfg.getGraph().incomingEdgesOf(iterator.peek()).iterator();
+          List<PhpBasicBlock> parentBlocks = new ArrayList<>();
+          while(edgeIterator.hasNext()){
+            PhpStatement p = cfg.getGraph().getEdgeSource(edgeIterator.next());
+            parentBlocks.add(p.getBasicBlock());
+          }
+
+          blockGraphFactory.openBlock(parentBlocks);
         }
       }
 
-      // If statement's child got a basic block
-      Set<PhpBasicBlock> childBasicBlock = collectChildBasicBlock(cfg, statement);
-      if (childBasicBlock.size() != 0) {
-        System.out.println("child has basic block " + statement);
-        if(!blockGraphFactory.isClosed()) {
-          if(!blockGraphFactory.isEmptyBlock()) {
-            closedBlock = blockGraphFactory.closeBlock();
-          }
-        }
-        blockGraphFactory.connectBasicBlock(statement.getBasicBlock(), childBasicBlock);
-        if (iterator.hasNext() && blockGraphFactory.isClosed()) {
-          blockGraphFactory.openBlock(closedBlock);
+      // Check if child has basic block
+      Iterator<ControlFlowEdge> edgeIterator = cfg.getGraph().outgoingEdgesOf(statement).iterator();
+      while(edgeIterator.hasNext()){
+        PhpStatement p = cfg.getGraph().getEdgeTarget(edgeIterator.next());
+        if(p.getBasicBlock() != null){
+          blockGraphFactory.connectBasicBlock(blockGraphFactory.getLastBlock(), p.getBasicBlock());
         }
       }
     }
-
     return blockGraphFactory.build();
   }
 

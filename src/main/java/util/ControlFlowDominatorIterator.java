@@ -22,9 +22,12 @@ public class ControlFlowDominatorIterator implements Iterator<PhpStatement> {
 
   public ControlFlowDominatorIterator(ControlFlowGraphDominators cfgd, PhpStatement root) {
     this.dominatorGraph = cfgd;
-    this.currentStatement = root;
+    this.currentStatement = null;
     this.statementStack = new Stack<>();
     this.seenVertex = new HashSet<>();
+
+    statementStack.push(root);
+    seenVertex.add(root);
   }
 
   @Override
@@ -67,5 +70,13 @@ public class ControlFlowDominatorIterator implements Iterator<PhpStatement> {
     currentStatement = statementStack.pop();
     generateStatementSet();
     return currentStatement;
+  }
+
+  public PhpStatement peek() {
+    if(hasNext()){
+      return statementStack.peek();
+    } else {
+      return null;
+    }
   }
 }

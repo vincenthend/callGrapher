@@ -56,12 +56,9 @@ public class ControlFlowNormalizer {
     return returnType;
   }
 
-  public void normalizeFunctionCall(PhpStatement callStatement) {
-    // Find assignment before this statement involving the caller variable
-    FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
+  private void populateAssignment(PhpStatement funcCall){
     EdgeReversedGraph<PhpStatement, ControlFlowEdge> graph = new EdgeReversedGraph<PhpStatement, ControlFlowEdge>(cfg.getGraph());
     ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(graph, funcCall);
-    Set<String> possibleTypes = new HashSet<>();
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
       if (statement.getStatementType() == StatementType.ASSIGNMENT) {
@@ -84,7 +81,15 @@ public class ControlFlowNormalizer {
         addVariableType(assignment.getAssignedVariable(), finishedTypeStack);
       }
     }
+  }
 
+  public void normalizeFunctionCall(PhpStatement callStatement) {
+    // Find assignment before this statement involving the caller variable
+    FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
+    Map<String, Set<String>> origVariableMap = copyVariableStack(currentVariableList);
+    populateAssignment(funcCall);
+
+    Set<String> possibleTypes = getVariableType(funcCall.getCallerVariable());
     // Replace function call for all type found
     for (String type : possibleTypes) {
       String functionName;
@@ -133,6 +138,7 @@ public class ControlFlowNormalizer {
         }
       }
     }
+    currentVariableList = origVariableMap;
   }
 
   /**
@@ -169,7 +175,6 @@ public class ControlFlowNormalizer {
     currentVariableList.put(variable, variableType);
   }
 
-
   /**
    * Add type of variable to variable list.
    *
@@ -177,11 +182,7 @@ public class ControlFlowNormalizer {
    * @return list of variable types
    */
   private Set<String> getVariableType(String variable) {
-    Set<String> variableType = null;
-    if (currentVariableList.containsKey(variable)) {
-      variableType = currentVariableList.get(variable);
-    }
-    return variableType;
+    return currentVariableList.getOrDefault(variable,new HashSet<>());
   }
 
   /**
