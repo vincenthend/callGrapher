@@ -10,6 +10,7 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.DepthFirstIterator;
 import util.ControlFlowGraphTranslator;
 
 import java.util.*;
@@ -126,13 +127,34 @@ public class ControlFlowGraphDiff {
     return blockMapping;
   }
 
-  private Graph<PhpStatement, DefaultEdge> diffBlockControlFlowGraph(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew) {
-    // Traverse old graph
-      // get mapping, if exists
-        // check for values, if different
-          // Add block to graph
-      // if doesn't exist, add block to graph do it by removing vertex
+  private ControlFlowBlockGraph diffBlockControlFlowGraph(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew) {
+    ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(gOld);
 
-    return null;
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<PhpBasicBlock, DefaultEdge>(blockGraph.getGraph());
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorNew = new DepthFirstIterator<PhpBasicBlock, DefaultEdge>(gNew.getGraph());
+    // Traverse old graph
+    while(iteratorOld.hasNext() && iteratorNew.hasNext()){
+      PhpBasicBlock blockOld = iteratorOld.next();
+      PhpBasicBlock blockNew = iteratorNew.next();
+      List<PhpStatement> stateOld = blockOld.getBlockStatements();
+      List<PhpStatement> stateNew = blockNew.getBlockStatements();
+
+      boolean same = true;
+      if(stateOld.size() == stateNew.size()){
+        for(int i = 0; i<stateOld.size(); i++){
+          if(!stateOld.get(i).toString().equals(stateNew.get(i).toString())){
+            same = false;
+          }
+        }
+      } else {
+        same = false;
+      }
+
+      if(same){
+        blockGraph.getGraph().removeVertex(blockOld);
+      }
+
+    }
+    return blockGraph;
   }
 }
