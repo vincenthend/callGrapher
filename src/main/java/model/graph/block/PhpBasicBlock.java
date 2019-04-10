@@ -2,6 +2,7 @@ package model.graph.block;
 
 import model.graph.block.statement.PhpStatement;
 
+import java.util.Collection;
 import java.util.LinkedList;
 
 public class PhpBasicBlock {
@@ -13,6 +14,10 @@ public class PhpBasicBlock {
 
   public void addStatement(PhpStatement statement) {
     blockStatements.add(statement);
+  }
+
+  public void addStatement(Collection<? extends PhpStatement> statement) {
+    blockStatements.addAll(statement);
   }
 
   public LinkedList<PhpStatement> getBlockStatements() {
