@@ -200,7 +200,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     }
 
     init.getLastVertices().removeAll(statement.getLastVertices());
-    init.getLastVertices().addAll(initStatement);
+    init.getLastVertices().add(init.getFirstVertex());
 
     reduceBreakContinueStatement(init);
     return init;
@@ -211,7 +211,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph init = visit(ctx.parenthesis());
     ControlFlowGraph statement = visit(ctx.statement());
     statement.appendGraph(init);
-
+    // TODO Fix this error
     // connect loop to first statement
     for (PhpStatement p : init.getLastVertices()) {
       statement.addStatement(p, statement.getFirstVertex(), ControlFlowEdge.ControlFlowEdgeType.LOOP);

@@ -9,6 +9,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
 import util.ControlFlowGraphDominators;
 import util.ControlFlowGraphTranslator;
+import view.GraphView;
 
 import javax.swing.*;
 import java.util.LinkedList;
@@ -29,16 +30,16 @@ public class Main {
 //    path.add("../phpmyadmin/libraries/classes/Response.php");
 //    path.add("../phpmyadmin/libraries/classes/Util.php");
 //    path.add("../phpmyadmin/libraries/classes/Url.php");
-    path.add("./testfile/file1.php");
-    path.add("./testfile/file2.php");
-    path.add("./testfile/file3.php");
-//    path.add("./testfile/file4.php");
+//    path.add("./testfile/file1.php");
+//    path.add("./testfile/file2.php");
+//    path.add("./testfile/file3.php");
+    path.add("./testfile/file4.php");
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
 //    shownFunction.add("NavigationTree::groupNode");
-    shownFunction.add("UserController::showProfile");
-//    shownFunction.add("SQLConnector::runQuery");
+//    shownFunction.add("UserController::showProfile");
+    shownFunction.add("SQLConnector::runQuery");
 
     ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();
     analyzer.analyzeControlFlowGraph(path);
@@ -53,23 +54,8 @@ public class Main {
 //    ControlFlowBlockGraph blockGraph = translator.translate();
 
     ControlFlowGraph cfg = analyzer.getCombinedControlFlowGraph(shownFunction);
-//    ControlFlowBlockGraph cfbg = blockGraph;
-    Logger.info("Drawing graphs");
-    JFrame jFrame = new JFrame();
-    jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-    jFrame.setSize(400, 320);
-//    JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfgd.getTree());
-    JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfg.getGraph());
-//    JGraphXAdapter jgxAdapter = new JGraphXAdapter(cfbg.getGraph());
-
-    jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
-    mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
-
-    mxHierarchicalLayout layout = new mxHierarchicalLayout(jgxAdapter);
-
-    layout.execute(jgxAdapter.getDefaultParent());
-    jFrame.getContentPane().add(mxcomp);
-    jFrame.setVisible(true);
+    GraphView view = new GraphView(cfg);
+    view.show();
 
     ControlFlowExporter.exportSVG(cfg, "D:\\");
   }
