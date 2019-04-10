@@ -8,7 +8,6 @@ import model.graph.block.SimilarityTable;
 import model.graph.block.statement.PhpStatement;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
-import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.traverse.DepthFirstIterator;
 import util.ControlFlowGraphTranslator;
@@ -20,12 +19,14 @@ public class ControlFlowGraphDiff {
   private final float BETA = 1;
   private final float GAMMA = 1;
 
-  public void diffGraph(ControlFlowGraph g1, ControlFlowGraph g2) {
+  public ControlFlowBlockGraph diffGraph(ControlFlowGraph g1, ControlFlowGraph g2) {
     ControlFlowBlockGraph b1 = new ControlFlowGraphTranslator(g1).translate();
     ControlFlowBlockGraph b2 = new ControlFlowGraphTranslator(g2).translate();
 
     SimilarityTable similarityTable = computeSimilarityTable(b1, b2);
+    BidiMap<PhpBasicBlock, PhpBasicBlock> blockMatchingMap = matchBasicBlock(similarityTable, b1, b2);
 
+    return diffBlockControlFlowGraph(blockMatchingMap, b1, b2);
   }
 
   /**
@@ -54,7 +55,11 @@ public class ControlFlowGraphDiff {
 
     Set<String> unionSet = new HashSet<>(oldStatementSet);
     unionSet.addAll(newStatementSet);
-    return intersectSet.size() / unionSet.size();
+    if (unionSet.size() == 0) {
+      return 0;
+    } else {
+      return (float)intersectSet.size() / (float)unionSet.size();
+    }
   }
 
   /**
@@ -95,11 +100,11 @@ public class ControlFlowGraphDiff {
         PhpBasicBlock combinedNewChild = new PhpBasicBlock();
         while (oldBlockEdge.hasNext()) {
           List<PhpStatement> oldStatement = blockGraphOld.getGraph().getEdgeTarget(oldBlockEdge.next()).getBlockStatements();
-          combinedOldParent.addStatement(oldStatement);
+          combinedOldChild.addStatement(oldStatement);
         }
         while (newBlockEdge.hasNext()) {
           List<PhpStatement> newStatement = blockGraphNew.getGraph().getEdgeTarget(newBlockEdge.next()).getBlockStatements();
-          combinedNewParent.addStatement(newStatement);
+          combinedNewChild.addStatement(newStatement);
         }
         float simM2 = countSimilarity(combinedOldChild, combinedNewChild);
 
@@ -117,9 +122,9 @@ public class ControlFlowGraphDiff {
     Queue<BlockSimilarity> similarities = similarityTable.getSortedSimilarity();
 
     // Match blocks by iterating queue
-    while(!similarities.isEmpty()){
+    while (!similarities.isEmpty()) {
       BlockSimilarity blockSim = similarities.remove();
-      if(!blockMapping.containsKey(blockSim.getOldBlock()) && !blockMapping.containsValue(blockSim.getNewBlock())){
+      if (!blockMapping.containsKey(blockSim.getOldBlock()) && !blockMapping.containsValue(blockSim.getNewBlock())) {
         blockMapping.put(blockSim.getOldBlock(), blockSim.getNewBlock());
       }
     }
@@ -130,30 +135,30 @@ public class ControlFlowGraphDiff {
   private ControlFlowBlockGraph diffBlockControlFlowGraph(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew) {
     ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(gOld);
 
-    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<PhpBasicBlock, DefaultEdge>(blockGraph.getGraph());
-    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorNew = new DepthFirstIterator<PhpBasicBlock, DefaultEdge>(gNew.getGraph());
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<PhpBasicBlock, DefaultEdge>(gOld.getGraph());
+
     // Traverse old graph
-    while(iteratorOld.hasNext() && iteratorNew.hasNext()){
+    while (iteratorOld.hasNext()) {
       PhpBasicBlock blockOld = iteratorOld.next();
-      PhpBasicBlock blockNew = iteratorNew.next();
-      List<PhpStatement> stateOld = blockOld.getBlockStatements();
-      List<PhpStatement> stateNew = blockNew.getBlockStatements();
+      PhpBasicBlock blockNew = mapping.getOrDefault(blockOld, null);
+      if (blockNew != null) {
+        boolean same = true;
+        List<PhpStatement> stateOld = blockOld.getBlockStatements();
+        List<PhpStatement> stateNew = blockNew.getBlockStatements();
 
-      boolean same = true;
-      if(stateOld.size() == stateNew.size()){
-        for(int i = 0; i<stateOld.size(); i++){
-          if(!stateOld.get(i).toString().equals(stateNew.get(i).toString())){
-            same = false;
+        if (stateOld.size() == stateNew.size()) {
+          for (int i = 0; i < stateOld.size(); i++) {
+            if (!stateOld.get(i).toString().equals(stateNew.get(i).toString())) {
+              same = false;
+            }
           }
+        } else {
+          same = false;
         }
-      } else {
-        same = false;
+        if (same) {
+          blockGraph.getGraph().removeVertex(blockOld);
+        }
       }
-
-      if(same){
-        blockGraph.getGraph().removeVertex(blockOld);
-      }
-
     }
     return blockGraph;
   }

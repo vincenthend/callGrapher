@@ -6,7 +6,6 @@ import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
 import model.graph.block.PhpBasicBlock;
 import model.graph.block.statement.PhpStatement;
-import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 
 import java.util.*;
@@ -49,14 +48,18 @@ public class ControlFlowGraphTranslator {
       }
 
       // Check if child has basic block
-      Iterator<ControlFlowEdge> edgeIterator = cfg.getGraph().outgoingEdgesOf(statement).iterator();
-      while(edgeIterator.hasNext()){
-        PhpStatement connected = cfg.getGraph().getEdgeTarget(edgeIterator.next());
-        if(connected.getBasicBlock() != null){
-          blockGraphFactory.connectBasicBlock(statement.getBasicBlock(), connected.getBasicBlock());
+      for (ControlFlowEdge controlFlowEdge : cfg.getGraph().outgoingEdgesOf(statement)) {
+        PhpStatement connectedStatement = cfg.getGraph().getEdgeTarget(controlFlowEdge);
+        if (connectedStatement.getBasicBlock() != null) {
+          PhpBasicBlock connectedBlock = connectedStatement.getBasicBlock();
+          // If connected in the middle, split block
+          if (connectedBlock.getBlockStatements().getFirst() != connectedStatement) {
+            blockGraphFactory.splitBlock(connectedBlock, connectedStatement);
+          }
+          blockGraphFactory.connectBasicBlock(statement.getBasicBlock(), connectedStatement.getBasicBlock());
         }
       }
     }
-    return blockGraphFactory.build();
+    return blockGraphFactory.getBlockGraph();
   }
 }

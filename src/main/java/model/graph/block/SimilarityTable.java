@@ -9,7 +9,7 @@ public class SimilarityTable {
   private Map<PhpBasicBlock, Integer> oldBlockMap;
   private Map<Integer, PhpBasicBlock> oldBlockId;
   private Map<PhpBasicBlock, Integer> newBlockMap;
-  private Map<PhpBasicBlock, Integer> newBlockId;
+  private Map<Integer, PhpBasicBlock> newBlockId;
   private ControlFlowBlockGraph cfgOld;
   private ControlFlowBlockGraph cfgNew;
   private int nbOldVertex;
@@ -23,6 +23,20 @@ public class SimilarityTable {
 
     this.cfgOld = cfgOld;
     this.cfgNew = cfgNew;
+
+    // Map matrix ID and block
+    int n = 0;
+    for(PhpBasicBlock block : cfgOld.getGraph().vertexSet()){
+      oldBlockMap.put(block,n);
+      oldBlockId.put(n,block);
+      n++;
+    }
+    n = 0;
+    for(PhpBasicBlock block : cfgNew.getGraph().vertexSet()){
+      newBlockMap.put(block,n);
+      newBlockId.put(n,block);
+      n++;
+    }
 
     this.nbOldVertex = cfgOld.getGraph().vertexSet().size();
     this.nbNewVertex = cfgNew.getGraph().vertexSet().size();
@@ -67,7 +81,7 @@ public class SimilarityTable {
     });
     for (int i = 0; i < nbOldVertex; i++) {
       for (int j = 0; j < nbNewVertex; j++) {
-        similarityData.add(new BlockSimilarity(oldBlockId.get(i),oldBlockId.get(j),similarityMatrix[i][j]));
+        similarityData.add(new BlockSimilarity(oldBlockId.get(i),newBlockId.get(j),similarityMatrix[i][j]));
       }
     }
     return similarityData;

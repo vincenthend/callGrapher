@@ -9,6 +9,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
 import util.ControlFlowGraphDominators;
 import util.ControlFlowGraphTranslator;
+import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
 import javax.swing.*;
@@ -19,44 +20,35 @@ public class Main {
 
   public static void main(String[] args) {
     // Parameters
-    List<String> path = new LinkedList<>();
-//    path.add("../phpmyadmin/libraries/classes/Navigation/NavigationTree.php");
-//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/Node.php");
-//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeDatabase.php");
-//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTable.php");
-//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTableContainer.php");
-//    path.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeViewContainer.php");
-//    path.add("../phpmyadmin/libraries/classes/RecentFavoriteTable.php");
-//    path.add("../phpmyadmin/libraries/classes/Response.php");
-//    path.add("../phpmyadmin/libraries/classes/Util.php");
-//    path.add("../phpmyadmin/libraries/classes/Url.php");
-//    path.add("./testfile/file1.php");
-//    path.add("./testfile/file2.php");
-//    path.add("./testfile/file3.php");
-    path.add("./testfile/file4.php");
+    List<String> pathOld = new LinkedList<>();
+    pathOld.add("./testfile/file4.php");
+
+    List<String> pathNew = new LinkedList<>();
+    pathNew.add("./testfile/file5.php");
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-//    shownFunction.add("NavigationTree::groupNode");
-//    shownFunction.add("UserController::showProfile");
     shownFunction.add("SQLConnector::runQuery");
 
-    ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();
-    analyzer.analyzeControlFlowGraph(path);
-    if (normalizeFunc) {
-      analyzer.normalizeFunction(shownFunction);
-    }
-    ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(analyzer.getProjectData().getFunction(shownFunction.get(0)).getControlFlowGraph());
+    ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
+    analyzerOld.analyzeControlFlowGraph(pathOld);
+    analyzerOld.normalizeFunction(shownFunction);
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
 
+    ControlFlowGraphAnalyzer analyzerNew = new ControlFlowGraphAnalyzer();
+    analyzerNew.analyzeControlFlowGraph(pathNew);
+    analyzerNew.normalizeFunction(shownFunction);
+    ControlFlowGraph cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
 
-    // Translate to block graph
-//    ControlFlowGraphTranslator translator = new ControlFlowGraphTranslator(analyzer.getProjectData().getNormalizedFunction((shownFunction.get(0))).getControlFlowGraph());
-//    ControlFlowBlockGraph blockGraph = translator.translate();
+    ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
 
-    ControlFlowGraph cfg = analyzer.getCombinedControlFlowGraph(shownFunction);
-    GraphView view = new GraphView(cfg);
+//    GraphView view = new GraphView(cfgOld);
+//    GraphView view = new GraphView(cfgNew);
+//    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
+//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
+    GraphView view = new GraphView(diff.diffGraph(cfgOld, cfgNew));
     view.show();
 
-    ControlFlowExporter.exportSVG(cfg, "D:\\");
+    //ControlFlowExporter.exportSVG(cfg, "D:\\");
   }
 }

@@ -16,7 +16,8 @@ abstract public class PhpStatement implements Cloneable {
 
   @Override
   public String toString() {
-    return "["+ statementId +"] ["+this.statementType.toString() + "]";
+//    return "["+ statementId +"] ["+this.statementType.toString() + "]";
+    return "["+this.statementType.toString() + "]";
   }
 
   @Override

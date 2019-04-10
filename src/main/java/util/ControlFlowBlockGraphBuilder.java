@@ -3,8 +3,11 @@ package util;
 import model.graph.block.PhpBasicBlock;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.block.statement.PhpStatement;
+import org.jgrapht.graph.DefaultEdge;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class ControlFlowBlockGraphBuilder {
   private ControlFlowBlockGraph blockGraph;
@@ -38,6 +41,37 @@ public class ControlFlowBlockGraphBuilder {
     lastBlock = null;
 
     return returnedBlock;
+  }
+
+  public void splitBlock(PhpBasicBlock block, PhpStatement statement){
+    if(blockGraph.getGraph().containsVertex(block)){
+      PhpBasicBlock splitBlock = new PhpBasicBlock();
+
+      // Add statements
+      int i = block.getBlockStatements().indexOf(statement);
+      for(; i<block.getBlockStatements().size(); i++){
+        PhpStatement blockStatement = block.getBlockStatements().get(i);
+        blockStatement.setBasicBlock(splitBlock);
+        splitBlock.addStatement(blockStatement);
+        block.getBlockStatements().remove(i);
+      }
+
+      // Connect statements
+      Set<DefaultEdge> outgoingEdge = blockGraph.getGraph().outgoingEdgesOf(block);
+      blockGraph.getGraph().addVertex(splitBlock);
+      for(DefaultEdge edge : outgoingEdge){
+        blockGraph.getGraph().addEdge(splitBlock, blockGraph.getGraph().getEdgeTarget(edge));
+      }
+
+      // Remove outgoing edge
+      DefaultEdge[] arr = outgoingEdge.toArray(new DefaultEdge[outgoingEdge.size()]);
+      for(DefaultEdge edge : arr){
+        blockGraph.getGraph().removeEdge(edge);
+      }
+      blockGraph.getGraph().addEdge(block, splitBlock);
+
+
+    }
   }
 
   /**
@@ -90,7 +124,7 @@ public class ControlFlowBlockGraphBuilder {
    * Return the ControlFlowBlockGraph object that has been built.
    * @return built ControlFlowBlockGraph
    */
-  public ControlFlowBlockGraph build() {
+  public ControlFlowBlockGraph getBlockGraph() {
     return blockGraph;
   }
 }

@@ -18,7 +18,7 @@ public class ControlFlowBlockGraph {
   }
 
   public ControlFlowBlockGraph(ControlFlowBlockGraph controlFlowBlockGraph){
-    Map<PhpBasicBlock,PhpStatement> map = new HashMap<>();
+    graph = new DefaultDirectedGraph<PhpBasicBlock, DefaultEdge>(DefaultEdge.class);
     for(PhpBasicBlock p : controlFlowBlockGraph.graph.vertexSet()){
       graph.addVertex(p);
     }
