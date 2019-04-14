@@ -371,10 +371,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     }
 
     PhpFunction temp_func = new PhpFunction("__construct", name, "", null);
-    PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
-    if (phpFunction == null) {
-      graph.addStatement(new FunctionCallStatement(temp_func, args, null));
-    }
+    graph.addStatement(new FunctionCallStatement(temp_func, args, null));
     return graph;
   }
 

@@ -1,18 +1,7 @@
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.view.mxStylesheet;
-import logger.Logger;
-import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
-import org.jgrapht.Graph;
-import org.jgrapht.ext.JGraphXAdapter;
-import util.ControlFlowGraphDominators;
-import util.ControlFlowGraphTranslator;
 import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
-import javax.swing.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,14 +10,33 @@ public class Main {
   public static void main(String[] args) {
     // Parameters
     List<String> pathOld = new LinkedList<>();
-    pathOld.add("./testfile/file4.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/NavigationTree.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/Nodes/Node.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/Nodes/NodeDatabase.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/Nodes/NodeTable.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/Nodes/NodeTableContainer.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Navigation/Nodes/NodeViewContainer.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/RecentFavoriteTable.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Response.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Util.php");
+    pathOld.add("../phpmyadminvul/libraries/classes/Url.php");
 
     List<String> pathNew = new LinkedList<>();
-    pathNew.add("./testfile/file5.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/NavigationTree.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/Nodes/Node.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeDatabase.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTable.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeTableContainer.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Navigation/Nodes/NodeViewContainer.php");
+    pathNew.add("../phpmyadmin/libraries/classes/RecentFavoriteTable.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Response.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Util.php");
+    pathNew.add("../phpmyadmin/libraries/classes/Url.php");
 
-    boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("SQLConnector::runQuery");
+//    shownFunction.add("SQLConnector::runQuery");
+    shownFunction.add("NavigationTree::groupNode");
+//    shownFunction.add("UserController::showProfile");
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
@@ -49,6 +57,6 @@ public class Main {
     GraphView view = new GraphView(diff.diffGraph(cfgOld, cfgNew));
     view.show();
 
-    //ControlFlowExporter.exportSVG(cfg, "D:\\");
+    ControlFlowExporter.exportSVG(cfgOld, "D:\\");
   }
 }
