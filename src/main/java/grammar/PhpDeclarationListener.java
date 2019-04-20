@@ -57,6 +57,8 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
         String varName = formctx.variableInitializer().VarName().getText();
         if(formctx.variableInitializer().constantInititalizer() != null){
           parameters.put(varName, formctx.variableInitializer().constantInititalizer().getText());
+        } else if (formctx.typeHint() != null){
+          parameters.put(varName, formctx.typeHint().getText());
         } else {
           parameters.put(varName, null);
         }

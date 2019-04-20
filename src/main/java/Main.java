@@ -10,9 +10,9 @@ import view.GraphView;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    diffCommit();
+//    diffCommit();
 //    diffGraph();
-//    drawGraph();
+    drawGraph();
   }
 
   public static void diffCommit() throws Exception{
