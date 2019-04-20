@@ -1,13 +1,13 @@
 package model.php;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PhpClass implements Comparable<PhpClass> {
   private String className;
   private Map<String, PhpFunction> functionMap;
-  private Map<String, List<String>> attributeMap;
+  private Map<String, Set<String>> attributeMap;
 
   public PhpClass(String className) {
     this.className = className;
@@ -31,11 +31,11 @@ public class PhpClass implements Comparable<PhpClass> {
     this.functionMap = functionMap;
   }
 
-  public Map<String, List<String>> getAttributeMap() {
+  public Map<String, Set<String>> getAttributeMap() {
     return attributeMap;
   }
 
-  public void setAttributeMap(Map<String, List<String>> attributeMap) {
+  public void setAttributeMap(Map<String, Set<String>> attributeMap) {
     this.attributeMap = attributeMap;
   }
 
