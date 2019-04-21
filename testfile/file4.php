@@ -4,7 +4,7 @@
             a();
             b();
             while($a){
-                if (b()) {
+                if (b() && bb()) {
                     foo();
                 } else {
                     bar();
