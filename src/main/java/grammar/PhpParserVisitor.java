@@ -11,12 +11,6 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface PhpParserVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link PhpParser#start}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitStart(PhpParser.StartContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link PhpParser#htmlDocument}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

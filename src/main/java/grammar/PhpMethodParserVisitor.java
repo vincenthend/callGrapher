@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.DepthFirstIterator;
+import util.PhpAssignedTypeIdentifier;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   private ProjectData projectData;
@@ -121,6 +122,62 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     if(ctx.elseStatement() == null && ctx.elseColonStatement() == null){
       graph.getLastVertices().add(branch_point);
     }
+    return graph;
+  }
+
+  @Override
+  public ControlFlowGraph visitSwitchStatement(PhpParser.SwitchStatementContext ctx) {
+    ControlFlowGraph graph = new ControlFlowGraph();
+
+    CharStream input = ctx.start.getInputStream();
+    Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
+    String code = input.getText(interval);
+    graph.addStatement(new BranchStatement(code));
+
+    ControlFlowGraph par_graph;
+    ControlFlowGraph stat_graph;
+
+    par_graph = visit(ctx.parenthesis().expression());
+    graph.appendGraph(par_graph);
+
+    PhpStatement branch_point = graph.getLastVertices().iterator().next();
+
+    if (ctx.switchBlock().size() != 0) {
+      ControlFlowGraph default_graph = null;
+      ControlFlowGraph switch_graph = new ControlFlowGraph();
+      List<PhpStatement> caseStatements = new ArrayList<>();
+      for (PhpParser.SwitchBlockContext s : ctx.switchBlock()) {
+        if (s.Default().size() != 0) {
+          default_graph = visit(s.innerStatementList());
+        } else {
+          if (s.expression() != null) {
+            par_graph = new ControlFlowGraph();
+            par_graph.appendGraph(visit(s.expression().get(0)));
+          }
+
+          // Visit block and append to conditions
+          stat_graph = visit(s.innerStatementList());
+          par_graph.appendGraph(stat_graph, ControlFlowEdge.ControlFlowEdgeType.BRANCH);
+          caseStatements.add(par_graph.getFirstVertex());
+
+          switch_graph.appendGraph(par_graph);
+        }
+      }
+      graph.appendGraph(switch_graph);
+
+      for (PhpStatement p : caseStatements) {
+        graph.addStatement(branch_point,p);
+      }
+
+      if(default_graph != null) {
+        graph.appendGraph(default_graph);
+        graph.addStatement(branch_point, default_graph.getFirstVertex());
+      } else {
+        graph.getLastVertices().add(branch_point);
+      }
+    }
+
+    reduceBreakContinueStatement(graph);
     return graph;
   }
 

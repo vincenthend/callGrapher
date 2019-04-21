@@ -10,9 +10,9 @@ import view.GraphView;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    diffCommit();
+//    diffCommit();
 //    diffGraph();
-//    drawGraph();
+    drawGraph();
   }
 
   public static void diffCommit() throws Exception{
@@ -101,18 +101,16 @@ public class Main {
   public static void drawGraph(){
     // Parameters
     List<String> pathOld = new LinkedList<>();
-    pathOld.add("./testfile/file1.php");
-    pathOld.add("./testfile/file2.php");
-    pathOld.add("./testfile/file3.php");
+    pathOld.add("./testfile/file4.php");
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("UserController::showProfile");
+    shownFunction.add("SQLConnector::runQuery");
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
     analyzerOld.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getFunction(shownFunction.get(0)).getControlFlowGraph();
 
     GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));

@@ -8,16 +8,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface PhpParserListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link PhpParser#start}.
-	 * @param ctx the parse tree
-	 */
-	void enterStart(PhpParser.StartContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PhpParser#start}.
-	 * @param ctx the parse tree
-	 */
-	void exitStart(PhpParser.StartContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link PhpParser#htmlDocument}.
 	 * @param ctx the parse tree
 	 */

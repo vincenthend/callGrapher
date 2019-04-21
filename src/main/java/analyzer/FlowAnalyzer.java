@@ -2,9 +2,11 @@ package analyzer;
 
 import grammar.PhpLexer;
 import grammar.PhpMethodParserVisitor;
-import grammar.PhpParser;
+
 import java.util.Set;
 import java.util.TreeSet;
+
+import grammar.PhpParser;
 import logger.Logger;
 import model.ProjectData;
 import model.php.PhpFunction;

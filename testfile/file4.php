@@ -1,14 +1,15 @@
 <?php
     class SQLConnector{
         function runQuery($query){
-            a();
-            b();
-            while($a){
-                if (b() && bb()) {
-                    foo();
-                } else {
-                    bar();
-                }
+            switch($a){
+                case 1:
+                    a();
+                    break;
+                case 2:
+                    b();
+                    break;
+                default:
+                    dddef();
             }
             c();
         }

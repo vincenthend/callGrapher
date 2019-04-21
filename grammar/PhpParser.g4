@@ -28,10 +28,6 @@ options { tokenVocab=PhpLexer; }
 
 // HTML
 // Also see here: https://github.com/antlr/grammars-v4/tree/master/html
-start
-    : htmlDocument
-    ;
-
 htmlDocument
     : Shebang? htmlElementOrPhpBlock* EOF
     ;
@@ -737,7 +733,6 @@ identifier
     | Const
     | Continue
     | Declare
-    | Default
     | Do
     | DoubleCast
     | DoubleType

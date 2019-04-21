@@ -1,4 +1,4 @@
-package grammar;
+package util;
 
 import grammar.PhpParser.ChainExpressionContext;
 import model.ProjectData;
