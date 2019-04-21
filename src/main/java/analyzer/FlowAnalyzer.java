@@ -3,17 +3,15 @@ package analyzer;
 import grammar.PhpLexer;
 import grammar.PhpMethodParserVisitor;
 import grammar.PhpParser;
+import java.util.Set;
+import java.util.TreeSet;
 import logger.Logger;
-import model.graph.block.statement.PhpStatement;
-import model.php.PhpFunction;
 import model.ProjectData;
+import model.php.PhpFunction;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.util.Set;
-import java.util.TreeSet;
 
 public class FlowAnalyzer {
   private ProjectData projectData;

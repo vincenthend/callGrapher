@@ -1,14 +1,13 @@
 package grammar;
 
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import logger.Logger;
+import model.ProjectData;
 import model.php.PhpClass;
 import model.php.PhpFunction;
-import model.ProjectData;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;
-
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 
 
 /**
@@ -71,7 +70,7 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       Logger.info("Function Member " + function.getCalledName() + " found");
     } else if(ctx.variableInitializer().size() != 0){
       for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()) {
-        c.getAttributeMap().put(varContext.getText(), new LinkedList<>());
+        c.getAttributeMap().put(varContext.getText(), new HashSet<>());
 
         Logger.info("Attribute Member " + className + "::" + varContext.getText() + " found");
       }

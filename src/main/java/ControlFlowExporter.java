@@ -3,38 +3,35 @@ import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.util.mxCellRenderer;
 import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxRectangle;
-import logger.Logger;
-import model.graph.ControlFlowEdge;
-import model.graph.ControlFlowGraph;
-import model.graph.block.statement.PhpStatement;
-import org.jgrapht.Graph;
-import org.jgrapht.ext.JGraphXAdapter;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.io.ComponentNameProvider;
-import org.jgrapht.io.DOTExporter;
-import org.jgrapht.io.GraphExporter;
-import org.w3c.dom.Document;
-
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import logger.Logger;
+import model.graph.ControlFlowEdge;
+import model.graph.block.statement.PhpStatement;
+import org.jgrapht.Graph;
+import org.jgrapht.ext.JGraphXAdapter;
+import org.jgrapht.io.ComponentNameProvider;
+import org.jgrapht.io.DOTExporter;
+import org.jgrapht.io.GraphExporter;
+import org.w3c.dom.Document;
 
 /**
  * Exports Control Flow Graph to file format
  */
 public class ControlFlowExporter {
 
-  public static void exportPNG(ControlFlowGraph cfg, String path) {
+  public static void exportPNG(Graph graph, String path) {
     //Save Image
     Logger.info("Exporting graph, please wait...");
-    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
+    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(graph);
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
@@ -68,9 +65,9 @@ public class ControlFlowExporter {
     }
   }
 
-  public static void exportSVG(ControlFlowGraph cfg, String path) {
+  public static void exportSVG(Graph graph, String path, String name) {
     Logger.info("Exporting graph, please wait...");
-    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(cfg.getGraph());
+    JGraphXAdapter<PhpStatement, ControlFlowEdge> jgxAdapter = new JGraphXAdapter<>(graph);
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);
 
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
@@ -79,23 +76,22 @@ public class ControlFlowExporter {
     try {
       Document doc = mxCellRenderer.createSvgDocument(mxcomp.getGraph(), null, 1, Color.WHITE, null);
       DOMSource domSource = new DOMSource(doc);
-      FileWriter fileWriter = new FileWriter(new File(path + "graph.svg"));
+      FileWriter fileWriter = new FileWriter(new File(path + name+ ".svg"));
       StreamResult streamResult = new StreamResult(fileWriter);
 
       TransformerFactory transformerFactory = TransformerFactory.newInstance();
       Transformer transformer = transformerFactory.newTransformer();
       transformer.transform(domSource, streamResult);
-
+      fileWriter.close();
       Logger.info("Graph exported succesfully");
     } catch (Exception e){
       e.printStackTrace();
     }
   }
 
-  public static void exportDot(ControlFlowGraph cfg, String path) {
+  public static void exportDot(Graph graph, String path, String name) {
     //Save Image
     Logger.info("Exporting graph, please wait...");
-    Graph<PhpStatement, ControlFlowEdge> graph = cfg.getGraph();
     ComponentNameProvider<PhpStatement> vertexIdProvider = new ComponentNameProvider<PhpStatement>() {
       @Override
       public String getName(PhpStatement p) {
@@ -110,7 +106,7 @@ public class ControlFlowExporter {
     };
     GraphExporter<PhpStatement, ControlFlowEdge> exporter = new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
     try {
-      FileWriter fileWriter = new FileWriter(new File(path + "graph.dot"));
+      FileWriter fileWriter = new FileWriter(new File(path + name +".dot"));
       exporter.exportGraph(graph, fileWriter);
       Logger.info("Graph exported succesfully");
     } catch (Exception e) {

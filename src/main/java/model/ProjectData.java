@@ -86,8 +86,8 @@ public class ProjectData {
       try {
         Logger.info("Normalizing "+phpFunction.getCalledName());
         PhpFunction normalizedFunc = phpFunction.clone();
-        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
-        normalizer.normalize();
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
+        normalizer.normalize(phpFunction);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } catch (CloneNotSupportedException e) {
         e.printStackTrace();
@@ -101,8 +101,8 @@ public class ProjectData {
         PhpFunction function = getFunction(functionName);
         Logger.info("Normalizing "+function.getCalledName());
         PhpFunction normalizedFunc = function.clone();
-        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(normalizedFunc, this);
-        normalizer.normalize();
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
+        normalizer.normalize(normalizedFunc);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } catch (CloneNotSupportedException e) {
         e.printStackTrace();

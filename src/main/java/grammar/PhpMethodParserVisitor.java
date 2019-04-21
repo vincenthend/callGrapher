@@ -1,22 +1,28 @@
 package grammar;
 
-import model.graph.ControlFlowEdge;
-import model.graph.ControlFlowGraph;
-import model.php.PhpClass;
-import model.php.PhpFunction;
-import model.ProjectData;
-import model.graph.block.statement.*;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.Interval;
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.traverse.DepthFirstIterator;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import model.ProjectData;
+import model.graph.ControlFlowEdge;
+import model.graph.ControlFlowGraph;
+import model.graph.block.statement.AssignmentStatement;
+import model.graph.block.statement.BranchStatement;
+import model.graph.block.statement.BreakStatement;
+import model.graph.block.statement.ContinueStatement;
+import model.graph.block.statement.ExpressionStatement;
+import model.graph.block.statement.FunctionCallStatement;
+import model.graph.block.statement.PhpStatement;
+import model.graph.block.statement.ReturnStatement;
+import model.graph.block.statement.StatementType;
+import model.php.PhpClass;
+import model.php.PhpFunction;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.Interval;
+import org.jgrapht.Graphs;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   private ProjectData projectData;
@@ -156,11 +162,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     String value;
     PhpStatement keyAssignment;
     PhpStatement valueAssignment;
-    if (ctx.chain().size() == 3) {
-      key = ctx.chain(1).getText();
-      value = ctx.chain(2).getText();
+    if (ctx.chain().size() > 1 && ctx.expression() != null) {
+      key = ctx.chain(ctx.chain().size()-1).getText();
+      value = ctx.chain(ctx.chain().size()-2).getText();
     } else {
-      value = ctx.chain(1).getText();
+      value = ctx.chain(ctx.chain().size()-1).getText();
     }
     valueAssignment = new AssignmentStatement(value, array, value + "=" + array);
     cfg.addStatement(valueAssignment);
