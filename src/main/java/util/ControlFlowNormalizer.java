@@ -73,7 +73,16 @@ public class ControlFlowNormalizer {
     Map<String, Set<String>> varMap = new HashMap<>();
     String classConstructor = c.getClassName() + "::__construct";
     PhpFunction constructorFunction = projectData.getFunctionMap().get(classConstructor);
+
     if(constructorFunction != null) {
+      if(constructorFunction.getParameters() != null) {
+        for (Entry<String, String> entry : constructorFunction.getParameters().entrySet()) {
+          Set<String> type = new HashSet();
+          type.add(entry.getValue());
+          varMap.put(entry.getKey(), type);
+        }
+      }
+
       ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(
           constructorFunction.getControlFlowGraph());
       Iterator<PhpStatement> iterator = cfgd.iterator();

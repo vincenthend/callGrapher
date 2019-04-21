@@ -1,5 +1,6 @@
 package grammar;
 
+import grammar.PhpParser.ChainExpressionContext;
 import model.ProjectData;
 
 import java.util.HashMap;
@@ -26,6 +27,11 @@ public class PhpAssignedTypeVisitor extends PhpParserBaseVisitor<String> {
     } else {
       return "$"+ctx.getParent().getText();
     }
+  }
+
+  @Override
+  public String visitChainExpression(ChainExpressionContext ctx) {
+    return ctx.getText();
   }
 
   @Override

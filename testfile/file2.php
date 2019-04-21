@@ -1,7 +1,7 @@
 <?php
 class UserController {
-  function __construct(){
-    $this->connection = new SQLConnector();
+  function __construct(SQLConnector $conn){
+    $this->connection = $conn;
   }
   function showProfile($username){
       $a = 1;
