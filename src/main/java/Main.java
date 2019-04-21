@@ -10,21 +10,22 @@ import view.GraphView;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-//    diffCommit();
+    diffCommit();
 //    diffGraph();
-    drawGraph();
+//    drawGraph();
   }
 
   public static void diffCommit() throws Exception{
     // Parameters
     String root = "../phpMyFAQ/";
-    String vulHash = "a1ecdf14e86bc091d27dc94987d97bd402f9b94e";
-    String unvulHash = "b3be25bd70cb27b6670a9a6e3900de29e8b7b423";
+    String vulHash = "8ca2644742bf9e71a041c62ffb92611905c9cb15";
+    String unvulHash = "2f461413f9723f5e3ebf6c4ec5d1997176a0f175";
     List<String> file = new LinkedList<>();
     file.add(root+"phpmyfaq/inc/PMF/");
+    file.add(root+"phpmyfaq/ajaxservice.php");
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("PMF_Captcha::garbageCollector");
+    shownFunction.add("ajaxservice.php::main");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -49,19 +50,19 @@ public class Main {
     ControlFlowGraph cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
 
     ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
-    ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgOld, cfgNew);
+    ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgNew, cfgOld);
 
-    GraphView view = new GraphView(cfgOld);
+//    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(cfgNew);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
 //    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
-//    GraphView view = new GraphView(diffGraph);
+    GraphView view = new GraphView(diffGraph);
 //    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
-//    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\","graphVul");
-//    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\","graphNonvul");
-//    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\","graphDiff");
+    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\","graphVul");
+    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\","graphNonvul");
+    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\","graphDiff");
   }
 
   public static void diffGraph(){
@@ -110,7 +111,7 @@ public class Main {
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
     analyzerOld.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getFunction(shownFunction.get(0)).getControlFlowGraph();
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
 
     GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));

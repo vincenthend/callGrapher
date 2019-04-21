@@ -453,7 +453,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     } else if (ctx.newExpr() != null){
       assigneeContext = ctx.newExpr();
     }
-    String assignedType = PhpAssignedTypeIdentifier.identify(assigneeContext.getText());
+    CharStream input = ctx.start.getInputStream();
+    Interval interval = new Interval(assigneeContext.start.getStartIndex(), assigneeContext.stop.getStopIndex());
+    String assignedType = PhpAssignedTypeIdentifier.identify(input.getText(interval));
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));

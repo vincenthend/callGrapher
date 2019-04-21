@@ -10,6 +10,7 @@ import model.php.PhpClass;
 import model.php.PhpFunction;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.misc.Interval;
+import util.PhpAssignedTypeIdentifier;
 
 
 /**
@@ -74,7 +75,9 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       Logger.info("Function Member " + function.getCalledName() + " found");
     } else if(ctx.variableInitializer().size() != 0){
       for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()) {
-        String assignedType = "";
+        CharStream input = ctx.start.getInputStream();
+        Interval interval = new Interval(varContext.start.getStartIndex(), varContext.stop.getStopIndex());
+        String assignedType = PhpAssignedTypeIdentifier.identify(input.getText(interval));
         Set<String> type = new HashSet<>();
         type.add(assignedType);
         c.getAttributeMap().put("$this->"+varContext.VarName().getText(), type);

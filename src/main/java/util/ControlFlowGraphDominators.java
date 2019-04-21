@@ -25,7 +25,6 @@ public class ControlFlowGraphDominators implements Iterable<PhpStatement>{
     parent = new HashMap<>();
     tree = new DefaultDirectedGraph<PhpStatement, DefaultEdge>(DefaultEdge.class);
 
-    traverseGraph();
     compute();
   }
 

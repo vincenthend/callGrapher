@@ -45,8 +45,10 @@ public class ControlFlowNormalizer {
 
     if(currentFunction.getClassName() != null && !currentFunction.getFunctionName().equals("__construct")){
       // Normalize class constructor
-      Map<String, Set<String>> attr = projectData.getClass(currentFunction.getClassName()).getAttributeMap();
-      normalizeConstructor(projectData.getClass(currentFunction.getClassName()));
+      if(!projectData.getClass(currentFunction.getClassName()).isConstructorNorm()) {
+        Map<String, Set<String>> attr = projectData.getClass(currentFunction.getClassName()).getAttributeMap();
+        normalizeConstructor(projectData.getClass(currentFunction.getClassName()));
+      }
     }
 
     ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(currentFunction.getControlFlowGraph());
@@ -77,9 +79,12 @@ public class ControlFlowNormalizer {
     if(constructorFunction != null) {
       if(constructorFunction.getParameters() != null) {
         for (Entry<String, String> entry : constructorFunction.getParameters().entrySet()) {
-          Set<String> type = new HashSet();
-          type.add(entry.getValue());
-          varMap.put(entry.getKey(), type);
+          // If parameter has typehint
+          if(entry.getKey() != null) {
+            Set<String> type = new HashSet();
+            type.add(entry.getValue());
+            varMap.put(entry.getKey(), type);
+          }
         }
       }
 
@@ -95,18 +100,21 @@ public class ControlFlowNormalizer {
           AssignmentStatement assignment = (AssignmentStatement) statement;
           Stack<String> assignedTypeStack = new Stack<>();
           Stack<String> finishedTypeStack = new Stack<>();
-          assignedTypeStack.push(assignment.getAssignedType());
-
-          // Handle chain call
+          if(assignment.getAssignedType() != null) {
+            assignedTypeStack.push(assignment.getAssignedType());
+          }
+            // Handle chain call
           while (!assignedTypeStack.isEmpty()) {
             String assignedType = assignedTypeStack.pop();
-            if (assignedType.startsWith("$")) {
-              Set<String> varTypes = getVariableType(varMap, assignedType);
-              if (varTypes != null) {
-                assignedTypeStack.addAll(varTypes);
+            if(assignedType != null) {
+              if (assignedType.startsWith("$")) {
+                Set<String> varTypes = getVariableType(varMap, assignedType);
+                if (varTypes != null) {
+                  assignedTypeStack.addAll(varTypes);
+                }
+              } else {
+                finishedTypeStack.push(assignedType);
               }
-            } else {
-              finishedTypeStack.push(assignedType);
             }
           }
           // Add it to the stack
@@ -115,6 +123,7 @@ public class ControlFlowNormalizer {
       }
       c.setAttributeMap(varMap);
     }
+    c.setConstructorNorm(true);
   }
 
   /**
@@ -164,8 +173,16 @@ public class ControlFlowNormalizer {
   public Map<String, Set<String>> normalizeFunctionCall(PhpFunction currentFunction, Map<String, Set<String>> previousVarMap, PhpStatement callStatement) {
     // Initialize variable map with constructor defined variables
     FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
-    Map<String, Set<String>> initialVarMap = copyVariableStack(projectData.getClass(currentFunction.getClassName()).getAttributeMap());
-    Map<String, Set<String>> returnVarMap = copyVariableStack(initialVarMap);
+    Map<String, Set<String>> initialVarMap;
+    Map<String, Set<String>> returnVarMap;
+
+    if(currentFunction.getClassName() != null) {
+      initialVarMap = copyVariableStack(projectData.getClass(currentFunction.getClassName()).getAttributeMap());
+      returnVarMap = copyVariableStack(initialVarMap);
+    } else {
+      initialVarMap = new HashMap<>();
+      returnVarMap = new HashMap<>();
+    }
     mergeVariableMap(initialVarMap, populateAssignment(currentFunction, funcCall));
     mergeVariableMap(initialVarMap, previousVarMap);
 
@@ -218,6 +235,11 @@ public class ControlFlowNormalizer {
           currentFunction.getControlFlowGraph().getGraph().removeEdge(funcCall, succ);
         }
         Graphs.addGraph(currentFunction.getControlFlowGraph().getGraph(), funcCfg.getGraph());
+
+//        PhpStatement funcBlock = new FunctionCallStatement(function, funcCall.getParameterMap(), funcCall.getCallerVariable());
+//        currentFunction.getControlFlowGraph().getGraph().addVertex(funcBlock);
+//        currentFunction.getControlFlowGraph().getGraph().addEdge(funcCall, funcBlock);
+//        currentFunction.getControlFlowGraph().getGraph().addEdge(funcBlock, funcCfg.getFirstVertex());
         currentFunction.getControlFlowGraph().getGraph().addEdge(funcCall, funcCfg.getFirstVertex());
         for (PhpStatement lastVert : funcCfg.getLastVertices()) {
           for (PhpStatement succ : succList) {
