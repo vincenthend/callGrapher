@@ -2,6 +2,8 @@ package grammar;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
+
 import logger.Logger;
 import model.ProjectData;
 import model.php.PhpClass;
@@ -72,9 +74,12 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       Logger.info("Function Member " + function.getCalledName() + " found");
     } else if(ctx.variableInitializer().size() != 0){
       for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()) {
-        c.getAttributeMap().put(varContext.getText(), new HashSet<>());
+        String assignedType = "";
+        Set<String> type = new HashSet<>();
+        type.add(assignedType);
+        c.getAttributeMap().put("$this->"+varContext.VarName().getText(), type);
 
-        Logger.info("Attribute Member " + className + "::" + varContext.getText() + " found");
+        Logger.info("Attribute Member " + className + "::" + varContext.getText() + " found, initialized with "+assignedType);
       }
     }
   }

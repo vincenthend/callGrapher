@@ -46,9 +46,7 @@ public class ControlFlowNormalizer {
     if(currentFunction.getClassName() != null && !currentFunction.getFunctionName().equals("__construct")){
       // Normalize class constructor
       Map<String, Set<String>> attr = projectData.getClass(currentFunction.getClassName()).getAttributeMap();
-      if(attr.isEmpty()){
-        normalizeConstructor(projectData.getClass(currentFunction.getClassName()));
-      }
+      normalizeConstructor(projectData.getClass(currentFunction.getClassName()));
     }
 
     ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(currentFunction.getControlFlowGraph());
@@ -70,10 +68,12 @@ public class ControlFlowNormalizer {
   }
 
   private void normalizeConstructor(PhpClass c){
-    Map<String, Set<String>> varMap = new HashMap<>();
+    Map<String, Set<String>> varMap = c.getAttributeMap();
+
     String classConstructor = c.getClassName() + "::__construct";
     PhpFunction constructorFunction = projectData.getFunctionMap().get(classConstructor);
 
+    // Add constructor parameters
     if(constructorFunction != null) {
       if(constructorFunction.getParameters() != null) {
         for (Entry<String, String> entry : constructorFunction.getParameters().entrySet()) {
@@ -109,7 +109,6 @@ public class ControlFlowNormalizer {
               finishedTypeStack.push(assignedType);
             }
           }
-
           // Add it to the stack
           addVariableType(varMap, assignment.getAssignedVariable(), finishedTypeStack);
         }
@@ -125,7 +124,7 @@ public class ControlFlowNormalizer {
    */
   private Map<String, Set<String>> populateAssignment(PhpFunction function, PhpStatement funcCall) {
     EdgeReversedGraph<PhpStatement, ControlFlowEdge> graph = new EdgeReversedGraph<>(function.getControlFlowGraph().getGraph());
-    Map<String, Set<String>> varList = new HashMap<>();
+    Map<String, Set<String>> varMap = new HashMap<>();
 
     ControlFlowDepthFirstIterator iterator = new ControlFlowDepthFirstIterator(graph, funcCall);
     while (iterator.hasNext()) {
@@ -141,7 +140,7 @@ public class ControlFlowNormalizer {
         while (!assignedTypeStack.isEmpty()) {
           String assignedType = assignedTypeStack.pop();
           if (assignedType.startsWith("$")) {
-            Set<String> varTypes = getVariableType(varList, assignedType);
+            Set<String> varTypes = getVariableType(varMap, assignedType);
             if (varTypes != null) {
               assignedTypeStack.addAll(varTypes);
             }
@@ -151,11 +150,11 @@ public class ControlFlowNormalizer {
         }
 
         // Add it to the stack
-        addVariableType(varList, assignment.getAssignedVariable(), finishedTypeStack);
+        addVariableType(varMap, assignment.getAssignedVariable(), finishedTypeStack);
       }
     }
 
-    return varList;
+    return varMap;
   }
 
   /**

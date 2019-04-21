@@ -1,9 +1,7 @@
 package grammar;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 import model.ProjectData;
 import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
@@ -21,6 +19,7 @@ import model.php.PhpFunction;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.jgrapht.Graphs;
 import org.jgrapht.traverse.DepthFirstIterator;
 
@@ -303,16 +302,19 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph graph = new ControlFlowGraph();
     if (ctx.actualArguments() != null) { // Method access by member
       PhpParser.ChainContext parent_ctx = (PhpParser.ChainContext) ctx.getParent();
-      String var_name;
-      if (parent_ctx.chainBase() != null) {
-        var_name = parent_ctx.chainBase().getText();
-      } else if (parent_ctx.functionCall() != null) {
-        var_name = parent_ctx.functionCall().functionCallName().getText();
-      } else if (parent_ctx.newExpr() != null) {
-        var_name = parent_ctx.newExpr().typeRef().getText();
-      } else {
-        var_name = parent_ctx.getText();
+      StringBuilder var_name = new StringBuilder();
+
+      boolean callFound = false;
+      Iterator<ParseTree> iterator = parent_ctx.children.iterator();
+      while(iterator.hasNext() && !callFound){
+        ParseTree tree = iterator.next();
+        if(tree == ctx){
+          callFound = true;
+        } else {
+          var_name.append(tree.getText());
+        }
       }
+
       // Get Arguments
       List<PhpParser.ActualArgumentContext> argsCtx = ctx.actualArguments().arguments().actualArgument();
       List<String> args = new LinkedList<>();
@@ -324,7 +326,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
       // Get function graph
       PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), null, "", null);
-      graph.addStatement(new FunctionCallStatement(temp_func, args, var_name));
+      graph.addStatement(new FunctionCallStatement(temp_func, args, var_name.toString()));
     }/* else { // Variable access by member
       graph = visitExpression(ctx, "member");
     }*/
@@ -394,7 +396,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     } else if (ctx.newExpr() != null){
       assigneeContext = ctx.newExpr();
     }
-    String assignedType = new PhpAssignedTypeVisitor(projectData).visit(assigneeContext);
+    String assignedType = PhpAssignedTypeIdentifier.identify(assigneeContext.getText());
 
     ControlFlowGraph graph = new ControlFlowGraph();
     graph.addStatement(new AssignmentStatement(ctx.chain(0).getText(), assignedType, ctx.getText()));
