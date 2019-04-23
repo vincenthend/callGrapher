@@ -17,15 +17,14 @@ public class Main {
 
   public static void diffCommit() throws Exception{
     // Parameters
-    String root = "../phpMyFAQ/";
-    String vulHash = "8ca2644742bf9e71a041c62ffb92611905c9cb15";
-    String unvulHash = "2f461413f9723f5e3ebf6c4ec5d1997176a0f175";
+    String root = "../phpmyadmin/";
+    String vulHash = "63b7f6c0a94af5d7402c4f198846dc0c066f5413";
+    String unvulHash = "5e108a340f3eac6b6c488439343b6c1a7454787c";
     List<String> file = new LinkedList<>();
-    file.add(root+"phpmyfaq/inc/PMF/");
-    file.add(root+"phpmyfaq/ajaxservice.php");
+    file.add(root+"libraries/core.lib.php");
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("ajaxservice.php::main");
+    shownFunction.add("PMA_safeUnserialize");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -50,7 +49,7 @@ public class Main {
     ControlFlowGraph cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
 
     ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
-    ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgNew, cfgOld);
+    ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgOld, cfgNew);
 
 //    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(cfgNew);

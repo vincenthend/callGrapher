@@ -183,9 +183,20 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitForStatement(PhpParser.ForStatementContext ctx) {
-    ControlFlowGraph init = visit(ctx.forInit());
-    ControlFlowGraph expression = visit(ctx.expressionList());
-    ControlFlowGraph update = visit(ctx.forUpdate());
+    ControlFlowGraph init = null;
+    ControlFlowGraph expression = null;
+    ControlFlowGraph update = null;
+    if(ctx.forInit() != null) {
+      init = visit(ctx.forInit());
+    } else {
+      init = new ControlFlowGraph();
+    }
+    if(ctx.expressionList() != null) {
+     expression = visit(ctx.expressionList());
+    }
+    if(ctx.forUpdate() != null) {
+     update = visit(ctx.forUpdate());
+    }
 
     ControlFlowGraph statement;
     if (ctx.statement() != null) {
