@@ -10,8 +10,8 @@ public class FunctionCallStatement extends PhpStatement {
   private String callerVariable;
   private List<String> parameterList;
 
-  public FunctionCallStatement(PhpFunction function, List<String> parameterList, String callerVariable) {
-    super(StatementType.FUNCTION_CALL, function.getCode());
+  public FunctionCallStatement(PhpFunction function, List<String> parameterList, String callerVariable, String code) {
+    super(StatementType.FUNCTION_CALL, code);
     this.function = function;
     this.parameterList = new LinkedList<>();
     this.parameterList.addAll(parameterList);

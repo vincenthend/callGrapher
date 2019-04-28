@@ -1,6 +1,8 @@
 package grammar;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import model.ProjectData;
 import model.graph.ControlFlowEdge;
@@ -361,7 +363,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       graph.appendGraph(argCfg);
     }
 
-    graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "", null), args, null));
+    graph.addStatement(new FunctionCallStatement(new PhpFunction(name, null, "", null), args, null, name));
     return graph;
   }
 
@@ -379,7 +381,12 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
         if(tree == ctx){
           callFound = true;
         } else {
-          var_name.append(tree.getText());
+          Pattern p = Pattern.compile("^((->|\\$)?[a-zA-Z0-9_]+)(\\(.*)?$");
+          Matcher m = p.matcher(tree.getText());
+
+          if(m.find()){
+            var_name.append(m.group(1));
+          }
         }
       }
 
@@ -394,7 +401,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
       // Get function graph
       PhpFunction temp_func = new PhpFunction(ctx.keyedFieldName().getText(), null, "", null);
-      graph.addStatement(new FunctionCallStatement(temp_func, args, var_name.toString()));
+      graph.addStatement(new FunctionCallStatement(temp_func, args, var_name.toString(),var_name.toString()+"->"+temp_func.getFunctionName()));
     }/* else { // Variable access by member
       graph = visitExpression(ctx, "member");
     }*/
@@ -449,7 +456,9 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     PhpFunction temp_func = new PhpFunction("__construct", name, "", null);
     PhpFunction phpFunction = projectData.getFunction(temp_func.getCalledName());
     if (phpFunction == null) {
-      graph.addStatement(new FunctionCallStatement(temp_func, args, null));
+      graph.addStatement(new FunctionCallStatement(temp_func, args, null, ctx.getText()));
+    } else {
+      graph.addStatement(new FunctionCallStatement(phpFunction, args, null, ctx.getText()));
     }
     return graph;
   }

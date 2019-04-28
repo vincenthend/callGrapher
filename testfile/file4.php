@@ -1,15 +1,31 @@
 <?php
-    class SQLConnector{
-        function runQuery($query){
-            global $PMF_LANG, $plr;
-
-            $this->_config  = $config;
-            $this->pmf_lang = $PMF_LANG;
-            $this->plr      = $plr;
-
-            if ($this->_config->get('security.permLevel') == 'medium') {
-                $this->groupSupport = true;
-            }
+    class A{
+        function bar(){
+            return 2;
         }
     }
+
+    class B{
+        function bar(){
+            return 1;
+        }
+    }
+
+    class C{
+        function __construct(){
+            if(true){
+                $this->object = new A();
+            } else {
+                $this->object = new B();
+            }
+        }
+
+        function foo(){
+            return $this->object;
+        }
+    }
+
+    $obj_c = new C();
+    $obj_c->foo($a)->bar();
+    doo();
 ?>

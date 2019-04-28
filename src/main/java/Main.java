@@ -18,13 +18,13 @@ public class Main {
   public static void diffCommit() throws Exception{
     // Parameters
     String root = "../phpmyadmin/";
-    String vulHash = "63b7f6c0a94af5d7402c4f198846dc0c066f5413";
-    String unvulHash = "5e108a340f3eac6b6c488439343b6c1a7454787c";
+    String vulHash = "0c3dfd186c281710516805f97a9875149abeb3ce";
+    String unvulHash = "af7c58939155d407233c8c3bf6f2ad3e540f489a";
     List<String> file = new LinkedList<>();
     file.add(root+"libraries/core.lib.php");
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("PMA_safeUnserialize");
+    shownFunction.add("PMA_isAllowedDomain");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -59,9 +59,9 @@ public class Main {
 //    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
-    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\","graphVul");
-    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\","graphNonvul");
-    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\","graphDiff");
+    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","10-graphVul");
+    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","10-graphNonvul");
+    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","10-graphDiff");
   }
 
   public static void diffGraph(){
@@ -105,7 +105,7 @@ public class Main {
 
     boolean normalizeFunc = true;
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("SQLConnector::runQuery");
+    shownFunction.add("file4.php::main");
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
