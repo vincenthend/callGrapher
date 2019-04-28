@@ -42,7 +42,11 @@ public class FlowAnalyzer {
   public void analyzeAll() {
     Set<PhpFunction> funcSet = new TreeSet<PhpFunction>(projectData.getFunctionMap().values());
     for (PhpFunction f : funcSet) {
-      analyze(f);
+      try {
+        analyze(f);
+      } catch (Exception e){
+        Logger.error("Fail to parse "+f);
+      }
     }
   }
 }

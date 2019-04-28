@@ -1,5 +1,4 @@
-// Generated from E:/ITB Stuff/Tugas Akhir/callGrapher/grammar\PhpParser.g4 by ANTLR 4.7
-package grammar;
+package grammar;// Generated from PhpParser.g4 by ANTLR 4.7.1
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**

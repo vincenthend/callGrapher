@@ -17,14 +17,15 @@ public class Main {
 
   public static void diffCommit() throws Exception{
     // Parameters
-    String root = "../phpmyadmin/";
-    String vulHash = "0c3dfd186c281710516805f97a9875149abeb3ce";
-    String unvulHash = "af7c58939155d407233c8c3bf6f2ad3e540f489a";
+    String root = "../elFinder/";
+    String vulHash = "15dc92ae485a88c1f8811404069aa0e09ae3e1ba";
+    String unvulHash = "f133163f2d754584de65d718b2fde96191557316";
     List<String> file = new LinkedList<>();
-    file.add(root+"libraries/core.lib.php");
+    file.add(root+"php/elFinder.class.php");
+
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("PMA_isAllowedDomain");
+    shownFunction.add("elFinder::upload");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -59,9 +60,9 @@ public class Main {
 //    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
-    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","10-graphVul");
-    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","10-graphNonvul");
-    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","10-graphDiff");
+    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","02-graphVul");
+    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","02-graphNonvul");
+    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","02-graphDiff");
   }
 
   public static void diffGraph(){
