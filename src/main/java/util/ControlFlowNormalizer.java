@@ -51,6 +51,7 @@ public class ControlFlowNormalizer {
       }
       mergeVariableMap(varList, projectData.getClass(currentFunction.getClassName()).getAttributeMap());
     }
+    addVariableType(varList,"$this", currentFunction.getClassName());
 
     ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(currentFunction.getControlFlowGraph());
     Iterator<PhpStatement> iterator = cfgd.iterator();

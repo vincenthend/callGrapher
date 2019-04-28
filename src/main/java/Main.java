@@ -60,9 +60,9 @@ public class Main {
 //    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
-    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","02-graphVul");
-    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","02-graphNonvul");
-    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","02-graphDiff");
+    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","13-graphVul");
+    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","13-graphNonvul");
+    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","13-graphDiff");
   }
 
   public static void diffGraph(){
