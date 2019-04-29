@@ -20,13 +20,19 @@ public class ControlFlowGraphDiff {
   private final float GAMMA = 1;
 
   public ControlFlowBlockGraph diffGraph(ControlFlowGraph g1, ControlFlowGraph g2) {
-    ControlFlowBlockGraph b1 = new ControlFlowGraphTranslator(g1).translate();
-    ControlFlowBlockGraph b2 = new ControlFlowGraphTranslator(g2).translate();
+    if(g1 != null && g2 != null){
+      ControlFlowBlockGraph b1 = new ControlFlowGraphTranslator(g1).translate();
+      ControlFlowBlockGraph b2 = new ControlFlowGraphTranslator(g2).translate();
 
-    SimilarityTable similarityTable = computeSimilarityTable(b1, b2);
-    BidiMap<PhpBasicBlock, PhpBasicBlock> blockMatchingMap = matchBasicBlock(similarityTable, b1, b2);
+      SimilarityTable similarityTable = computeSimilarityTable(b1, b2);
+      BidiMap<PhpBasicBlock, PhpBasicBlock> blockMatchingMap = matchBasicBlock(similarityTable, b1, b2);
 
-    return diffBlockControlFlowGraph(blockMatchingMap, b1, b2);
+      return diffBlockControlFlowGraph(blockMatchingMap, b1, b2);
+    } else if(g1 == null){
+      return new ControlFlowGraphTranslator(g2).translate();
+    } else{
+      return new ControlFlowGraphTranslator(g1).translate();
+    }
   }
 
   public ControlFlowBlockGraph diffGraphAnnotate(ControlFlowGraph g1, ControlFlowGraph g2) {

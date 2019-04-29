@@ -4,6 +4,7 @@ import java.util.List;
 import logger.Logger;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
+import model.php.PhpFunction;
 import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
@@ -17,15 +18,15 @@ public class Main {
 
   public static void diffCommit() throws Exception{
     // Parameters
-    String root = "../elFinder/";
-    String vulHash = "15dc92ae485a88c1f8811404069aa0e09ae3e1ba";
-    String unvulHash = "f133163f2d754584de65d718b2fde96191557316";
+    String root = "../phpmyadmin/";
+    String vulHash = "2cb51d22dba43f4a5d57d76ad8c734422db7c916";
+    String unvulHash = "8ee12d39e568d46b358601be1217e5087f4acf75";
     List<String> file = new LinkedList<>();
-    file.add(root+"php/elFinder.class.php");
+    file.add(root+"libraries/plugins/AuthenticationPlugin.class.php");
 
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("elFinder::upload");
+    shownFunction.add("AuthenticationPlugin::setSessionAccessTime");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -36,7 +37,12 @@ public class Main {
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(file);
     analyzerOld.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+
+    PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0));
+    ControlFlowGraph cfgOld = null;
+    if(oldFunc != null){
+     cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+    }
 
 
     Logger.info("Checkout to unvulnerable commit "+unvulHash);
@@ -47,7 +53,11 @@ public class Main {
     ControlFlowGraphAnalyzer analyzerNew = new ControlFlowGraphAnalyzer();
     analyzerNew.analyzeControlFlowGraph(file);
     analyzerNew.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+    PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0));
+    ControlFlowGraph cfgNew = null;
+    if(newFunc != null){
+      cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+    }
 
     ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
     ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgOld, cfgNew);
@@ -60,9 +70,9 @@ public class Main {
 //    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
-    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","13-graphVul");
-    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","13-graphNonvul");
-    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","13-graphDiff");
+    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","11a-graphVul");
+    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","11a-graphNonvul");
+    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","11a-graphDiff");
   }
 
   public static void diffGraph(){

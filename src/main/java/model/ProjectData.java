@@ -99,13 +99,20 @@ public class ProjectData {
     for (String functionName : functionNames){
       try {
         PhpFunction function = getFunction(functionName);
-        Logger.info("Normalizing "+function.getCalledName());
-        PhpFunction normalizedFunc = function.clone();
-        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
-        normalizer.normalize(normalizedFunc);
-        normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
+        if(function != null){
+          Logger.info("Normalizing " + function.getCalledName());
+          PhpFunction normalizedFunc = function.clone();
+          ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
+          normalizer.normalize(normalizedFunc);
+          normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
+        } else {
+          throw new IllegalStateException();
+        }
       } catch (CloneNotSupportedException e) {
         e.printStackTrace();
+      } catch (IllegalStateException ex){
+        System.out.println("Function "+functionName+"doesn't exist");
+        normalizedFunctions.put(functionName, null);
       }
     }
   }
