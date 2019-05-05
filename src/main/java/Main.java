@@ -19,14 +19,14 @@ public class Main {
   public static void diffCommit() throws Exception{
     // Parameters
     String root = "../phpmyadmin/";
-    String vulHash = "2cb51d22dba43f4a5d57d76ad8c734422db7c916";
-    String unvulHash = "8ee12d39e568d46b358601be1217e5087f4acf75";
+    String vulHash = "f67e04987dc1fb3ab6935b20034d64cda3520ff6";
+    String unvulHash = "7232271a379396ca1d4b083af051262057003c41";
     List<String> file = new LinkedList<>();
-    file.add(root+"libraries/plugins/AuthenticationPlugin.class.php");
+    file.add(root+"libraries/common.inc.php");
 
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("AuthenticationPlugin::setSessionAccessTime");
+    shownFunction.add("common.inc.php::main");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -44,7 +44,6 @@ public class Main {
      cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
     }
 
-
     Logger.info("Checkout to unvulnerable commit "+unvulHash);
     builder = new ProcessBuilder("git","checkout",unvulHash);
     builder.directory(new File(root));
@@ -61,18 +60,18 @@ public class Main {
 
     ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
     ControlFlowBlockGraph diffGraph = diff.diffGraph(cfgOld, cfgNew);
+//    ControlFlowBlockGraph diffGraph = diff.diffGraphAnnotate(cfgOld, cfgNew);
 
 //    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(cfgNew);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
 //    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
     GraphView view = new GraphView(diffGraph);
-//    GraphView view = new GraphView(diff.diffGraphAnnotate(cfgOld, cfgNew));
     view.show();
 
     ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","11a-graphVul");
     ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","11a-graphNonvul");
-    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","11a-graphDiff");
+//    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","11a-graphDiff");
   }
 
   public static void diffGraph(){
