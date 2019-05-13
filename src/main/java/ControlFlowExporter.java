@@ -15,9 +15,11 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import logger.Logger;
 import model.graph.ControlFlowEdge;
+import model.graph.block.PhpBasicBlock;
 import model.graph.block.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
+import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.io.ComponentNameProvider;
 import org.jgrapht.io.DOTExporter;
 import org.jgrapht.io.GraphExporter;
@@ -92,19 +94,9 @@ public class ControlFlowExporter {
   public static void exportDot(Graph graph, String path, String name) {
     //Save Image
     Logger.info("Exporting graph, please wait...");
-    ComponentNameProvider<PhpStatement> vertexIdProvider = new ComponentNameProvider<PhpStatement>() {
-      @Override
-      public String getName(PhpStatement p) {
-        return p.toString().replaceAll("\\s", "");
-      }
-    };
-    ComponentNameProvider<PhpStatement> vertexLabelProvider = new ComponentNameProvider<PhpStatement>() {
-      @Override
-      public String getName(PhpStatement phpStatement) {
-        return phpStatement.toString();
-      }
-    };
-    GraphExporter<PhpStatement, ControlFlowEdge> exporter = new DOTExporter<>(vertexIdProvider, vertexLabelProvider, null);
+    ComponentNameProvider<Object> vertexIdProvider = p -> p.getClass().getSimpleName()+"xx"+System.identityHashCode(p);
+    ComponentNameProvider<Object> vertexLabelProvider = phpStatement -> phpStatement.toString();
+    GraphExporter<Object, DefaultEdge> exporter = new DOTExporter<Object, DefaultEdge>(vertexIdProvider, vertexLabelProvider, null);
     try {
       FileWriter fileWriter = new FileWriter(new File(path + name +".dot"));
       exporter.exportGraph(graph, fileWriter);

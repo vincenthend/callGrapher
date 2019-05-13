@@ -18,15 +18,15 @@ public class Main {
 
   public static void diffCommit() throws Exception{
     // Parameters
-    String root = "../phpmyadmin/";
-    String vulHash = "f67e04987dc1fb3ab6935b20034d64cda3520ff6";
-    String unvulHash = "7232271a379396ca1d4b083af051262057003c41";
+    String root = "../Burden/";
+    String vulHash = "14585dfffaea9bf6da2d87196aedd7b43515e607";
+    String unvulHash = "edaa1bb8f73d6f3c8b2e78b67f1b40e02fccd0c1";
     List<String> file = new LinkedList<>();
-    file.add(root+"libraries/common.inc.php");
+    file.add(root+"login.php");
 
 
     List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("common.inc.php::main");
+    shownFunction.add("login.php::main");
 
     Logger.info("Root is set to"+root);
     Logger.info("Checkout to vulnerable commit "+vulHash);
@@ -69,9 +69,9 @@ public class Main {
     GraphView view = new GraphView(diffGraph);
     view.show();
 
-    ControlFlowExporter.exportSVG(cfgOld.getGraph(), "D:\\cfg\\","11a-graphVul");
-    ControlFlowExporter.exportSVG(cfgNew.getGraph(), "D:\\cfg\\","11a-graphNonvul");
-//    ControlFlowExporter.exportSVG(diffGraph.getGraph(), "D:\\cfg\\","11a-graphDiff");
+    ControlFlowExporter.exportDot(cfgOld.getGraph(), "D:\\cfg\\","24-graphVul");
+    ControlFlowExporter.exportDot(cfgNew.getGraph(), "D:\\cfg\\","24-graphNonvul");
+    ControlFlowExporter.exportDot(diffGraph.getGraph(), "D:\\cfg\\","24-graphDiff");
   }
 
   public static void diffGraph(){
