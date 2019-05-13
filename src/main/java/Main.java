@@ -5,6 +5,7 @@ import logger.Logger;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
 import model.php.PhpFunction;
+import util.ControlFlowGraphTranslator;
 import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
@@ -65,13 +66,13 @@ public class Main {
 //    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(cfgNew);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
+//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translateToBlockGraph());
     GraphView view = new GraphView(diffGraph);
     view.show();
 
     ControlFlowExporter.exportDot(cfgOld.getGraph(), "D:\\cfg\\","24-graphVul");
     ControlFlowExporter.exportDot(cfgNew.getGraph(), "D:\\cfg\\","24-graphNonvul");
-    ControlFlowExporter.exportDot(diffGraph.getGraph(), "D:\\cfg\\","24-graphDiff");
+    ControlFlowExporter.exportDot(new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph).getGraph(), "D:\\cfg\\","24-graphDiff");
   }
 
   public static void diffGraph(){
@@ -101,7 +102,7 @@ public class Main {
 //    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(cfgNew);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
+//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translateToBlockGraph());
     GraphView view = new GraphView(diff.diffGraph(cfgOld, cfgNew));
     view.show();
 
@@ -124,7 +125,7 @@ public class Main {
 
     GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translate());
+//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translateToBlockGraph());
     view.show();
 
     //ControlFlowExporter.exportSVG(cfg, "D:\\");

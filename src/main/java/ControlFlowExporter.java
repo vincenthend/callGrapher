@@ -15,7 +15,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import logger.Logger;
 import model.graph.ControlFlowEdge;
-import model.graph.block.PhpBasicBlock;
 import model.graph.block.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
@@ -95,7 +94,7 @@ public class ControlFlowExporter {
     //Save Image
     Logger.info("Exporting graph, please wait...");
     ComponentNameProvider<Object> vertexIdProvider = p -> p.getClass().getSimpleName()+"xx"+System.identityHashCode(p);
-    ComponentNameProvider<Object> vertexLabelProvider = phpStatement -> phpStatement.toString();
+    ComponentNameProvider<Object> vertexLabelProvider = phpStatement -> phpStatement.toString().replace("\\","\\\\").replace("\n","\\n");
     GraphExporter<Object, DefaultEdge> exporter = new DOTExporter<Object, DefaultEdge>(vertexIdProvider, vertexLabelProvider, null);
     try {
       FileWriter fileWriter = new FileWriter(new File(path + name +".dot"));

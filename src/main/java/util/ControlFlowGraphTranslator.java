@@ -1,29 +1,27 @@
 package util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import logger.Logger;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowEdge;
 import model.graph.ControlFlowGraph;
 import model.graph.block.PhpBasicBlock;
 import model.graph.block.statement.PhpStatement;
+import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
-
-import java.util.*;
+import org.jgrapht.traverse.DepthFirstIterator;
 
 public class ControlFlowGraphTranslator {
-  private ControlFlowGraph cfg;
-  private ControlFlowGraphDominators dominators;
-
-  public ControlFlowGraphTranslator(ControlFlowGraph cfg) {
-    this.cfg = cfg;
-    this.dominators = new ControlFlowGraphDominators(cfg);
-  }
 
   /**
    * Translate a CFG into a CFBlockGraph.
    * @return result of translations
    */
-  public ControlFlowBlockGraph translate() {
+  public ControlFlowBlockGraph translateToBlockGraph(ControlFlowGraph cfg) {
+    ControlFlowGraphDominators dominators = new ControlFlowGraphDominators(cfg);
     ControlFlowBlockGraphBuilder blockGraphFactory = new ControlFlowBlockGraphBuilder();
     ControlFlowDominatorIterator iterator = dominators.iterator();
 
@@ -61,5 +59,46 @@ public class ControlFlowGraphTranslator {
       }
     }
     return blockGraphFactory.getBlockGraph();
+  }
+
+  public ControlFlowGraph translateToFlowGraph(ControlFlowBlockGraph cfbg){
+    ControlFlowGraph cfg = new ControlFlowGraph();
+
+    // Add all node
+    Set<PhpBasicBlock> vertexSet = cfbg.getGraph().vertexSet();
+    Iterator<PhpBasicBlock> vertexIterator = vertexSet.iterator();
+    while(vertexIterator.hasNext()){
+      PhpBasicBlock block = vertexIterator.next();
+      Iterator<PhpStatement> statementIterator = block.getBlockStatements().listIterator();
+      while(statementIterator.hasNext()){
+        cfg.getGraph().addVertex(statementIterator.next());
+      }
+    }
+
+    // Connect every node
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> dfs = new DepthFirstIterator<>(cfbg.getGraph());
+    while(dfs.hasNext()){
+      PhpBasicBlock block = dfs.next();
+
+      Iterator<PhpStatement> statementIterator = block.getBlockStatements().listIterator();
+      PhpStatement statement = statementIterator.next();
+      while(statementIterator.hasNext()){
+        PhpStatement oldStatement = statement;
+        statement = statementIterator.next();
+        cfg.getGraph().addEdge(oldStatement, statement);
+      }
+      // Handle first and last statement
+      // Connect to prev blocks last statement
+      List<PhpBasicBlock> prevBlockList = Graphs.predecessorListOf(cfbg.getGraph(), block);
+      for (PhpBasicBlock prevBlock : prevBlockList) {
+        cfg.getGraph().addEdge(prevBlock.getBlockStatements().getLast(), block.getBlockStatements().getFirst());
+      }
+      List<PhpBasicBlock> nextBlockList = Graphs.successorListOf(cfbg.getGraph(), block);
+      for (PhpBasicBlock nextBlock : nextBlockList) {
+        cfg.getGraph().addEdge(block.getBlockStatements().getLast(), nextBlock.getBlockStatements().getFirst());
+      }
+    }
+
+    return cfg;
   }
 }
