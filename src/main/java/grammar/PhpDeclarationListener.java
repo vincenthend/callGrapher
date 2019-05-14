@@ -32,7 +32,7 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
 
   @Override
   public void exitTopStatement(PhpParser.TopStatementContext ctx) {
-    if(ctx.statement() != null){
+    if(ctx.statement() != null && ctx.statement().inlineHtmlStatement() == null && ctx.statement().emptyStatement() == null){
       Interval interval = new Interval(ctx.statement().start.getStartIndex(), ctx.statement().stop.getStopIndex());
       unattachedCode.append(charStream.getText(interval));
     }

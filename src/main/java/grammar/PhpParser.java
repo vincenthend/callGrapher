@@ -1,4 +1,4 @@
-package grammar;// Generated from PhpParser.g4 by ANTLR 4.7.1
+package grammar;// Generated from E:\antlr\src\main\antlr4\PhpParser.g4 by ANTLR 4.7.2
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class PhpParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -103,112 +103,121 @@ public class PhpParser extends Parser {
 		RULE_assignmentList = 120, RULE_assignmentListElement = 121, RULE_modifier = 122, 
 		RULE_identifier = 123, RULE_memberModifier = 124, RULE_magicConstant = 125, 
 		RULE_magicMethod = 126, RULE_primitiveType = 127, RULE_castOperation = 128;
-	public static final String[] ruleNames = {
-		"htmlDocument", "htmlElementOrPhpBlock", "htmlElements", "htmlElement", 
-		"scriptTextPart", "phpBlock", "importStatement", "topStatement", "useDeclaration", 
-		"useDeclarationContentList", "useDeclarationContent", "namespaceDeclaration", 
-		"namespaceStatement", "functionDeclaration", "classDeclaration", "classEntryType", 
-		"interfaceList", "typeParameterListInBrackets", "typeParameterList", "typeParameterWithDefaultsList", 
-		"typeParameterDecl", "typeParameterWithDefaultDecl", "genericDynamicArgs", 
-		"attributes", "attributesGroup", "attribute", "attributeArgList", "attributeNamedArgList", 
-		"attributeNamedArg", "innerStatementList", "innerStatement", "statement", 
-		"emptyStatement", "blockStatement", "ifStatement", "elseIfStatement", 
-		"elseIfColonStatement", "elseStatement", "elseColonStatement", "whileStatement", 
-		"doWhileStatement", "forStatement", "forInit", "forUpdate", "switchStatement", 
-		"switchBlock", "breakStatement", "continueStatement", "returnStatement", 
-		"expressionStatement", "unsetStatement", "foreachStatement", "tryCatchFinally", 
-		"catchClause", "finallyStatement", "throwStatement", "gotoStatement", 
-		"declareStatement", "inlineHtmlStatement", "inlineHtml", "declareList", 
-		"formalParameterList", "formalParameter", "typeHint", "globalStatement", 
-		"globalVar", "echoStatement", "staticVariableStatement", "classStatement", 
-		"traitAdaptations", "traitAdaptationStatement", "traitPrecedence", "traitAlias", 
-		"traitMethodReference", "baseCtorCall", "methodBody", "propertyModifiers", 
-		"memberModifiers", "variableInitializer", "identifierInititalizer", "globalConstantDeclaration", 
-		"expressionList", "parenthesis", "expression", "newExpr", "assignmentOperator", 
-		"yieldExpression", "arrayItemList", "arrayItem", "lambdaFunctionUseVars", 
-		"lambdaFunctionUseVar", "qualifiedStaticTypeRef", "typeRef", "indirectTypeRef", 
-		"qualifiedNamespaceName", "namespaceNameList", "qualifiedNamespaceNameList", 
-		"arguments", "actualArgument", "constantInititalizer", "constantArrayItemList", 
-		"constantArrayItem", "constant", "literalConstant", "numericConstant", 
-		"classConstant", "stringConstant", "string", "interpolatedStringPart", 
-		"chainList", "chain", "memberAccess", "functionCall", "functionCallName", 
-		"actualArguments", "chainBase", "keyedFieldName", "keyedSimpleFieldName", 
-		"keyedVariable", "squareCurlyExpression", "assignmentList", "assignmentListElement", 
-		"modifier", "identifier", "memberModifier", "magicConstant", "magicMethod", 
-		"primitiveType", "castOperation"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"htmlDocument", "htmlElementOrPhpBlock", "htmlElements", "htmlElement", 
+			"scriptTextPart", "phpBlock", "importStatement", "topStatement", "useDeclaration", 
+			"useDeclarationContentList", "useDeclarationContent", "namespaceDeclaration", 
+			"namespaceStatement", "functionDeclaration", "classDeclaration", "classEntryType", 
+			"interfaceList", "typeParameterListInBrackets", "typeParameterList", 
+			"typeParameterWithDefaultsList", "typeParameterDecl", "typeParameterWithDefaultDecl", 
+			"genericDynamicArgs", "attributes", "attributesGroup", "attribute", "attributeArgList", 
+			"attributeNamedArgList", "attributeNamedArg", "innerStatementList", "innerStatement", 
+			"statement", "emptyStatement", "blockStatement", "ifStatement", "elseIfStatement", 
+			"elseIfColonStatement", "elseStatement", "elseColonStatement", "whileStatement", 
+			"doWhileStatement", "forStatement", "forInit", "forUpdate", "switchStatement", 
+			"switchBlock", "breakStatement", "continueStatement", "returnStatement", 
+			"expressionStatement", "unsetStatement", "foreachStatement", "tryCatchFinally", 
+			"catchClause", "finallyStatement", "throwStatement", "gotoStatement", 
+			"declareStatement", "inlineHtmlStatement", "inlineHtml", "declareList", 
+			"formalParameterList", "formalParameter", "typeHint", "globalStatement", 
+			"globalVar", "echoStatement", "staticVariableStatement", "classStatement", 
+			"traitAdaptations", "traitAdaptationStatement", "traitPrecedence", "traitAlias", 
+			"traitMethodReference", "baseCtorCall", "methodBody", "propertyModifiers", 
+			"memberModifiers", "variableInitializer", "identifierInititalizer", "globalConstantDeclaration", 
+			"expressionList", "parenthesis", "expression", "newExpr", "assignmentOperator", 
+			"yieldExpression", "arrayItemList", "arrayItem", "lambdaFunctionUseVars", 
+			"lambdaFunctionUseVar", "qualifiedStaticTypeRef", "typeRef", "indirectTypeRef", 
+			"qualifiedNamespaceName", "namespaceNameList", "qualifiedNamespaceNameList", 
+			"arguments", "actualArgument", "constantInititalizer", "constantArrayItemList", 
+			"constantArrayItem", "constant", "literalConstant", "numericConstant", 
+			"classConstant", "stringConstant", "string", "interpolatedStringPart", 
+			"chainList", "chain", "memberAccess", "functionCall", "functionCallName", 
+			"actualArguments", "chainBase", "keyedFieldName", "keyedSimpleFieldName", 
+			"keyedVariable", "squareCurlyExpression", "assignmentList", "assignmentListElement", 
+			"modifier", "identifier", "memberModifier", "magicConstant", "magicMethod", 
+			"primitiveType", "castOperation"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, "'/>'", null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, null, null, null, null, null, null, "'abstract'", "'array'", "'as'", 
-		"'binary'", null, null, "'break'", "'callable'", "'case'", "'catch'", 
-		"'class'", "'clone'", "'const'", "'continue'", "'declare'", "'default'", 
-		"'do'", "'real'", "'double'", "'echo'", "'else'", "'elseif'", "'empty'", 
-		"'enddeclare'", "'endfor'", "'endforeach'", "'endif'", "'endswitch'", 
-		"'endwhile'", "'eval'", "'die'", "'extends'", "'final'", "'finally'", 
-		"'float'", "'for'", "'foreach'", "'function'", "'global'", "'goto'", "'if'", 
-		"'implements'", "'import'", "'include'", "'include_once'", "'instanceof'", 
-		"'insteadof'", "'int8'", "'int16'", "'int64'", null, "'interface'", "'isset'", 
-		"'list'", "'and'", "'or'", "'xor'", "'namespace'", "'new'", "'null'", 
-		"'object'", "'parent'", "'partial'", "'print'", "'private'", "'protected'", 
-		"'public'", "'require'", "'require_once'", "'resource'", "'return'", "'static'", 
-		"'string'", "'switch'", "'throw'", "'trait'", "'try'", "'clrtypeof'", 
-		null, "'unicode'", "'unset'", "'use'", "'var'", "'while'", "'yield'", 
-		"'__get'", "'__set'", "'__call'", "'__callstatic'", "'__construct'", "'__destruct'", 
-		"'__wakeup'", "'__sleep'", "'__autoload'", "'__isset'", "'__unset'", "'__tostring'", 
-		"'__invoke'", "'__set_state'", "'__clone'", "'__debuginfo'", "'__namespace__'", 
-		"'__class__'", "'__trait__'", "'__function__'", "'__method__'", "'__line__'", 
-		"'__file__'", "'__dir__'", "'<:'", "':>'", "'=>'", "'++'", "'--'", "'==='", 
-		"'!=='", "'=='", null, "'<='", "'>='", "'+='", "'-='", "'*='", "'**'", 
-		"'**='", "'/='", "'.='", "'%='", "'<<='", "'>>='", "'&='", "'|='", "'^='", 
-		"'||'", "'&&'", "'<<'", "'>>'", "'::'", "'->'", "'\\'", "'...'", null, 
-		null, "'&'", "'|'", "'!'", "'^'", "'+'", "'-'", "'*'", "'%'", null, "'~'", 
-		"'@'", null, "'.'", null, "'('", "')'", "'['", "']'", null, "'}'", "','", 
-		"':'", "';'", null, "'''", "'`'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, "SeaWhitespace", "HtmlText", "XmlStart", "PHPStart", "HtmlScriptOpen", 
-		"HtmlStyleOpen", "HtmlComment", "HtmlDtd", "HtmlOpen", "Shebang", "Error", 
-		"XmlText", "XmlClose", "PHPStartInside", "HtmlClose", "HtmlSlashClose", 
-		"HtmlSlash", "HtmlEquals", "HtmlStartQuoteString", "HtmlStartDoubleQuoteString", 
-		"HtmlHex", "HtmlDecimal", "HtmlSpace", "HtmlName", "ErrorInside", "PHPStartInsideQuoteString", 
-		"HtmlEndQuoteString", "HtmlQuoteString", "ErrorHtmlQuote", "PHPStartDoubleQuoteString", 
-		"HtmlEndDoubleQuoteString", "HtmlDoubleQuoteString", "ErrorHtmlDoubleQuote", 
-		"ScriptText", "ScriptClose", "PHPStartInsideScript", "StyleBody", "PHPEnd", 
-		"Whitespace", "MultiLineComment", "SingleLineComment", "ShellStyleComment", 
-		"Abstract", "Array", "As", "BinaryCast", "BoolType", "BooleanConstant", 
-		"Break", "Callable", "Case", "Catch", "Class", "Clone", "Const", "Continue", 
-		"Declare", "Default", "Do", "DoubleCast", "DoubleType", "Echo", "Else", 
-		"ElseIf", "Empty", "EndDeclare", "EndFor", "EndForeach", "EndIf", "EndSwitch", 
-		"EndWhile", "Eval", "Exit", "Extends", "Final", "Finally", "FloatCast", 
-		"For", "Foreach", "Function", "Global", "Goto", "If", "Implements", "Import", 
-		"Include", "IncludeOnce", "InstanceOf", "InsteadOf", "Int8Cast", "Int16Cast", 
-		"Int64Type", "IntType", "Interface", "IsSet", "List", "LogicalAnd", "LogicalOr", 
-		"LogicalXor", "Namespace", "New", "Null", "ObjectType", "Parent_", "Partial", 
-		"Print", "Private", "Protected", "Public", "Require", "RequireOnce", "Resource", 
-		"Return", "Static", "StringType", "Switch", "Throw", "Trait", "Try", "Typeof", 
-		"UintCast", "UnicodeCast", "Unset", "Use", "Var", "While", "Yield", "Get", 
-		"Set", "Call", "CallStatic", "Constructor", "Destruct", "Wakeup", "Sleep", 
-		"Autoload", "IsSet__", "Unset__", "ToString__", "Invoke", "SetState", 
-		"Clone__", "DebugInfo", "Namespace__", "Class__", "Traic__", "Function__", 
-		"Method__", "Line__", "File__", "Dir__", "Lgeneric", "Rgeneric", "DoubleArrow", 
-		"Inc", "Dec", "IsIdentical", "IsNoidentical", "IsEqual", "IsNotEq", "IsSmallerOrEqual", 
-		"IsGreaterOrEqual", "PlusEqual", "MinusEqual", "MulEqual", "Pow", "PowEqual", 
-		"DivEqual", "Concaequal", "ModEqual", "ShiftLeftEqual", "ShiftRightEqual", 
-		"AndEqual", "OrEqual", "XorEqual", "BooleanOr", "BooleanAnd", "ShiftLeft", 
-		"ShiftRight", "DoubleColon", "ObjectOperator", "NamespaceSeparator", "Ellipsis", 
-		"Less", "Greater", "Ampersand", "Pipe", "Bang", "Caret", "Plus", "Minus", 
-		"Asterisk", "Percent", "Divide", "Tilde", "SuppressWarnings", "Dollar", 
-		"Dot", "QuestionMark", "OpenRoundBracket", "CloseRoundBracket", "OpenSquareBracket", 
-		"CloseSquareBracket", "OpenCurlyBracket", "CloseCurlyBracket", "Comma", 
-		"Colon", "SemiColon", "Eq", "Quote", "BackQuote", "VarName", "Label", 
-		"Octal", "Decimal", "Real", "Hex", "Binary", "BackQuoteString", "SingleQuoteString", 
-		"DoubleQuote", "StartNowDoc", "StartHereDoc", "ErrorPhp", "CurlyDollar", 
-		"StringPart", "Comment", "PHPEndSingleLineComment", "CommentEnd", "HereDocText", 
-		"XmlText2"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, "'/>'", null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, null, null, null, null, null, null, "'abstract'", "'array'", "'as'", 
+			"'binary'", null, null, "'break'", "'callable'", "'case'", "'catch'", 
+			"'class'", "'clone'", "'const'", "'continue'", "'declare'", "'default'", 
+			"'do'", "'real'", "'double'", "'echo'", "'else'", "'elseif'", "'empty'", 
+			"'enddeclare'", "'endfor'", "'endforeach'", "'endif'", "'endswitch'", 
+			"'endwhile'", "'eval'", "'die'", "'extends'", "'final'", "'finally'", 
+			"'float'", "'for'", "'foreach'", "'function'", "'global'", "'goto'", 
+			"'if'", "'implements'", "'import'", "'include'", "'include_once'", "'instanceof'", 
+			"'insteadof'", "'int8'", "'int16'", "'int64'", null, "'interface'", "'isset'", 
+			"'list'", "'and'", "'or'", "'xor'", "'namespace'", "'new'", "'null'", 
+			"'object'", "'parent'", "'partial'", "'print'", "'private'", "'protected'", 
+			"'public'", "'require'", "'require_once'", "'resource'", "'return'", 
+			"'static'", "'string'", "'switch'", "'throw'", "'trait'", "'try'", "'clrtypeof'", 
+			null, "'unicode'", "'unset'", "'use'", "'var'", "'while'", "'yield'", 
+			"'__get'", "'__set'", "'__call'", "'__callstatic'", "'__construct'", 
+			"'__destruct'", "'__wakeup'", "'__sleep'", "'__autoload'", "'__isset'", 
+			"'__unset'", "'__tostring'", "'__invoke'", "'__set_state'", "'__clone'", 
+			"'__debuginfo'", "'__namespace__'", "'__class__'", "'__trait__'", "'__function__'", 
+			"'__method__'", "'__line__'", "'__file__'", "'__dir__'", "'<:'", "':>'", 
+			"'=>'", "'++'", "'--'", "'==='", "'!=='", "'=='", null, "'<='", "'>='", 
+			"'+='", "'-='", "'*='", "'**'", "'**='", "'/='", "'.='", "'%='", "'<<='", 
+			"'>>='", "'&='", "'|='", "'^='", "'||'", "'&&'", "'<<'", "'>>'", "'::'", 
+			"'->'", "'\\'", "'...'", null, null, "'&'", "'|'", "'!'", "'^'", "'+'", 
+			"'-'", "'*'", "'%'", null, "'~'", "'@'", null, "'.'", null, "'('", "')'", 
+			"'['", "']'", null, "'}'", "','", "':'", "';'", null, "'''", "'`'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, "SeaWhitespace", "HtmlText", "XmlStart", "PHPStart", "HtmlScriptOpen", 
+			"HtmlStyleOpen", "HtmlComment", "HtmlDtd", "HtmlOpen", "Shebang", "Error", 
+			"XmlText", "XmlClose", "PHPStartInside", "HtmlClose", "HtmlSlashClose", 
+			"HtmlSlash", "HtmlEquals", "HtmlStartQuoteString", "HtmlStartDoubleQuoteString", 
+			"HtmlHex", "HtmlDecimal", "HtmlSpace", "HtmlName", "ErrorInside", "PHPStartInsideQuoteString", 
+			"HtmlEndQuoteString", "HtmlQuoteString", "ErrorHtmlQuote", "PHPStartDoubleQuoteString", 
+			"HtmlEndDoubleQuoteString", "HtmlDoubleQuoteString", "ErrorHtmlDoubleQuote", 
+			"ScriptText", "ScriptClose", "PHPStartInsideScript", "StyleBody", "PHPEnd", 
+			"Whitespace", "MultiLineComment", "SingleLineComment", "ShellStyleComment", 
+			"Abstract", "Array", "As", "BinaryCast", "BoolType", "BooleanConstant", 
+			"Break", "Callable", "Case", "Catch", "Class", "Clone", "Const", "Continue", 
+			"Declare", "Default", "Do", "DoubleCast", "DoubleType", "Echo", "Else", 
+			"ElseIf", "Empty", "EndDeclare", "EndFor", "EndForeach", "EndIf", "EndSwitch", 
+			"EndWhile", "Eval", "Exit", "Extends", "Final", "Finally", "FloatCast", 
+			"For", "Foreach", "Function", "Global", "Goto", "If", "Implements", "Import", 
+			"Include", "IncludeOnce", "InstanceOf", "InsteadOf", "Int8Cast", "Int16Cast", 
+			"Int64Type", "IntType", "Interface", "IsSet", "List", "LogicalAnd", "LogicalOr", 
+			"LogicalXor", "Namespace", "New", "Null", "ObjectType", "Parent_", "Partial", 
+			"Print", "Private", "Protected", "Public", "Require", "RequireOnce", 
+			"Resource", "Return", "Static", "StringType", "Switch", "Throw", "Trait", 
+			"Try", "Typeof", "UintCast", "UnicodeCast", "Unset", "Use", "Var", "While", 
+			"Yield", "Get", "Set", "Call", "CallStatic", "Constructor", "Destruct", 
+			"Wakeup", "Sleep", "Autoload", "IsSet__", "Unset__", "ToString__", "Invoke", 
+			"SetState", "Clone__", "DebugInfo", "Namespace__", "Class__", "Traic__", 
+			"Function__", "Method__", "Line__", "File__", "Dir__", "Lgeneric", "Rgeneric", 
+			"DoubleArrow", "Inc", "Dec", "IsIdentical", "IsNoidentical", "IsEqual", 
+			"IsNotEq", "IsSmallerOrEqual", "IsGreaterOrEqual", "PlusEqual", "MinusEqual", 
+			"MulEqual", "Pow", "PowEqual", "DivEqual", "Concaequal", "ModEqual", 
+			"ShiftLeftEqual", "ShiftRightEqual", "AndEqual", "OrEqual", "XorEqual", 
+			"BooleanOr", "BooleanAnd", "ShiftLeft", "ShiftRight", "DoubleColon", 
+			"ObjectOperator", "NamespaceSeparator", "Ellipsis", "Less", "Greater", 
+			"Ampersand", "Pipe", "Bang", "Caret", "Plus", "Minus", "Asterisk", "Percent", 
+			"Divide", "Tilde", "SuppressWarnings", "Dollar", "Dot", "QuestionMark", 
+			"OpenRoundBracket", "CloseRoundBracket", "OpenSquareBracket", "CloseSquareBracket", 
+			"OpenCurlyBracket", "CloseCurlyBracket", "Comma", "Colon", "SemiColon", 
+			"Eq", "Quote", "BackQuote", "VarName", "Label", "Octal", "Decimal", "Real", 
+			"Hex", "Binary", "BackQuoteString", "SingleQuoteString", "DoubleQuote", 
+			"StartNowDoc", "StartHereDoc", "ErrorPhp", "CurlyDollar", "StringPart", 
+			"Comment", "PHPEndSingleLineComment", "CommentEnd", "HereDocText", "XmlText2"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -258,6 +267,7 @@ public class PhpParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
+
 	public static class HtmlDocumentContext extends ParserRuleContext {
 		public TerminalNode EOF() { return getToken(PhpParser.EOF, 0); }
 		public TerminalNode Shebang() { return getToken(PhpParser.Shebang, 0); }
@@ -858,6 +868,7 @@ public class PhpParser extends Parser {
 		public NamespaceNameListContext namespaceNameList() {
 			return getRuleContext(NamespaceNameListContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ImportStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1009,6 +1020,7 @@ public class PhpParser extends Parser {
 		public UseDeclarationContentListContext useDeclarationContentList() {
 			return getRuleContext(UseDeclarationContentListContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public TerminalNode Function() { return getToken(PhpParser.Function, 0); }
 		public TerminalNode Const() { return getToken(PhpParser.Const, 0); }
 		public UseDeclarationContext(ParserRuleContext parent, int invokingState) {
@@ -1080,6 +1092,14 @@ public class PhpParser extends Parser {
 		}
 		public UseDeclarationContentContext useDeclarationContent(int i) {
 			return getRuleContext(UseDeclarationContentContext.class,i);
+		}
+		public List<TerminalNode> NamespaceSeparator() { return getTokens(PhpParser.NamespaceSeparator); }
+		public TerminalNode NamespaceSeparator(int i) {
+			return getToken(PhpParser.NamespaceSeparator, i);
+		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public UseDeclarationContentListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1222,9 +1242,11 @@ public class PhpParser extends Parser {
 	public static class NamespaceDeclarationContext extends ParserRuleContext {
 		public TerminalNode Namespace() { return getToken(PhpParser.Namespace, 0); }
 		public TerminalNode OpenCurlyBracket() { return getToken(PhpParser.OpenCurlyBracket, 0); }
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public NamespaceNameListContext namespaceNameList() {
 			return getRuleContext(NamespaceNameListContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public List<NamespaceStatementContext> namespaceStatement() {
 			return getRuleContexts(NamespaceStatementContext.class);
 		}
@@ -1414,12 +1436,15 @@ public class PhpParser extends Parser {
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public FormalParameterListContext formalParameterList() {
 			return getRuleContext(FormalParameterListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public BlockStatementContext blockStatement() {
 			return getRuleContext(BlockStatementContext.class,0);
 		}
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public TypeParameterListInBracketsContext typeParameterListInBrackets() {
 			return getRuleContext(TypeParameterListInBracketsContext.class,0);
 		}
@@ -1501,6 +1526,7 @@ public class PhpParser extends Parser {
 			return getRuleContext(AttributesContext.class,0);
 		}
 		public TerminalNode OpenCurlyBracket() { return getToken(PhpParser.OpenCurlyBracket, 0); }
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public ClassEntryTypeContext classEntryType() {
 			return getRuleContext(ClassEntryTypeContext.class,0);
 		}
@@ -1757,6 +1783,10 @@ public class PhpParser extends Parser {
 		public QualifiedStaticTypeRefContext qualifiedStaticTypeRef(int i) {
 			return getRuleContext(QualifiedStaticTypeRefContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public InterfaceListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1815,12 +1845,15 @@ public class PhpParser extends Parser {
 	}
 
 	public static class TypeParameterListInBracketsContext extends ParserRuleContext {
+		public TerminalNode Lgeneric() { return getToken(PhpParser.Lgeneric, 0); }
 		public TypeParameterListContext typeParameterList() {
 			return getRuleContext(TypeParameterListContext.class,0);
 		}
+		public TerminalNode Rgeneric() { return getToken(PhpParser.Rgeneric, 0); }
 		public TypeParameterWithDefaultsListContext typeParameterWithDefaultsList() {
 			return getRuleContext(TypeParameterWithDefaultsListContext.class,0);
 		}
+		public TerminalNode Comma() { return getToken(PhpParser.Comma, 0); }
 		public TypeParameterListInBracketsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1904,6 +1937,10 @@ public class PhpParser extends Parser {
 		public TypeParameterDeclContext typeParameterDecl(int i) {
 			return getRuleContext(TypeParameterDeclContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public TypeParameterListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1969,6 +2006,10 @@ public class PhpParser extends Parser {
 		}
 		public TypeParameterWithDefaultDeclContext typeParameterWithDefaultDecl(int i) {
 			return getRuleContext(TypeParameterWithDefaultDeclContext.class,i);
+		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public TypeParameterWithDefaultsListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2151,11 +2192,17 @@ public class PhpParser extends Parser {
 	}
 
 	public static class GenericDynamicArgsContext extends ParserRuleContext {
+		public TerminalNode Lgeneric() { return getToken(PhpParser.Lgeneric, 0); }
 		public List<TypeRefContext> typeRef() {
 			return getRuleContexts(TypeRefContext.class);
 		}
 		public TypeRefContext typeRef(int i) {
 			return getRuleContext(TypeRefContext.class,i);
+		}
+		public TerminalNode Rgeneric() { return getToken(PhpParser.Rgeneric, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public GenericDynamicArgsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2279,14 +2326,21 @@ public class PhpParser extends Parser {
 	}
 
 	public static class AttributesGroupContext extends ParserRuleContext {
+		public TerminalNode OpenSquareBracket() { return getToken(PhpParser.OpenSquareBracket, 0); }
 		public List<AttributeContext> attribute() {
 			return getRuleContexts(AttributeContext.class);
 		}
 		public AttributeContext attribute(int i) {
 			return getRuleContext(AttributeContext.class,i);
 		}
+		public TerminalNode CloseSquareBracket() { return getToken(PhpParser.CloseSquareBracket, 0); }
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
+		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public AttributesGroupContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2365,12 +2419,15 @@ public class PhpParser extends Parser {
 		public QualifiedNamespaceNameContext qualifiedNamespaceName() {
 			return getRuleContext(QualifiedNamespaceNameContext.class,0);
 		}
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public AttributeArgListContext attributeArgList() {
 			return getRuleContext(AttributeArgListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public AttributeNamedArgListContext attributeNamedArgList() {
 			return getRuleContext(AttributeNamedArgListContext.class,0);
 		}
+		public TerminalNode Comma() { return getToken(PhpParser.Comma, 0); }
 		public AttributeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2467,6 +2524,10 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public AttributeArgListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2533,6 +2594,10 @@ public class PhpParser extends Parser {
 		public AttributeNamedArgContext attributeNamedArg(int i) {
 			return getRuleContext(AttributeNamedArgContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public AttributeNamedArgListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2592,6 +2657,7 @@ public class PhpParser extends Parser {
 
 	public static class AttributeNamedArgContext extends ParserRuleContext {
 		public TerminalNode VarName() { return getToken(PhpParser.VarName, 0); }
+		public TerminalNode DoubleArrow() { return getToken(PhpParser.DoubleArrow, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -2775,6 +2841,7 @@ public class PhpParser extends Parser {
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public BlockStatementContext blockStatement() {
 			return getRuleContext(BlockStatementContext.class,0);
 		}
@@ -2805,6 +2872,7 @@ public class PhpParser extends Parser {
 		public YieldExpressionContext yieldExpression() {
 			return getRuleContext(YieldExpressionContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public GlobalStatementContext globalStatement() {
 			return getRuleContext(GlobalStatementContext.class,0);
 		}
@@ -3046,6 +3114,7 @@ public class PhpParser extends Parser {
 	}
 
 	public static class EmptyStatementContext extends ParserRuleContext {
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public EmptyStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3091,6 +3160,7 @@ public class PhpParser extends Parser {
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public BlockStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3152,10 +3222,12 @@ public class PhpParser extends Parser {
 		public ElseStatementContext elseStatement() {
 			return getRuleContext(ElseStatementContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
 		public TerminalNode EndIf() { return getToken(PhpParser.EndIf, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public List<ElseIfColonStatementContext> elseIfColonStatement() {
 			return getRuleContexts(ElseIfColonStatementContext.class);
 		}
@@ -3341,6 +3413,7 @@ public class PhpParser extends Parser {
 		public ParenthesisContext parenthesis() {
 			return getRuleContext(ParenthesisContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
@@ -3439,6 +3512,7 @@ public class PhpParser extends Parser {
 
 	public static class ElseColonStatementContext extends ParserRuleContext {
 		public TerminalNode Else() { return getToken(PhpParser.Else, 0); }
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
@@ -3494,10 +3568,12 @@ public class PhpParser extends Parser {
 		public StatementContext statement() {
 			return getRuleContext(StatementContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
 		public TerminalNode EndWhile() { return getToken(PhpParser.EndWhile, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public WhileStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3728,6 +3804,7 @@ public class PhpParser extends Parser {
 		public ParenthesisContext parenthesis() {
 			return getRuleContext(ParenthesisContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public DoWhileStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -3778,9 +3855,16 @@ public class PhpParser extends Parser {
 
 	public static class ForStatementContext extends ParserRuleContext {
 		public TerminalNode For() { return getToken(PhpParser.For, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
+		public List<TerminalNode> SemiColon() { return getTokens(PhpParser.SemiColon); }
+		public TerminalNode SemiColon(int i) {
+			return getToken(PhpParser.SemiColon, i);
+		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public StatementContext statement() {
 			return getRuleContext(StatementContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
@@ -4146,7 +4230,13 @@ public class PhpParser extends Parser {
 			return getRuleContext(ParenthesisContext.class,0);
 		}
 		public TerminalNode OpenCurlyBracket() { return getToken(PhpParser.OpenCurlyBracket, 0); }
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public TerminalNode EndSwitch() { return getToken(PhpParser.EndSwitch, 0); }
+		public List<TerminalNode> SemiColon() { return getTokens(PhpParser.SemiColon); }
+		public TerminalNode SemiColon(int i) {
+			return getToken(PhpParser.SemiColon, i);
+		}
 		public List<SwitchBlockContext> switchBlock() {
 			return getRuleContexts(SwitchBlockContext.class);
 		}
@@ -4272,6 +4362,14 @@ public class PhpParser extends Parser {
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
+		public List<TerminalNode> Colon() { return getTokens(PhpParser.Colon); }
+		public TerminalNode Colon(int i) {
+			return getToken(PhpParser.Colon, i);
+		}
+		public List<TerminalNode> SemiColon() { return getTokens(PhpParser.SemiColon); }
+		public TerminalNode SemiColon(int i) {
+			return getToken(PhpParser.SemiColon, i);
+		}
 		public List<TerminalNode> Case() { return getTokens(PhpParser.Case); }
 		public TerminalNode Case(int i) {
 			return getToken(PhpParser.Case, i);
@@ -4378,6 +4476,7 @@ public class PhpParser extends Parser {
 
 	public static class BreakStatementContext extends ParserRuleContext {
 		public TerminalNode Break() { return getToken(PhpParser.Break, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -4436,6 +4535,7 @@ public class PhpParser extends Parser {
 
 	public static class ContinueStatementContext extends ParserRuleContext {
 		public TerminalNode Continue() { return getToken(PhpParser.Continue, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -4494,6 +4594,7 @@ public class PhpParser extends Parser {
 
 	public static class ReturnStatementContext extends ParserRuleContext {
 		public TerminalNode Return() { return getToken(PhpParser.Return, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -4554,6 +4655,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ExpressionStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -4598,9 +4700,12 @@ public class PhpParser extends Parser {
 
 	public static class UnsetStatementContext extends ParserRuleContext {
 		public TerminalNode Unset() { return getToken(PhpParser.Unset, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public ChainListContext chainList() {
 			return getRuleContext(ChainListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public UnsetStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -4651,6 +4756,10 @@ public class PhpParser extends Parser {
 
 	public static class ForeachStatementContext extends ParserRuleContext {
 		public TerminalNode Foreach() { return getToken(PhpParser.Foreach, 0); }
+		public List<TerminalNode> OpenRoundBracket() { return getTokens(PhpParser.OpenRoundBracket); }
+		public TerminalNode OpenRoundBracket(int i) {
+			return getToken(PhpParser.OpenRoundBracket, i);
+		}
 		public List<ChainContext> chain() {
 			return getRuleContexts(ChainContext.class);
 		}
@@ -4658,6 +4767,10 @@ public class PhpParser extends Parser {
 			return getRuleContext(ChainContext.class,i);
 		}
 		public TerminalNode As() { return getToken(PhpParser.As, 0); }
+		public List<TerminalNode> CloseRoundBracket() { return getTokens(PhpParser.CloseRoundBracket); }
+		public TerminalNode CloseRoundBracket(int i) {
+			return getToken(PhpParser.CloseRoundBracket, i);
+		}
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -4668,10 +4781,17 @@ public class PhpParser extends Parser {
 		public StatementContext statement() {
 			return getRuleContext(StatementContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
 		public TerminalNode EndForeach() { return getToken(PhpParser.EndForeach, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
+		public List<TerminalNode> Ampersand() { return getTokens(PhpParser.Ampersand); }
+		public TerminalNode Ampersand(int i) {
+			return getToken(PhpParser.Ampersand, i);
+		}
+		public TerminalNode DoubleArrow() { return getToken(PhpParser.DoubleArrow, 0); }
 		public ForeachStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5116,10 +5236,12 @@ public class PhpParser extends Parser {
 
 	public static class CatchClauseContext extends ParserRuleContext {
 		public TerminalNode Catch() { return getToken(PhpParser.Catch, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public QualifiedStaticTypeRefContext qualifiedStaticTypeRef() {
 			return getRuleContext(QualifiedStaticTypeRefContext.class,0);
 		}
 		public TerminalNode VarName() { return getToken(PhpParser.VarName, 0); }
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public BlockStatementContext blockStatement() {
 			return getRuleContext(BlockStatementContext.class,0);
 		}
@@ -5225,6 +5347,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public ThrowStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5274,6 +5397,7 @@ public class PhpParser extends Parser {
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public GotoStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5320,16 +5444,20 @@ public class PhpParser extends Parser {
 
 	public static class DeclareStatementContext extends ParserRuleContext {
 		public TerminalNode Declare() { return getToken(PhpParser.Declare, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public DeclareListContext declareList() {
 			return getRuleContext(DeclareListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public StatementContext statement() {
 			return getRuleContext(StatementContext.class,0);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public InnerStatementListContext innerStatementList() {
 			return getRuleContext(InnerStatementListContext.class,0);
 		}
 		public TerminalNode EndDeclare() { return getToken(PhpParser.EndDeclare, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public DeclareStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5710,6 +5838,10 @@ public class PhpParser extends Parser {
 		public IdentifierInititalizerContext identifierInititalizer(int i) {
 			return getRuleContext(IdentifierInititalizerContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public DeclareListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5773,6 +5905,10 @@ public class PhpParser extends Parser {
 		}
 		public FormalParameterContext formalParameter(int i) {
 			return getRuleContext(FormalParameterContext.class,i);
+		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public FormalParameterListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -5849,6 +5985,8 @@ public class PhpParser extends Parser {
 		public TypeHintContext typeHint() {
 			return getRuleContext(TypeHintContext.class,0);
 		}
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
+		public TerminalNode Ellipsis() { return getToken(PhpParser.Ellipsis, 0); }
 		public FormalParameterContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -5998,6 +6136,11 @@ public class PhpParser extends Parser {
 		public GlobalVarContext globalVar(int i) {
 			return getRuleContext(GlobalVarContext.class,i);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public GlobalStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6069,6 +6212,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public GlobalVarContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6142,6 +6286,7 @@ public class PhpParser extends Parser {
 		public ExpressionListContext expressionList() {
 			return getRuleContext(ExpressionListContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public EchoStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6193,6 +6338,11 @@ public class PhpParser extends Parser {
 		}
 		public VariableInitializerContext variableInitializer(int i) {
 			return getRuleContext(VariableInitializerContext.class,i);
+		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public StaticVariableStatementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -6268,6 +6418,11 @@ public class PhpParser extends Parser {
 		public VariableInitializerContext variableInitializer(int i) {
 			return getRuleContext(VariableInitializerContext.class,i);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public TerminalNode Const() { return getToken(PhpParser.Const, 0); }
 		public List<IdentifierInititalizerContext> identifierInititalizer() {
 			return getRuleContexts(IdentifierInititalizerContext.class);
@@ -6279,15 +6434,18 @@ public class PhpParser extends Parser {
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public FormalParameterListContext formalParameterList() {
 			return getRuleContext(FormalParameterListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public MethodBodyContext methodBody() {
 			return getRuleContext(MethodBodyContext.class,0);
 		}
 		public MemberModifiersContext memberModifiers() {
 			return getRuleContext(MemberModifiersContext.class,0);
 		}
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public TypeParameterListInBracketsContext typeParameterListInBrackets() {
 			return getRuleContext(TypeParameterListInBracketsContext.class,0);
 		}
@@ -6470,7 +6628,9 @@ public class PhpParser extends Parser {
 	}
 
 	public static class TraitAdaptationsContext extends ParserRuleContext {
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public TerminalNode OpenCurlyBracket() { return getToken(PhpParser.OpenCurlyBracket, 0); }
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public List<TraitAdaptationStatementContext> traitAdaptationStatement() {
 			return getRuleContexts(TraitAdaptationStatementContext.class);
 		}
@@ -6613,6 +6773,7 @@ public class PhpParser extends Parser {
 		public QualifiedNamespaceNameContext qualifiedNamespaceName() {
 			return getRuleContext(QualifiedNamespaceNameContext.class,0);
 		}
+		public TerminalNode DoubleColon() { return getToken(PhpParser.DoubleColon, 0); }
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
@@ -6620,6 +6781,7 @@ public class PhpParser extends Parser {
 		public QualifiedNamespaceNameListContext qualifiedNamespaceNameList() {
 			return getRuleContext(QualifiedNamespaceNameListContext.class,0);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public TraitPrecedenceContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6675,6 +6837,7 @@ public class PhpParser extends Parser {
 			return getRuleContext(TraitMethodReferenceContext.class,0);
 		}
 		public TerminalNode As() { return getToken(PhpParser.As, 0); }
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public MemberModifierContext memberModifier() {
 			return getRuleContext(MemberModifierContext.class,0);
 		}
@@ -6758,6 +6921,7 @@ public class PhpParser extends Parser {
 		public QualifiedNamespaceNameContext qualifiedNamespaceName() {
 			return getRuleContext(QualifiedNamespaceNameContext.class,0);
 		}
+		public TerminalNode DoubleColon() { return getToken(PhpParser.DoubleColon, 0); }
 		public TraitMethodReferenceContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -6811,6 +6975,7 @@ public class PhpParser extends Parser {
 	}
 
 	public static class BaseCtorCallContext extends ParserRuleContext {
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public IdentifierContext identifier() {
 			return getRuleContext(IdentifierContext.class,0);
 		}
@@ -6862,6 +7027,7 @@ public class PhpParser extends Parser {
 	}
 
 	public static class MethodBodyContext extends ParserRuleContext {
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
 		public BlockStatementContext blockStatement() {
 			return getRuleContext(BlockStatementContext.class,0);
 		}
@@ -7167,6 +7333,11 @@ public class PhpParser extends Parser {
 		public IdentifierInititalizerContext identifierInititalizer(int i) {
 			return getRuleContext(IdentifierInititalizerContext.class,i);
 		}
+		public TerminalNode SemiColon() { return getToken(PhpParser.SemiColon, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public GlobalConstantDeclarationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -7237,6 +7408,10 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public ExpressionListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -7295,6 +7470,8 @@ public class PhpParser extends Parser {
 	}
 
 	public static class ParenthesisContext extends ParserRuleContext {
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -7393,6 +7570,11 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode Tilde() { return getToken(PhpParser.Tilde, 0); }
+		public TerminalNode SuppressWarnings() { return getToken(PhpParser.SuppressWarnings, 0); }
+		public TerminalNode Bang() { return getToken(PhpParser.Bang, 0); }
+		public TerminalNode Plus() { return getToken(PhpParser.Plus, 0); }
+		public TerminalNode Minus() { return getToken(PhpParser.Minus, 0); }
 		public UnaryOperatorExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -7411,9 +7593,11 @@ public class PhpParser extends Parser {
 	public static class SpecialWordExpressionContext extends ExpressionContext {
 		public TerminalNode Yield() { return getToken(PhpParser.Yield, 0); }
 		public TerminalNode List() { return getToken(PhpParser.List, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public AssignmentListContext assignmentList() {
 			return getRuleContext(AssignmentListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public TerminalNode Eq() { return getToken(PhpParser.Eq, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
@@ -7448,6 +7632,16 @@ public class PhpParser extends Parser {
 	}
 	public static class ArrayCreationExpressionContext extends ExpressionContext {
 		public TerminalNode Array() { return getToken(PhpParser.Array, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
+		public List<TerminalNode> OpenSquareBracket() { return getTokens(PhpParser.OpenSquareBracket); }
+		public TerminalNode OpenSquareBracket(int i) {
+			return getToken(PhpParser.OpenSquareBracket, i);
+		}
+		public List<TerminalNode> CloseSquareBracket() { return getTokens(PhpParser.CloseSquareBracket); }
+		public TerminalNode CloseSquareBracket(int i) {
+			return getToken(PhpParser.CloseSquareBracket, i);
+		}
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -7532,6 +7726,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode Colon() { return getToken(PhpParser.Colon, 0); }
 		public TerminalNode QuestionMark() { return getToken(PhpParser.QuestionMark, 0); }
 		public ConditionalExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
@@ -7556,7 +7751,13 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode Pow() { return getToken(PhpParser.Pow, 0); }
+		public TerminalNode Asterisk() { return getToken(PhpParser.Asterisk, 0); }
 		public TerminalNode Divide() { return getToken(PhpParser.Divide, 0); }
+		public TerminalNode Percent() { return getToken(PhpParser.Percent, 0); }
+		public TerminalNode Plus() { return getToken(PhpParser.Plus, 0); }
+		public TerminalNode Minus() { return getToken(PhpParser.Minus, 0); }
+		public TerminalNode Dot() { return getToken(PhpParser.Dot, 0); }
 		public ArithmeticExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -7576,9 +7777,11 @@ public class PhpParser extends Parser {
 		public StringConstantContext stringConstant() {
 			return getRuleContext(StringConstantContext.class,0);
 		}
+		public TerminalNode OpenSquareBracket() { return getToken(PhpParser.OpenSquareBracket, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode CloseSquareBracket() { return getToken(PhpParser.CloseSquareBracket, 0); }
 		public IndexerExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -7621,6 +7824,8 @@ public class PhpParser extends Parser {
 		public ChainContext chain() {
 			return getRuleContext(ChainContext.class,0);
 		}
+		public TerminalNode Inc() { return getToken(PhpParser.Inc, 0); }
+		public TerminalNode Dec() { return getToken(PhpParser.Dec, 0); }
 		public PrefixIncDecExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -7644,8 +7849,15 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode ShiftLeft() { return getToken(PhpParser.ShiftLeft, 0); }
+		public TerminalNode ShiftRight() { return getToken(PhpParser.ShiftRight, 0); }
 		public TerminalNode Less() { return getToken(PhpParser.Less, 0); }
+		public TerminalNode IsSmallerOrEqual() { return getToken(PhpParser.IsSmallerOrEqual, 0); }
 		public TerminalNode Greater() { return getToken(PhpParser.Greater, 0); }
+		public TerminalNode IsGreaterOrEqual() { return getToken(PhpParser.IsGreaterOrEqual, 0); }
+		public TerminalNode IsIdentical() { return getToken(PhpParser.IsIdentical, 0); }
+		public TerminalNode IsNoidentical() { return getToken(PhpParser.IsNoidentical, 0); }
+		public TerminalNode IsEqual() { return getToken(PhpParser.IsEqual, 0); }
 		public TerminalNode IsNotEq() { return getToken(PhpParser.IsNotEq, 0); }
 		public ComparisonExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
@@ -7722,6 +7934,7 @@ public class PhpParser extends Parser {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public TerminalNode Eq() { return getToken(PhpParser.Eq, 0); }
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public NewExprContext newExpr() {
 			return getRuleContext(NewExprContext.class,0);
 		}
@@ -7744,6 +7957,8 @@ public class PhpParser extends Parser {
 		public ChainContext chain() {
 			return getRuleContext(ChainContext.class,0);
 		}
+		public TerminalNode Inc() { return getToken(PhpParser.Inc, 0); }
+		public TerminalNode Dec() { return getToken(PhpParser.Dec, 0); }
 		public PostfixIncDecExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -7783,9 +7998,11 @@ public class PhpParser extends Parser {
 		}
 	}
 	public static class CastExpressionContext extends ExpressionContext {
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public CastOperationContext castOperation() {
 			return getRuleContext(CastOperationContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
@@ -7829,13 +8046,16 @@ public class PhpParser extends Parser {
 	}
 	public static class LambdaFunctionExpressionContext extends ExpressionContext {
 		public TerminalNode Function() { return getToken(PhpParser.Function, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public FormalParameterListContext formalParameterList() {
 			return getRuleContext(FormalParameterListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public BlockStatementContext blockStatement() {
 			return getRuleContext(BlockStatementContext.class,0);
 		}
 		public TerminalNode Static() { return getToken(PhpParser.Static, 0); }
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public LambdaFunctionUseVarsContext lambdaFunctionUseVars() {
 			return getRuleContext(LambdaFunctionUseVarsContext.class,0);
 		}
@@ -7862,6 +8082,11 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
+		public TerminalNode Caret() { return getToken(PhpParser.Caret, 0); }
+		public TerminalNode Pipe() { return getToken(PhpParser.Pipe, 0); }
+		public TerminalNode BooleanAnd() { return getToken(PhpParser.BooleanAnd, 0); }
+		public TerminalNode BooleanOr() { return getToken(PhpParser.BooleanOr, 0); }
 		public BitwiseExpressionContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -8745,6 +8970,18 @@ public class PhpParser extends Parser {
 
 	public static class AssignmentOperatorContext extends ParserRuleContext {
 		public TerminalNode Eq() { return getToken(PhpParser.Eq, 0); }
+		public TerminalNode PlusEqual() { return getToken(PhpParser.PlusEqual, 0); }
+		public TerminalNode MinusEqual() { return getToken(PhpParser.MinusEqual, 0); }
+		public TerminalNode MulEqual() { return getToken(PhpParser.MulEqual, 0); }
+		public TerminalNode PowEqual() { return getToken(PhpParser.PowEqual, 0); }
+		public TerminalNode DivEqual() { return getToken(PhpParser.DivEqual, 0); }
+		public TerminalNode Concaequal() { return getToken(PhpParser.Concaequal, 0); }
+		public TerminalNode ModEqual() { return getToken(PhpParser.ModEqual, 0); }
+		public TerminalNode AndEqual() { return getToken(PhpParser.AndEqual, 0); }
+		public TerminalNode OrEqual() { return getToken(PhpParser.OrEqual, 0); }
+		public TerminalNode XorEqual() { return getToken(PhpParser.XorEqual, 0); }
+		public TerminalNode ShiftLeftEqual() { return getToken(PhpParser.ShiftLeftEqual, 0); }
+		public TerminalNode ShiftRightEqual() { return getToken(PhpParser.ShiftRightEqual, 0); }
 		public AssignmentOperatorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -8802,6 +9039,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode DoubleArrow() { return getToken(PhpParser.DoubleArrow, 0); }
 		public YieldExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -8863,6 +9101,10 @@ public class PhpParser extends Parser {
 		}
 		public ArrayItemContext arrayItem(int i) {
 			return getRuleContext(ArrayItemContext.class,i);
+		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public ArrayItemListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -8941,6 +9183,8 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
+		public TerminalNode DoubleArrow() { return getToken(PhpParser.DoubleArrow, 0); }
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public ChainContext chain() {
 			return getRuleContext(ChainContext.class,0);
 		}
@@ -9026,11 +9270,17 @@ public class PhpParser extends Parser {
 
 	public static class LambdaFunctionUseVarsContext extends ParserRuleContext {
 		public TerminalNode Use() { return getToken(PhpParser.Use, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public List<LambdaFunctionUseVarContext> lambdaFunctionUseVar() {
 			return getRuleContexts(LambdaFunctionUseVarContext.class);
 		}
 		public LambdaFunctionUseVarContext lambdaFunctionUseVar(int i) {
 			return getRuleContext(LambdaFunctionUseVarContext.class,i);
+		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public LambdaFunctionUseVarsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -9097,6 +9347,7 @@ public class PhpParser extends Parser {
 
 	public static class LambdaFunctionUseVarContext extends ParserRuleContext {
 		public TerminalNode VarName() { return getToken(PhpParser.VarName, 0); }
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public LambdaFunctionUseVarContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -9322,6 +9573,10 @@ public class PhpParser extends Parser {
 		public ChainBaseContext chainBase() {
 			return getRuleContext(ChainBaseContext.class,0);
 		}
+		public List<TerminalNode> ObjectOperator() { return getTokens(PhpParser.ObjectOperator); }
+		public TerminalNode ObjectOperator(int i) {
+			return getToken(PhpParser.ObjectOperator, i);
+		}
 		public List<KeyedFieldNameContext> keyedFieldName() {
 			return getRuleContexts(KeyedFieldNameContext.class);
 		}
@@ -9392,6 +9647,7 @@ public class PhpParser extends Parser {
 			return getRuleContext(NamespaceNameListContext.class,0);
 		}
 		public TerminalNode Namespace() { return getToken(PhpParser.Namespace, 0); }
+		public TerminalNode NamespaceSeparator() { return getToken(PhpParser.NamespaceSeparator, 0); }
 		public QualifiedNamespaceNameContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -9460,6 +9716,10 @@ public class PhpParser extends Parser {
 		public IdentifierContext identifier(int i) {
 			return getRuleContext(IdentifierContext.class,i);
 		}
+		public List<TerminalNode> NamespaceSeparator() { return getTokens(PhpParser.NamespaceSeparator); }
+		public TerminalNode NamespaceSeparator(int i) {
+			return getToken(PhpParser.NamespaceSeparator, i);
+		}
 		public NamespaceNameListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -9526,6 +9786,10 @@ public class PhpParser extends Parser {
 		public QualifiedNamespaceNameContext qualifiedNamespaceName(int i) {
 			return getRuleContext(QualifiedNamespaceNameContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public QualifiedNamespaceNameListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -9584,6 +9848,8 @@ public class PhpParser extends Parser {
 	}
 
 	public static class ArgumentsContext extends ParserRuleContext {
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public List<ActualArgumentContext> actualArgument() {
 			return getRuleContexts(ActualArgumentContext.class);
 		}
@@ -9592,6 +9858,10 @@ public class PhpParser extends Parser {
 		}
 		public YieldExpressionContext yieldExpression() {
 			return getRuleContext(YieldExpressionContext.class,0);
+		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
 		}
 		public ArgumentsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -9672,6 +9942,8 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode Ellipsis() { return getToken(PhpParser.Ellipsis, 0); }
+		public TerminalNode Ampersand() { return getToken(PhpParser.Ampersand, 0); }
 		public ChainContext chain() {
 			return getRuleContext(ChainContext.class,0);
 		}
@@ -9883,12 +10155,19 @@ public class PhpParser extends Parser {
 			return getRuleContext(StringContext.class,0);
 		}
 		public TerminalNode Array() { return getToken(PhpParser.Array, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public ConstantArrayItemListContext constantArrayItemList() {
 			return getRuleContext(ConstantArrayItemListContext.class,0);
 		}
+		public TerminalNode Comma() { return getToken(PhpParser.Comma, 0); }
+		public TerminalNode OpenSquareBracket() { return getToken(PhpParser.OpenSquareBracket, 0); }
+		public TerminalNode CloseSquareBracket() { return getToken(PhpParser.CloseSquareBracket, 0); }
 		public ConstantInititalizerContext constantInititalizer() {
 			return getRuleContext(ConstantInititalizerContext.class,0);
 		}
+		public TerminalNode Plus() { return getToken(PhpParser.Plus, 0); }
+		public TerminalNode Minus() { return getToken(PhpParser.Minus, 0); }
 		public ConstantInititalizerContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -10027,6 +10306,10 @@ public class PhpParser extends Parser {
 		public ConstantArrayItemContext constantArrayItem(int i) {
 			return getRuleContext(ConstantArrayItemContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public ConstantArrayItemListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -10093,6 +10376,7 @@ public class PhpParser extends Parser {
 		public ConstantInititalizerContext constantInititalizer(int i) {
 			return getRuleContext(ConstantInititalizerContext.class,i);
 		}
+		public TerminalNode DoubleArrow() { return getToken(PhpParser.DoubleArrow, 0); }
 		public ConstantArrayItemContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -10370,6 +10654,7 @@ public class PhpParser extends Parser {
 	}
 
 	public static class ClassConstantContext extends ParserRuleContext {
+		public TerminalNode DoubleColon() { return getToken(PhpParser.DoubleColon, 0); }
 		public TerminalNode Class() { return getToken(PhpParser.Class, 0); }
 		public TerminalNode Parent_() { return getToken(PhpParser.Parent_, 0); }
 		public IdentifierContext identifier() {
@@ -10974,6 +11259,10 @@ public class PhpParser extends Parser {
 		public ChainContext chain(int i) {
 			return getRuleContext(ChainContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public ChainListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -11038,9 +11327,11 @@ public class PhpParser extends Parser {
 		public FunctionCallContext functionCall() {
 			return getRuleContext(FunctionCallContext.class,0);
 		}
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public NewExprContext newExpr() {
 			return getRuleContext(NewExprContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public List<MemberAccessContext> memberAccess() {
 			return getRuleContexts(MemberAccessContext.class);
 		}
@@ -11129,6 +11420,7 @@ public class PhpParser extends Parser {
 	}
 
 	public static class MemberAccessContext extends ParserRuleContext {
+		public TerminalNode ObjectOperator() { return getToken(PhpParser.ObjectOperator, 0); }
 		public KeyedFieldNameContext keyedFieldName() {
 			return getRuleContext(KeyedFieldNameContext.class,0);
 		}
@@ -11394,6 +11686,7 @@ public class PhpParser extends Parser {
 		public KeyedVariableContext keyedVariable(int i) {
 			return getRuleContext(KeyedVariableContext.class,i);
 		}
+		public TerminalNode DoubleColon() { return getToken(PhpParser.DoubleColon, 0); }
 		public QualifiedStaticTypeRefContext qualifiedStaticTypeRef() {
 			return getRuleContext(QualifiedStaticTypeRefContext.class,0);
 		}
@@ -11760,6 +12053,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public List<SquareCurlyExpressionContext> squareCurlyExpression() {
 			return getRuleContexts(SquareCurlyExpressionContext.class);
 		}
@@ -11962,6 +12256,7 @@ public class PhpParser extends Parser {
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public List<SquareCurlyExpressionContext> squareCurlyExpression() {
 			return getRuleContexts(SquareCurlyExpressionContext.class);
 		}
@@ -12064,10 +12359,13 @@ public class PhpParser extends Parser {
 	}
 
 	public static class SquareCurlyExpressionContext extends ParserRuleContext {
+		public TerminalNode OpenSquareBracket() { return getToken(PhpParser.OpenSquareBracket, 0); }
+		public TerminalNode CloseSquareBracket() { return getToken(PhpParser.CloseSquareBracket, 0); }
 		public ExpressionContext expression() {
 			return getRuleContext(ExpressionContext.class,0);
 		}
 		public TerminalNode OpenCurlyBracket() { return getToken(PhpParser.OpenCurlyBracket, 0); }
+		public TerminalNode CloseCurlyBracket() { return getToken(PhpParser.CloseCurlyBracket, 0); }
 		public SquareCurlyExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -12147,6 +12445,10 @@ public class PhpParser extends Parser {
 		public AssignmentListElementContext assignmentListElement(int i) {
 			return getRuleContext(AssignmentListElementContext.class,i);
 		}
+		public List<TerminalNode> Comma() { return getTokens(PhpParser.Comma); }
+		public TerminalNode Comma(int i) {
+			return getToken(PhpParser.Comma, i);
+		}
 		public AssignmentListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -12225,9 +12527,11 @@ public class PhpParser extends Parser {
 			return getRuleContext(ChainContext.class,0);
 		}
 		public TerminalNode List() { return getToken(PhpParser.List, 0); }
+		public TerminalNode OpenRoundBracket() { return getToken(PhpParser.OpenRoundBracket, 0); }
 		public AssignmentListContext assignmentList() {
 			return getRuleContext(AssignmentListContext.class,0);
 		}
+		public TerminalNode CloseRoundBracket() { return getToken(PhpParser.CloseRoundBracket, 0); }
 		public AssignmentListElementContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}

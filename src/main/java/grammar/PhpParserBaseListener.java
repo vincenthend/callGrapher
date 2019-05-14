@@ -1,4 +1,4 @@
-package grammar;// Generated from PhpParser.g4 by ANTLR 4.7.1
+package grammar;// Generated from E:\antlr\src\main\antlr4\PhpParser.g4 by ANTLR 4.7.2
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;

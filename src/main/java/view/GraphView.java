@@ -27,6 +27,10 @@ public class GraphView {
     graph = cfgd.getTree();
   }
 
+  public GraphView(Graph graph) {
+    this.graph = graph;
+  }
+
   public void show() {
     Logger.info("Drawing graphs");
     JFrame jFrame = new JFrame();

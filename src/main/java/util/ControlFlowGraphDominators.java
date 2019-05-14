@@ -8,6 +8,7 @@ import org.jgrapht.alg.lca.BinaryLiftingLCAFinder;
 import org.jgrapht.alg.lca.TarjanLCAFinder;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
+import view.GraphView;
 
 import java.util.*;
 
