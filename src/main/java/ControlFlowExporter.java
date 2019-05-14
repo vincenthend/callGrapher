@@ -5,14 +5,15 @@ import com.mxgraph.util.mxConstants;
 import com.mxgraph.util.mxRectangle;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 import javax.imageio.ImageIO;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import logger.Logger;
 import model.graph.ControlFlowEdge;
 import model.graph.block.statement.PhpStatement;
@@ -86,6 +87,27 @@ public class ControlFlowExporter {
       fileWriter.close();
       Logger.info("Graph exported succesfully");
     } catch (Exception e){
+      e.printStackTrace();
+    }
+  }
+
+  public static void exportGVImage(Graph graph, String path, String name, String format){
+    Logger.info("Exporting graph, please wait...");
+    ComponentNameProvider<Object> vertexIdProvider = p -> p.getClass().getSimpleName()+"xx"+System.identityHashCode(p);
+    ComponentNameProvider<Object> vertexLabelProvider = phpStatement -> phpStatement.toString().replace("\\","\\\\").replace("\n","\\n");
+    GraphExporter<Object, DefaultEdge> exporter = new DOTExporter<Object, DefaultEdge>(vertexIdProvider, vertexLabelProvider, null);
+    try {
+      ProcessBuilder builder = new ProcessBuilder("dot","-T"+format);
+      builder.directory(new File(path));
+      builder.redirectOutput(new File(path+name+"."+format));
+      Process process = builder.start();
+
+      OutputStream stdin = process.getOutputStream();
+
+      BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(stdin));
+      exporter.exportGraph(graph, bufferedWriter);
+      Logger.info("Graph exported succesfully");
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }

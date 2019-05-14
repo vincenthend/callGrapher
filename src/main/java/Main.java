@@ -12,9 +12,9 @@ import view.GraphView;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-//    diffCommit();
+    diffCommit();
 //    diffGraph();
-    drawGraph();
+//    drawGraph();
   }
 
   public static void diffCommit() throws Exception{
@@ -70,9 +70,9 @@ public class Main {
     GraphView view = new GraphView(diffGraph);
     view.show();
 
-    ControlFlowExporter.exportDot(cfgOld.getGraph(), "D:\\cfg\\","9-graphVul");
-    ControlFlowExporter.exportDot(cfgNew.getGraph(), "D:\\cfg\\","9-graphNonvul");
-    ControlFlowExporter.exportDot(new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph).getGraph(), "D:\\cfg\\","9-graphDiff");
+    ControlFlowExporter.exportGVImage(cfgOld.getGraph(), "D:\\cfg\\","09-graphVul","svg");
+    ControlFlowExporter.exportGVImage(cfgNew.getGraph(), "D:\\cfg\\","09-graphNonvul","svg");
+    ControlFlowExporter.exportGVImage(new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph).getGraph(), "D:\\cfg\\","9-graphDiff","svg");
   }
 
   public static void diffGraph(){
