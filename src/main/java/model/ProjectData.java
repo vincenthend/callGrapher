@@ -81,7 +81,7 @@ public class ProjectData {
     return controlFlowGraph;
   }
 
-  public void normalizeFunctions(){
+  public void normalizeFunction(){
     for (PhpFunction phpFunction : functionMap.values()){
       try {
         Logger.info("Normalizing "+phpFunction.getCalledName());
@@ -95,25 +95,30 @@ public class ProjectData {
     }
   }
 
-  public void normalizeFunctions(List<String> functionNames){
+  public void normalizeFunction(List<String> functionNames){
     for (String functionName : functionNames){
-      try {
-        PhpFunction function = getFunction(functionName);
-        if(function != null){
-          Logger.info("Normalizing " + function.getCalledName());
-          PhpFunction normalizedFunc = function.clone();
-          ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
-          normalizer.normalize(normalizedFunc);
-          normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
-        } else {
-          throw new IllegalStateException();
-        }
-      } catch (CloneNotSupportedException e) {
-        Logger.error("Failed to clone");
-      } catch (IllegalStateException ex){
-        System.out.println("Function "+functionName+"doesn't exist");
-        normalizedFunctions.put(functionName, null);
+      normalizeFunction(functionName);
+    }
+  }
+
+  public void normalizeFunction(String functionName){
+    try {
+      PhpFunction function = getFunction(functionName);
+      if(function != null){
+        Logger.info("Normalizing " + function.getCalledName());
+        PhpFunction normalizedFunc = function.clone();
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
+        normalizer.normalize(normalizedFunc);
+        normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
+      } else {
+        throw new IllegalStateException();
       }
+    } catch (CloneNotSupportedException e) {
+      Logger.error("Failed to clone");
+    } catch (IllegalStateException ex){
+      System.out.println("Function "+functionName+"doesn't exist");
+      normalizedFunctions.put(functionName, null);
+      throw new IllegalStateException();
     }
   }
 }

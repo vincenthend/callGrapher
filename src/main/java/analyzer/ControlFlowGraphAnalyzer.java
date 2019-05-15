@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 public class ControlFlowGraphAnalyzer {
-  private boolean normalized = false;
   private ProjectData projectData;
 
   private List<File> listFilesForFolder(final File file) {
@@ -89,45 +88,18 @@ public class ControlFlowGraphAnalyzer {
    * @param functionList function to be normalized, null to normalize all.
    */
   public void normalizeFunction(List<String> functionList){
-    normalized = true;
     // Normalize functions
     Logger.info("Normalizing functions");
     if(!functionList.isEmpty()) {
-      projectData.normalizeFunctions(functionList);
+      projectData.normalizeFunction(functionList);
     } else {
-      projectData.normalizeFunctions();
+      projectData.normalizeFunction();
     }
   }
 
-  // TODO : Deprecate later
-  /**
-   * Append list of functions to get combined control graph for display.
-   * @param shownFunction functions to be shown
-   * @return list of functions to be shown
-   */
-  public ControlFlowGraph getCombinedControlFlowGraph(List<String> shownFunction){
-    // Append graph for viewing
-    ControlFlowGraph cfg;
-    if(shownFunction.isEmpty()) {
-      if(normalized) {
-        cfg = projectData.getCombinedNormalizedControlFlowGraph();
-      } else {
-        cfg = projectData.getCombinedControlFlowGraph();
-      }
-    } else {
-      cfg = new ControlFlowGraph();
-      for (String functionName: shownFunction) {
-        PhpFunction phpFunction;
-        if(normalized) {
-          phpFunction = projectData.getNormalizedFunction(functionName);
-        } else {
-          phpFunction = projectData.getFunction(functionName);
-        }
-        Graphs.addGraph(cfg.getGraph(), phpFunction.getControlFlowGraph().getGraph());
-      }
-    }
-
-    return cfg;
+  public void normalizeFunction(String functionName){
+    Logger.info("Normalizing functions");
+    projectData.normalizeFunction(functionName);
   }
 
   public ProjectData getProjectData() {

@@ -2,10 +2,12 @@ package main;
 
 import analyzer.ControlFlowGraphAnalyzer;
 import logger.Logger;
+import model.DiffJobData;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
 import model.php.PhpFunction;
 import util.ControlFlowExporter;
+import util.DiffJobDataLoader;
 import util.builder.ControlFlowGraphDominators;
 import util.builder.ControlFlowGraphTranslator;
 import util.diff.ControlFlowGraphDiff;
@@ -19,75 +21,70 @@ import java.util.List;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    String root = "../repo/phpmyadmin/";
-    String[] hash = new String[2];
-    hash[0] = "63b7f6c0a94af5d7402c4f198846dc0c066f5413"; // Vulnerable Hash
-    hash[1] = "5e108a340f3eac6b6c488439343b6c1a7454787c"; // Unvulnerable Hash
-
-    List<String> file = new LinkedList<>();
-    file.add(root + "libraries/core.lib.php");
-
-    List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("PMA_safeUnserialize");
-
-    String[] options = new String[5]; // [View, ExportFormat, ExportPath, ID, Annotate]
-    options[0] = "diff";
-    options[1] = "svg";
-    options[2] = "D:/cfg/";
-    options[3] = "09";
-    options[4] = null;
-
-    diffCommit(root, hash, file, shownFunction, options);
-//    diffGraph();
-//    drawGraph();
+//    DiffJobData diffJobData = new DiffJobData(9);
+//    diffJobData.setRoot("../repo/phpmyadmin/");
+//    diffJobData.setVulHash("63b7f6c0a94af5d7402c4f198846dc0c066f5413");
+//    diffJobData.setUnvulHash("5e108a340f3eac6b6c488439343b6c1a7454787c");
+//    diffJobData.addFileList("libraries/core.lib.php");
+//    diffJobData.setShownFunction("PMA_safeUnserialize");
+//
+//    diffJobData.getDiffJobOptions().setExportPath("D:\\cfg");
+    List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv");
+    Logger.info("Found " + jobList.size() + " job(s)");
+    for (DiffJobData diffJobData : jobList) {
+      Logger.info("Starting job with ID : " + diffJobData.getId());
+      diffCommit(diffJobData);
+    }
   }
 
-  public static void diffCommit(String root, String[] hash, List<String> fileList, List<String> shownFunction, String[] options) throws IOException, InterruptedException {
-    if (hash.length != 2 || options.length != 5) {
-      throw new IllegalArgumentException("Didn't supply required hash or options");
+  public static void diffCommit(DiffJobData diffJobData) throws IOException, InterruptedException {
+    if (diffJobData.getFileList().isEmpty()
+      || diffJobData.getRoot() == null
+      || diffJobData.getShownFunction() == null
+      || diffJobData.getUnvulHash() == null
+      || diffJobData.getVulHash() == null) {
+      throw new IllegalArgumentException("Incomplete job data");
     }
-    String vulHash = hash[0];
-    String unvulHash = hash[1];
 
     //
     // Analyze vulnerable code
     //
-    Logger.info("Root is set to" + root);
-    Logger.info("Checkout to vulnerable commit " + vulHash);
-    ProcessBuilder builder = new ProcessBuilder("git", "checkout", vulHash);
-    builder.directory(new File(root));
+    Logger.info("Root is set to " + diffJobData.getRoot());
+    Logger.info("Checkout to vulnerable commit " + diffJobData.getVulHash());
+    ProcessBuilder builder = new ProcessBuilder("git", "checkout", diffJobData.getVulHash());
+    builder.directory(new File(diffJobData.getRoot()));
     builder.start().waitFor();
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
-    analyzerOld.analyzeControlFlowGraph(fileList);
-    analyzerOld.normalizeFunction(shownFunction);
+    analyzerOld.analyzeControlFlowGraph(diffJobData.getFileList());
+    analyzerOld.normalizeFunction(diffJobData.getShownFunction());
 
-    PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0));
+    PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
     ControlFlowGraph cfgOld = null;
     if (oldFunc != null) {
-      cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+      cfgOld = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
     }
 
     //
     // Analyze non vulnerable code
     //
-    Logger.info("Checkout to unvulnerable commit " + unvulHash);
-    builder = new ProcessBuilder("git", "checkout", unvulHash);
-    builder.directory(new File(root));
+    Logger.info("Checkout to unvulnerable commit " + diffJobData.getUnvulHash());
+    builder = new ProcessBuilder("git", "checkout", diffJobData.getUnvulHash());
+    builder.directory(new File(diffJobData.getRoot()));
     builder.start().waitFor();
 
     ControlFlowGraphAnalyzer analyzerNew = new ControlFlowGraphAnalyzer();
-    analyzerNew.analyzeControlFlowGraph(fileList);
-    analyzerNew.normalizeFunction(shownFunction);
-    PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0));
+    analyzerNew.analyzeControlFlowGraph(diffJobData.getFileList());
+    analyzerNew.normalizeFunction(diffJobData.getShownFunction());
+    PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
     ControlFlowGraph cfgNew = null;
     if (newFunc != null) {
-      cfgNew = analyzerNew.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+      cfgNew = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
     }
 
     ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
     ControlFlowBlockGraph diffGraph;
-    if (options[4] == null) {
+    if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
       diffGraph = diff.diffGraph(cfgOld, cfgNew);
     } else {
       diffGraph = diff.diffGraphAnnotate(cfgOld, cfgNew);
@@ -97,7 +94,7 @@ public class Main {
     // UI Shown
     //
     GraphView view;
-    switch (options[0]) {
+    switch (diffJobData.getDiffJobOptions().getShownInterface()) {
       case "old":
         view = new GraphView(cfgOld);
         break;
@@ -129,14 +126,17 @@ public class Main {
     //
     //  Export Image
     //
-    String fileName = options[3] + "-";
-    if(cfgOld != null) {
-      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), options[2], fileName + "graphVul", options[1]);
+    String fileName = String.format("%03d", diffJobData.getId());
+    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
+    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
+    if (cfgOld != null) {
+      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
     }
-    if(cfgNew != null) {
-      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), options[2], fileName + "graphNonvul", options[1]);
+    if (cfgNew != null) {
+      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
     }
-    ControlFlowExporter.exportGVImage(new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph).getGraph(), options[2], fileName + "graphDiff", options[1]);
+    ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
+    ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
   }
 
   public static void diffGraph() {
