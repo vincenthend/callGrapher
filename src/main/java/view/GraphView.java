@@ -8,7 +8,7 @@ import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
-import util.ControlFlowGraphDominators;
+import util.builder.ControlFlowGraphDominators;
 
 import javax.swing.*;
 

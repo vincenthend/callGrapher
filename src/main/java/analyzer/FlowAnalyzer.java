@@ -1,7 +1,6 @@
 package analyzer;
 
 import grammar.PhpLexer;
-import grammar.PhpMethodParserVisitor;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -40,12 +39,11 @@ public class FlowAnalyzer {
   }
 
   public void analyzeAll() {
-    Set<PhpFunction> funcSet = new TreeSet<PhpFunction>(projectData.getFunctionMap().values());
+    Set<PhpFunction> funcSet = new TreeSet<>(projectData.getFunctionMap().values());
     for (PhpFunction f : funcSet) {
       try {
         analyze(f);
       } catch (Exception e){
-        e.printStackTrace();
         Logger.error("Fail to parse "+f);
       }
     }

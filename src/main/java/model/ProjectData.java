@@ -5,7 +5,7 @@ import model.graph.ControlFlowGraph;
 import model.php.PhpClass;
 import model.php.PhpFunction;
 import org.jgrapht.Graphs;
-import util.ControlFlowNormalizer;
+import util.builder.ControlFlowNormalizer;
 
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +90,7 @@ public class ProjectData {
         normalizer.normalize(phpFunction);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } catch (CloneNotSupportedException e) {
-        e.printStackTrace();
+        Logger.error("Failed to normalize "+phpFunction.getCalledName());
       }
     }
   }
@@ -109,7 +109,7 @@ public class ProjectData {
           throw new IllegalStateException();
         }
       } catch (CloneNotSupportedException e) {
-        e.printStackTrace();
+        Logger.error("Failed to clone");
       } catch (IllegalStateException ex){
         System.out.println("Function "+functionName+"doesn't exist");
         normalizedFunctions.put(functionName, null);

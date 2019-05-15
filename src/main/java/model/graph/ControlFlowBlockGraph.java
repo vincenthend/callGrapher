@@ -1,24 +1,19 @@
 package model.graph;
 
-import model.graph.block.PhpBasicBlock;
-import model.graph.block.statement.PhpStatement;
+import model.graph.statement.block.PhpBasicBlock;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 public class ControlFlowBlockGraph {
   private Graph<PhpBasicBlock, DefaultEdge> graph;
 
   public ControlFlowBlockGraph() {
-    graph = new DefaultDirectedGraph<PhpBasicBlock, DefaultEdge>(DefaultEdge.class);
+    graph = new DefaultDirectedGraph<>(DefaultEdge.class);
   }
 
   public ControlFlowBlockGraph(ControlFlowBlockGraph controlFlowBlockGraph){
-    graph = new DefaultDirectedGraph<PhpBasicBlock, DefaultEdge>(DefaultEdge.class);
+    graph = new DefaultDirectedGraph<>(DefaultEdge.class);
     for(PhpBasicBlock p : controlFlowBlockGraph.graph.vertexSet()){
       graph.addVertex(p);
     }

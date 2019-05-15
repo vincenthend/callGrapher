@@ -1,7 +1,5 @@
 package analyzer;
 
-import grammar.PhpDeclarationListener;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

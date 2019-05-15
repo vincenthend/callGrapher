@@ -1,30 +1,31 @@
 package model.graph;
 
+import model.graph.statement.PhpStatement;
+import model.graph.statement.StatementType;
+import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import model.graph.block.statement.PhpStatement;
-import model.graph.block.statement.StatementType;
-import org.jgrapht.Graph;
-import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultDirectedGraph;
-
 public class ControlFlowGraph implements Cloneable {
-  private Graph<PhpStatement,ControlFlowEdge> graph;
+  private Graph<PhpStatement, DefaultEdge> graph;
   private Set<PhpStatement> lastVertices;
   private PhpStatement firstVertex;
   private int maxId;
 
   public ControlFlowGraph() {
-    graph = new DefaultDirectedGraph<PhpStatement, ControlFlowEdge>(ControlFlowEdge.class);
+    graph = new DefaultDirectedGraph<>(DefaultEdge.class);
     firstVertex = null;
     lastVertices = new HashSet<>();
     maxId = 0;
   }
 
-  public Graph<PhpStatement, ControlFlowEdge> getGraph() {
+  public Graph<PhpStatement, DefaultEdge> getGraph() {
     return graph;
   }
 
@@ -38,45 +39,37 @@ public class ControlFlowGraph implements Cloneable {
 
   /**
    * Adds statement p1 after p. P1 may have existed
-   * @param p statement before
+   *
+   * @param p  statement before
    * @param p1 statement after
    */
   public void addStatement(PhpStatement p, PhpStatement p1) {
-    addStatement(p, p1, ControlFlowEdge.ControlFlowEdgeType.GENERAL);;
-  }
-
-  public void addStatement(PhpStatement p, PhpStatement p1, ControlFlowEdge.ControlFlowEdgeType type) {
-    ControlFlowEdge edge = new ControlFlowEdge(type);
-    if(!graph.vertexSet().contains(p1)) {
+    if (!graph.vertexSet().contains(p1)) {
       graph.addVertex(p1);
       lastVertices.add(p1);
       lastVertices.remove(p);
       p1.setStatementId(maxId);
       maxId += 1;
     }
-    graph.addEdge(p, p1, edge);
+    graph.addEdge(p, p1);
   }
 
   /**
    * Add statement after last vertices. Statement haven't existed in the graph.
+   *
    * @param a added statement
    */
   public void addStatement(PhpStatement a) {
-    addStatement(a, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
-  }
-
-  public void addStatement(PhpStatement a, ControlFlowEdge.ControlFlowEdgeType type) {
     graph.addVertex(a);
     a.setStatementId(maxId);
     maxId += 1;
-    if(lastVertices.size() == 0 && firstVertex == null) {
+    if (lastVertices.isEmpty() && firstVertex == null) {
       firstVertex = a;
     } else {
       PhpStatement[] phpStatements = lastVertices.toArray(new PhpStatement[lastVertices.size()]);
-      for(PhpStatement statement : phpStatements){
-        if(statement.getStatementType() != StatementType.RETURN){
-          ControlFlowEdge edge = new ControlFlowEdge(type);
-          graph.addEdge(statement, a, edge);
+      for (PhpStatement statement : phpStatements) {
+        if (statement.getStatementType() != StatementType.RETURN) {
+          graph.addEdge(statement, a);
           lastVertices.remove(statement);
         }
       }
@@ -87,25 +80,21 @@ public class ControlFlowGraph implements Cloneable {
 
   /**
    * Append ControlFlowGraph to an existing statement.
+   *
    * @param existing appended statement
-   * @param g appended CFG
+   * @param g        appended CFG
    */
-  public void appendGraph(PhpStatement existing, ControlFlowGraph g){
-    appendGraph(existing, g, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
-  }
-
-  public void appendGraph(PhpStatement existing, ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
-    if(g != null && g.graph.vertexSet().size() != 0) {
+  public void appendGraph(PhpStatement existing, ControlFlowGraph g) {
+    if (g != null && !g.graph.vertexSet().isEmpty()) {
       // Take care of ID
       Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
-      for(PhpStatement phpStatement : vertexSet){
-        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      for (PhpStatement phpStatement : vertexSet) {
+        phpStatement.setStatementId(phpStatement.getStatementId() + maxId);
       }
       maxId += vertexSet.size();
 
       Graphs.addGraph(graph, g.getGraph());
-      ControlFlowEdge edge = new ControlFlowEdge(type);
-      graph.addEdge(existing, g.firstVertex, edge);
+      graph.addEdge(existing, g.firstVertex);
       lastVertices.remove(existing);
       lastVertices.addAll(g.lastVertices);
     }
@@ -113,26 +102,22 @@ public class ControlFlowGraph implements Cloneable {
 
   /**
    * Append ControlFlowGraph to a list of statement
+   *
    * @param existing appended statmeents
-   * @param g appended CFG
+   * @param g        appended CFG
    */
-  public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g){
-    appendGraph(existing, g, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
-  }
-
-  public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
-    if(g != null && g.firstVertex != null) {
+  public void appendGraph(Iterable<PhpStatement> existing, ControlFlowGraph g) {
+    if (g != null && g.firstVertex != null) {
       // Take care of ID
       Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
-      for(PhpStatement phpStatement : vertexSet){
-        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      for (PhpStatement phpStatement : vertexSet) {
+        phpStatement.setStatementId(phpStatement.getStatementId() + maxId);
       }
       maxId += vertexSet.size();
 
       Graphs.addGraph(graph, g.getGraph());
       for (PhpStatement p : existing) {
-        ControlFlowEdge edge = new ControlFlowEdge(type);
-        graph.addEdge(p, g.firstVertex, edge);
+        graph.addEdge(p, g.firstVertex);
         lastVertices.remove(p);
       }
       lastVertices.addAll(g.lastVertices);
@@ -141,18 +126,15 @@ public class ControlFlowGraph implements Cloneable {
 
   /**
    * Append a ControlFlowGraph to this ControlFlowGraph
+   *
    * @param g appended CFG
    */
-  public void appendGraph(ControlFlowGraph g){
-    appendGraph(g, ControlFlowEdge.ControlFlowEdgeType.GENERAL);
-  }
-
-  public void appendGraph(ControlFlowGraph g, ControlFlowEdge.ControlFlowEdgeType type){
-    if(g != null) {
+  public void appendGraph(ControlFlowGraph g) {
+    if (g != null) {
       // Take care of ID
       Set<PhpStatement> vertexSet = g.getGraph().vertexSet();
-      for(PhpStatement phpStatement : vertexSet){
-        phpStatement.setStatementId(phpStatement.getStatementId()+maxId);
+      for (PhpStatement phpStatement : vertexSet) {
+        phpStatement.setStatementId(phpStatement.getStatementId() + maxId);
       }
       maxId += vertexSet.size();
 
@@ -161,11 +143,10 @@ public class ControlFlowGraph implements Cloneable {
         firstVertex = g.firstVertex;
       } else {
         HashSet<PhpStatement> removeList = new HashSet<>();
-        if(g.firstVertex != null) {
+        if (g.firstVertex != null) {
           for (PhpStatement p : lastVertices) {
-            if(p.getStatementType() != StatementType.RETURN){
-              ControlFlowEdge edge = new ControlFlowEdge(type);
-              graph.addEdge(p, g.firstVertex, edge);
+            if (p.getStatementType() != StatementType.RETURN) {
+              graph.addEdge(p, g.firstVertex);
               removeList.add(p);
             }
           }
@@ -177,28 +158,27 @@ public class ControlFlowGraph implements Cloneable {
   }
 
   @Override
-  public ControlFlowGraph clone() throws CloneNotSupportedException{
+  public ControlFlowGraph clone() throws CloneNotSupportedException {
     ControlFlowGraph cfg = (ControlFlowGraph) super.clone();
 
-    Graph<PhpStatement,ControlFlowEdge> graphClone = new DefaultDirectedGraph<PhpStatement, ControlFlowEdge>(ControlFlowEdge.class);
-    Map<PhpStatement,PhpStatement> map = new HashMap<>();
-    for(PhpStatement p : graph.vertexSet()){
+    Graph<PhpStatement, DefaultEdge> graphClone = new DefaultDirectedGraph<>(DefaultEdge.class);
+    Map<PhpStatement, PhpStatement> map = new HashMap<>();
+    for (PhpStatement p : graph.vertexSet()) {
       PhpStatement cloneStatement = p.clone();
       map.put(p, cloneStatement);
       graphClone.addVertex(cloneStatement);
     }
 
-    for(ControlFlowEdge e : graph.edgeSet()){
+    for (DefaultEdge e : graph.edgeSet()) {
       PhpStatement sourceStat = graph.getEdgeSource(e);
       PhpStatement targetStat = graph.getEdgeTarget(e);
-      ControlFlowEdge edge = new ControlFlowEdge(e.getEdgeType());
-      graphClone.addEdge(map.get(sourceStat), map.get(targetStat), edge);
+      graphClone.addEdge(map.get(sourceStat), map.get(targetStat));
     }
 
     cfg.graph = graphClone;
     cfg.firstVertex = map.get(firstVertex);
     cfg.lastVertices = new HashSet<>();
-    for(PhpStatement l : lastVertices) {
+    for (PhpStatement l : lastVertices) {
       cfg.lastVertices.add(map.get(l));
     }
 
