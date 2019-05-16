@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import grammar.PhpParser;
 import logger.Logger;
 import model.ProjectData;
+import model.graph.ControlFlowGraph;
 import model.php.PhpFunction;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -34,19 +35,19 @@ public class FlowAnalyzer {
       PhpLexer lexer = new PhpLexer(cs);
       PhpParser parser = new PhpParser(new CommonTokenStream(lexer));
       ParseTree tree = parser.htmlDocument();
-      function.setControlFlowGraph(visitor.visit(tree));
+      try {
+        function.setControlFlowGraph(visitor.visit(tree));
+      } catch (Exception e){
+        Logger.error("Fail to parse "+function);
+        function.setControlFlowGraph(new ControlFlowGraph());
+      }
     }
   }
 
   public void analyzeAll() {
     Set<PhpFunction> funcSet = new TreeSet<>(projectData.getFunctionMap().values());
     for (PhpFunction f : funcSet) {
-      try {
-        analyze(f);
-      } catch (Exception e){
-        Logger.error("Fail to parse "+f);
-        e.printStackTrace();
-      }
+      analyze(f);
     }
   }
 }

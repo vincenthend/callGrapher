@@ -42,6 +42,10 @@ public class DiffJob implements Runnable {
   }
 
   private synchronized ControlFlowGraphAnalyzer checkoutAndAnalyze(String hash) throws IOException, InterruptedException {
+    ProcessBuilder cleaner = new ProcessBuilder("git", "checkout", ".");
+    cleaner.directory(new File(diffJobData.getRoot()));
+    cleaner.start().waitFor();
+
     ProcessBuilder builder = new ProcessBuilder("git", "checkout", hash.trim());
     builder.directory(new File(diffJobData.getRoot()));
     Process p = builder.start();
