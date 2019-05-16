@@ -37,8 +37,6 @@ public class GraphView {
     jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     jFrame.setSize(400, 320);
 
-
-
     JGraphXAdapter jgxAdapter = new JGraphXAdapter(graph);
     jgxAdapter.getStylesheet().getDefaultEdgeStyle().put(mxConstants.STYLE_NOLABEL, "1");
     mxGraphComponent mxcomp = new mxGraphComponent(jgxAdapter);

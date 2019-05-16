@@ -126,6 +126,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     String code = input.getText(interval);
     graph.addStatement(new BranchStatement(code));
 
+    // Append condition as branchPoint
     graph.appendGraph(visit(ctx.parenthesis().expression()));
     PhpStatement branchPoint = graph.getLastVertices().iterator().next();
 
@@ -135,59 +136,83 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       List<PhpStatement> caseStatements = new ArrayList<>();
 
       List<ParseTree> defaultParsedStatement = new LinkedList<>();
+      boolean foundDefault = false;
       for (PhpParser.SwitchBlockContext s : ctx.switchBlock()) {
-        List<ParseTree> caseParsedStatement = new LinkedList<>();
+        if (s.expression().isEmpty()) {
+          // Is A Default Statement
+          switchGraph.appendGraph(visit(s.innerStatementList()));
+          foundDefault = true;
+        } else {
+          // Is A Case Statement
+          List<ParseTree> caseParsedStatement = new LinkedList<>();
 
-        // Iterate every inner statement to separate default statement
-        boolean foundDefault = false;
-        for (PhpParser.InnerStatementContext innerS : s.innerStatementList().innerStatement()) {
-          if (!foundDefault) {
-            if (innerS.statement().identifier() != null && innerS.statement().identifier().Default() != null) {
-              foundDefault = true;
-              defaultParsedStatement.add(innerS);
+          // Iterate every inner statement to separate default statement
+          for (PhpParser.InnerStatementContext innerS : s.innerStatementList().innerStatement()) {
+            if (!foundDefault) {
+              if (innerS.statement().identifier() != null && innerS.statement().identifier().Default() != null) {
+                foundDefault = true;
+                defaultParsedStatement.add(innerS);
+              } else {
+                caseParsedStatement.add(innerS);
+              }
             } else {
-              caseParsedStatement.add(innerS);
+              defaultParsedStatement.add(innerS);
             }
-          } else {
-            defaultParsedStatement.add(innerS);
           }
+          switchGraph = handleCaseBlock(s, caseParsedStatement);
         }
 
-        // Append graph for switch condition
-        ControlFlowGraph parentheseGraph = new ControlFlowGraph();
-        parentheseGraph.appendGraph(visit(s.expression().get(0)));
-
-        // Visit block and append to conditions
-        ControlFlowGraph statementGraph = new ControlFlowGraph();
-        for (ParseTree pt : caseParsedStatement) {
-          statementGraph.appendGraph(visit(pt));
+        // Handle switch's graph
+        // Connect first statement to branchPoint
+        graph.appendGraph(switchGraph);
+        if (switchGraph.getFirstVertex() != null) {
+          graph.addStatement(branchPoint, switchGraph.getFirstVertex());
         }
-        // Append to par_graph and then to switch_graph
-        parentheseGraph.appendGraph(statementGraph);
-        caseStatements.add(parentheseGraph.getFirstVertex());
 
-        switchGraph.appendGraph(parentheseGraph);
+        // Handle default's graph
+        if(!defaultParsedStatement.isEmpty()) {
+          ControlFlowGraph defaultGraph = handleDefaultBlock(defaultParsedStatement);
+          graph.appendGraph(defaultGraph);
+          if (defaultGraph.getFirstVertex() != null) {
+            graph.addStatement(branchPoint, defaultGraph.getFirstVertex());
+          } else {
+            graph.getLastVertices().add(branchPoint);
+          }
+          defaultParsedStatement.clear();
+        }
       }
-      graph.appendGraph(switchGraph);
 
-      for (PhpStatement p : caseStatements) {
-        graph.addStatement(branchPoint, p);
-      }
-
-      if (!defaultParsedStatement.isEmpty()) {
-        ControlFlowGraph defaultGraph = new ControlFlowGraph();
-        for (ParseTree pt : defaultParsedStatement) {
-          defaultGraph.appendGraph(visit(pt));
-        }
-        graph.appendGraph(defaultGraph);
-        graph.addStatement(branchPoint, defaultGraph.getFirstVertex());
-      } else {
+      if(!foundDefault){
         graph.getLastVertices().add(branchPoint);
       }
     }
 
     reduceBreakContinueStatement(graph);
     return graph;
+  }
+
+  private ControlFlowGraph handleDefaultBlock(List<ParseTree> parsedStatement) {
+    ControlFlowGraph defaultGraph = new ControlFlowGraph();
+    for (ParseTree pt : parsedStatement) {
+      defaultGraph.appendGraph(visit(pt));
+    }
+    return defaultGraph;
+  }
+
+  private ControlFlowGraph handleCaseBlock(PhpParser.SwitchBlockContext s, List<ParseTree> caseParsedStatement) {
+    // Append graph for switch condition
+    ControlFlowGraph parentheseGraph = new ControlFlowGraph();
+    parentheseGraph.appendGraph(visit(s.expression().get(0)));
+
+    // Visit block and append to conditions
+    ControlFlowGraph statementGraph = new ControlFlowGraph();
+    for (ParseTree pt : caseParsedStatement) {
+      statementGraph.appendGraph(visit(pt));
+    }
+    // Append to par_graph and then to switch_graph
+    parentheseGraph.appendGraph(statementGraph);
+
+    return parentheseGraph;
   }
 
   @Override
@@ -352,6 +377,11 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitReturnStatement(ctx);
     childGraph.addStatement(returnStatement);
     return childGraph;
+  }
+
+  @Override
+  public ControlFlowGraph visitTryCatchFinally(PhpParser.TryCatchFinallyContext ctx) {
+    return visit(ctx.blockStatement());
   }
 
   @Override

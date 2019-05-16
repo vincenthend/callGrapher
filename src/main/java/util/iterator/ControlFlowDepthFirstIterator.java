@@ -10,9 +10,9 @@ import java.util.*;
 public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   private Graph<PhpStatement, DefaultEdge> controlFlowGraph;
   private Set<PhpStatement> seenVertex;
-  private Deque<PhpStatement> statementStack;
+  private Stack<PhpStatement> statementStack;
   private PhpStatement currentStatement;
-  private Deque<PhpStatement> parentStack;
+  private Stack<PhpStatement> parentStack;
   private PhpStatement currentParent;
 
 
@@ -23,8 +23,8 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   public ControlFlowDepthFirstIterator(Graph<PhpStatement, DefaultEdge> cfg, PhpStatement root) {
     this.controlFlowGraph = cfg;
     this.seenVertex = new HashSet<>();
-    this.statementStack = new ArrayDeque<>();
-    this.parentStack = new ArrayDeque<>();
+    this.statementStack = new Stack<>();
+    this.parentStack = new Stack<>();
     this.currentParent = null;
 
     statementStack.push(root);

@@ -3,20 +3,17 @@ package main;
 import analyzer.ControlFlowGraphAnalyzer;
 import logger.Logger;
 import model.DiffJobData;
-import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
-import model.php.PhpFunction;
 import util.ControlFlowExporter;
 import util.DiffJobDataLoader;
-import util.builder.ControlFlowGraphDominators;
 import util.builder.ControlFlowGraphTranslator;
 import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -24,130 +21,27 @@ public class Main {
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv");
     Logger.info("Found " + jobList.size() + " job(s)");
 
-    LinkedList<DiffJobData> failedJob = new LinkedList<>();
-    LinkedList<Exception> failedJobExc = new LinkedList<>();
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
     for (DiffJobData diffJobData : jobList) {
       Logger.info("Starting job with ID : " + diffJobData.getId());
-      try {
-        diffCommit(diffJobData);
-      } catch (Exception e){
-        Logger.error("Job ID : "+diffJobData.getId()+" failed!!");
-        failedJob.add(diffJobData);
-        failedJobExc.add(e);
-      }
+      executorService.submit(new DiffJob(diffJobData));
     }
+    executorService.shutdown();
 
-    // Report
-    Logger.info("Diff completed! "+failedJob.size()+" job(s) failed");
-    if(!failedJob.isEmpty()) {
-      Logger.info("Failed job : ");
-      for (int i = 0; i < failedJob.size(); i++) {
-        Logger.info(failedJob.get(i).getId() + " - " + failedJob.get(i).getRoot());
-        Logger.info(failedJobExc.get(i).toString());
-      }
-    }
-  }
+    // SINGULAR DEBUG
+//    new DiffJob(jobList.get(18)).diffCommit();
 
-  public static void diffCommit(DiffJobData diffJobData) throws IOException, InterruptedException {
-    if (diffJobData.getFileList().isEmpty()
-      || diffJobData.getRoot() == null
-      || diffJobData.getShownFunction() == null
-      || diffJobData.getUnvulHash() == null
-      || diffJobData.getVulHash() == null) {
-      throw new IllegalArgumentException("Incomplete job data");
-    }
+//    jobList.get(2).getDiffJobOptions().setShownInterface("cfgOld");
+//    drawGraph(jobList.get(2));
 
-    //
-    // Analyze vulnerable code
-    //
-    Logger.info("Root is set to " + diffJobData.getRoot());
-    Logger.info("Checkout to vulnerable commit " + diffJobData.getVulHash());
-    ProcessBuilder builder = new ProcessBuilder("git", "checkout", diffJobData.getVulHash());
-    builder.directory(new File(diffJobData.getRoot()));
-    builder.start().waitFor();
-
-    ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
-    analyzerOld.analyzeControlFlowGraph(diffJobData.getFileList());
-    analyzerOld.normalizeFunction(diffJobData.getShownFunction());
-
-    PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
-    ControlFlowGraph cfgOld = null;
-    if (oldFunc != null) {
-      cfgOld = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
-    }
-
-    //
-    // Analyze non vulnerable code
-    //
-    Logger.info("Checkout to unvulnerable commit " + diffJobData.getUnvulHash());
-    builder = new ProcessBuilder("git", "checkout", diffJobData.getUnvulHash());
-    builder.directory(new File(diffJobData.getRoot()));
-    builder.start().waitFor();
-
-    ControlFlowGraphAnalyzer analyzerNew = new ControlFlowGraphAnalyzer();
-    analyzerNew.analyzeControlFlowGraph(diffJobData.getFileList());
-    analyzerNew.normalizeFunction(diffJobData.getShownFunction());
-    PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
-    ControlFlowGraph cfgNew = null;
-    if (newFunc != null) {
-      cfgNew = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
-    }
-
-    ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
-    ControlFlowBlockGraph diffGraph;
-    if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
-      diffGraph = diff.diffGraph(cfgOld, cfgNew);
-    } else {
-      diffGraph = diff.diffGraphAnnotate(cfgOld, cfgNew);
-    }
-
-    //
-    // UI Shown
-    //
-    GraphView view;
-    switch (diffJobData.getDiffJobOptions().getShownInterface()) {
-      case "old":
-        view = new GraphView(cfgOld);
-        break;
-      case "new":
-        view = new GraphView(cfgNew);
-        break;
-      case "diff":
-        view = new GraphView(diffGraph);
-        break;
-      case "oldDom":
-        view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-        break;
-      case "newDom":
-        view = new GraphView(new ControlFlowGraphDominators(cfgNew));
-        break;
-      case "oldBlock":
-        view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
-        break;
-      case "newBlock":
-        view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgNew));
-        break;
-      default:
-        view = null;
-    }
-    if (view != null) {
-      view.show();
-    }
-
-    //
-    //  Export Image
-    //
-    String fileName = String.format("%03d", diffJobData.getId());
-    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
-    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
-    if (cfgOld != null) {
-      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
-    }
-    if (cfgNew != null) {
-      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
-    }
-    ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
-    ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
+    // DEBUG
+//    DiffJobData diffJobData = new DiffJobData(1);
+//    diffJobData.setRoot("./testfile/");
+//    diffJobData.setShownFunction("file4.php::main");
+//    diffJobData.addFileList("file4.php");
+//    diffJobData.setUnvulHash("123");
+//    diffJobData.setVulHash("123");
+//    drawGraph(diffJobData);
   }
 
   public static void diffGraph() {
@@ -190,17 +84,21 @@ public class Main {
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
-    analyzerOld.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction).getControlFlowGraph();
+    for(String removedFunc : diffJobData.getUnnormalizedFunction()){
+      analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
+      analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
+    }
+//    analyzerOld.normalizeFunction(shownFunction);
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getFunction(shownFunction).getControlFlowGraph();
 
     GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-//    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translateToBlockGraph());
+//    GraphView view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
     view.show();
 
-    String fileName = String.format("%03d", diffJobData.getId());
-    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
-    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
-    ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
+//    String fileName = String.format("%03d", diffJobData.getId());
+//    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
+//    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
+//    ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
   }
 }

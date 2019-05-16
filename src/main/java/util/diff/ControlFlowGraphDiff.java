@@ -175,6 +175,7 @@ public class ControlFlowGraphDiff {
     ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(gOld);
 
     DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<>(gOld.getGraph());
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorNew = new DepthFirstIterator<>(gNew.getGraph());
 
     // Traverse old graph
     while (iteratorOld.hasNext()) {
@@ -189,6 +190,22 @@ public class ControlFlowGraphDiff {
         }
       } else {
         blockOld.setChanged(true);
+      }
+    }
+
+    while (iteratorNew.hasNext()) {
+      PhpBasicBlock blockNew = iteratorNew.next();
+      PhpBasicBlock blockOld = mapping.getKey(blockNew);
+      if (blockOld == null) {
+        Set<PhpBasicBlock> neighborBlockSet = new HashSet<>();
+        neighborBlockSet.addAll(Graphs.successorListOf(gNew.getGraph(),blockNew));
+        neighborBlockSet.addAll(Graphs.predecessorListOf(gNew.getGraph(),blockNew));
+        for (PhpBasicBlock block : neighborBlockSet) {
+          PhpBasicBlock neighborBlock = mapping.getKey(block);
+          if(neighborBlock != null){
+            neighborBlock.setChanged(true);
+          }
+        }
       }
     }
 

@@ -45,6 +45,7 @@ public class FlowAnalyzer {
         analyze(f);
       } catch (Exception e){
         Logger.error("Fail to parse "+f);
+        e.printStackTrace();
       }
     }
   }

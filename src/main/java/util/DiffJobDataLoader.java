@@ -32,6 +32,13 @@ public class DiffJobDataLoader {
 
       jobData.setShownFunction(data[5]);
 
+      if(data.length == 7) {
+        String[] unnormFunc = data[6].split("#");
+        for (String func : unnormFunc) {
+          jobData.addUnnormalizedFunction(func);
+        }
+      }
+
       jobData.getDiffJobOptions().setExportPath("D:\\cfg");
       jobData.getDiffJobOptions().setShownInterface("none");
       jobList.add(jobData);

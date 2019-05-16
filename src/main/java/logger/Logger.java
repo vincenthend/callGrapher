@@ -1,14 +1,11 @@
 package logger;
 
 public class Logger {
-  private Logger(){
-  }
-
   public static void info(String message) {
-    System.out.println("[INFO] " + message);
+    java.util.logging.Logger.getAnonymousLogger().info(message);
   }
 
   public static void error(String message) {
-    System.out.println("[ERROR] " + message);
+    java.util.logging.Logger.getAnonymousLogger().severe(message);
   }
 }

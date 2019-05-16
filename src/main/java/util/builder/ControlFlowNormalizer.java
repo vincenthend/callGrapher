@@ -222,7 +222,10 @@ public class ControlFlowNormalizer {
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
           //Get function return type and add it to variable map
+          System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
+          space++;
           Set<String> functionReturn = normalize(f, functionVariables);
+          space--;
           if (functionReturn != null) {
             addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
           }
@@ -230,8 +233,7 @@ public class ControlFlowNormalizer {
           ControlFlowGraph funcCfg = f.getControlFlowGraph();
 
           //Append CFG to func call and successor
-          Graphs.addGraph(currentFunction.getControlFlowGraph().getGraph(), funcCfg.getGraph());
-          currentFunction.getControlFlowGraph().getGraph().addEdge(funcCall, funcCfg.getFirstVertex());
+          currentFunction.getControlFlowGraph().appendGraph(funcCall, funcCfg);
           for (PhpStatement lastVert : funcCfg.getLastVertices()) {
             for (PhpStatement succ : succList) {
               currentFunction.getControlFlowGraph().getGraph().addEdge(lastVert, succ);

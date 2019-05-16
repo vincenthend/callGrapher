@@ -21,11 +21,11 @@ public class ControlFlowGraphTranslator {
    * @return result of translations
    */
   public ControlFlowBlockGraph translateToBlockGraph(ControlFlowGraph cfg) {
+    Logger.info("Translating to block graph");
     ControlFlowGraphDominators dominators = new ControlFlowGraphDominators(cfg);
     ControlFlowBlockGraphBuilder blockGraphFactory = new ControlFlowBlockGraphBuilder();
     ControlFlowDominatorIterator iterator = dominators.iterator();
 
-    Logger.info("Translating to block graph");
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
       blockGraphFactory.addStatement(statement);

@@ -10,12 +10,14 @@ public class DiffJobData {
   private String unvulHash;
   private List<String> fileList;
   private String shownFunction;
+  private List<String> unnormalizedFunction;
   private DiffJobOptions diffJobOptions;
 
   public DiffJobData(int id) {
     this.id = id;
     fileList = new LinkedList<>();
     diffJobOptions = new DiffJobOptions();
+    unnormalizedFunction = new LinkedList<>();
   }
 
   public int getId() {
@@ -68,6 +70,14 @@ public class DiffJobData {
 
   public DiffJobOptions getDiffJobOptions() {
     return diffJobOptions;
+  }
+
+  public void addUnnormalizedFunction(String functionName) {
+    this.unnormalizedFunction.add(functionName);
+  }
+
+  public List<String> getUnnormalizedFunction() {
+    return unnormalizedFunction;
   }
 
   public class DiffJobOptions {
