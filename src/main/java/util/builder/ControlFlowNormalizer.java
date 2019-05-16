@@ -20,7 +20,7 @@ import util.iterator.ControlFlowDepthFirstIterator;
 
 public class ControlFlowNormalizer {
   private ProjectData projectData;
-
+  private static int space = 0;
   public ControlFlowNormalizer(ProjectData projectData) {
     this.projectData = projectData;
   }
@@ -46,7 +46,6 @@ public class ControlFlowNormalizer {
       mergeVariableMap(varList, projectData.getClass(currentFunction.getClassName()).getAttributeMap());
     }
     addVariableType(varList,"$this", currentFunction.getClassName());
-
     ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(currentFunction.getControlFlowGraph());
     Iterator<PhpStatement> iterator = cfgd.iterator();
     while (iterator.hasNext()) {
@@ -223,7 +222,10 @@ public class ControlFlowNormalizer {
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
           //Get function return type and add it to variable map
+          System.out.println(space+" - "+currentFunction.getCalledName()+" calls "+f.getCalledName());
+          space++;
           Set<String> functionReturn = normalize(f, functionVariables);
+          space--;
           if (functionReturn != null) {
             addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
           }

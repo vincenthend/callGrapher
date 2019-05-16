@@ -21,19 +21,30 @@ import java.util.List;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-//    DiffJobData diffJobData = new DiffJobData(9);
-//    diffJobData.setRoot("../repo/phpmyadmin/");
-//    diffJobData.setVulHash("63b7f6c0a94af5d7402c4f198846dc0c066f5413");
-//    diffJobData.setUnvulHash("5e108a340f3eac6b6c488439343b6c1a7454787c");
-//    diffJobData.addFileList("libraries/core.lib.php");
-//    diffJobData.setShownFunction("PMA_safeUnserialize");
-//
-//    diffJobData.getDiffJobOptions().setExportPath("D:\\cfg");
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv");
     Logger.info("Found " + jobList.size() + " job(s)");
+
+    LinkedList<DiffJobData> failedJob = new LinkedList<>();
+    LinkedList<Exception> failedJobExc = new LinkedList<>();
     for (DiffJobData diffJobData : jobList) {
       Logger.info("Starting job with ID : " + diffJobData.getId());
-      diffCommit(diffJobData);
+      try {
+        diffCommit(diffJobData);
+      } catch (Exception e){
+        Logger.error("Job ID : "+diffJobData.getId()+" failed!!");
+        failedJob.add(diffJobData);
+        failedJobExc.add(e);
+      }
+    }
+
+    // Report
+    Logger.info("Diff completed! "+failedJob.size()+" job(s) failed");
+    if(!failedJob.isEmpty()) {
+      Logger.info("Failed job : ");
+      for (int i = 0; i < failedJob.size(); i++) {
+        Logger.info(failedJob.get(i).getId() + " - " + failedJob.get(i).getRoot());
+        Logger.info(failedJobExc.get(i).toString());
+      }
     }
   }
 
@@ -172,24 +183,24 @@ public class Main {
     //util.ControlFlowExporter.exportSVG(cfg, "D:\\");
   }
 
-  public static void drawGraph() {
+  public static void drawGraph(DiffJobData diffJobData) {
     // Parameters
-    List<String> pathOld = new LinkedList<>();
-    pathOld.add("./testfile/file4.php");
-
-    List<String> shownFunction = new LinkedList<>();
-    shownFunction.add("file4.php::main");
+    List<String> pathOld = diffJobData.getFileList();
+    String shownFunction = diffJobData.getShownFunction();
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
     analyzerOld.normalizeFunction(shownFunction);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction.get(0)).getControlFlowGraph();
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction).getControlFlowGraph();
 
     GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
 //    GraphView view = new GraphView(new ControlFlowGraphTranslator(cfgOld).translateToBlockGraph());
     view.show();
 
-    //util.ControlFlowExporter.exportSVG(cfg, "D:\\");
+    String fileName = String.format("%03d", diffJobData.getId());
+    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
+    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
+    ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
   }
 }
