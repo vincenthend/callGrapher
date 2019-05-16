@@ -222,10 +222,7 @@ public class ControlFlowNormalizer {
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
           //Get function return type and add it to variable map
-          System.out.println(space+" - "+currentFunction.getCalledName()+" calls "+f.getCalledName());
-          space++;
           Set<String> functionReturn = normalize(f, functionVariables);
-          space--;
           if (functionReturn != null) {
             addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
           }
