@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {1,2,3,4,5,6,7,9};
+    Integer[] jobSelection = {0,1,2,3,4,5,6,8};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
@@ -32,6 +32,7 @@ public class Main {
     // SINGULAR DEBUG
 //    new DiffJob(jobList.get(0)).diffCommit();
 
+    // DEBUG GUI
 //    jobList.get(2).getDiffJobOptions().setShownInterface("cfgOld");
 //    drawGraph(jobList.get(2));
 
@@ -56,7 +57,7 @@ public class Main {
       analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
       analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
     }
-//    analyzerOld.normalizeFunction(shownFunction);
+//    analyzerOld.normalizeFunction(shownFunction, -1);
     ControlFlowGraph cfgOld = analyzerOld.getProjectData().getFunction(shownFunction).getControlFlowGraph();
 
     GraphView view = new GraphView(cfgOld);

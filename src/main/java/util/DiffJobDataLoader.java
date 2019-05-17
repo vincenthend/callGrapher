@@ -10,48 +10,54 @@ import java.util.List;
 
 public class DiffJobDataLoader {
   private static final String SEPARATOR = ",";
-  private DiffJobDataLoader(){
+
+  private DiffJobDataLoader() {
   }
 
-  public static List<DiffJobData> loadCSV(String csvFile) throws IOException{
+  public static List<DiffJobData> loadCSV(String csvFile) throws IOException {
     List<DiffJobData> jobList = new LinkedList<>();
 
     BufferedReader br = new BufferedReader(new FileReader(csvFile));
-    String line = br.readLine(); // Skip header row
-    while ((line = br.readLine()) != null) {
-      String[] data = line.split(SEPARATOR);
-      DiffJobData jobData = new DiffJobData(Integer.parseInt(data[0]));
-      jobData.setRoot(data[1]);
-      jobData.setVulHash(data[2]);
-      jobData.setUnvulHash(data[3]);
+    try {
+      br.readLine();
+      String line; // Skip header row
+      while ((line = br.readLine()) != null) {
+        String[] data = line.split(SEPARATOR);
+        DiffJobData jobData = new DiffJobData(Integer.parseInt(data[0]));
+        jobData.setRoot(data[1]);
+        jobData.setVulHash(data[2]);
+        jobData.setUnvulHash(data[3]);
 
-      String[] fileList = data[4].split("#");
-      for(String file : fileList){
-        jobData.addFileList(file);
-      }
-
-      jobData.setShownFunction(data[5]);
-
-      if(data.length == 7) {
-        String[] unnormFunc = data[6].split("#");
-        for (String func : unnormFunc) {
-          jobData.addUnnormalizedFunction(func);
+        String[] fileList = data[4].split("#");
+        for (String file : fileList) {
+          jobData.addFileList(file);
         }
-      }
 
-      jobData.getDiffJobOptions().setExportPath("D:\\cfg");
-      jobData.getDiffJobOptions().setShownInterface("none");
-      jobList.add(jobData);
+        jobData.setShownFunction(data[5]);
+
+        if (data.length == 7) {
+          String[] unnormFunc = data[6].split("#");
+          for (String func : unnormFunc) {
+            jobData.addUnnormalizedFunction(func);
+          }
+        }
+
+        jobData.getDiffJobOptions().setExportPath("D:\\cfg");
+        jobData.getDiffJobOptions().setShownInterface("none");
+        jobList.add(jobData);
+      }
     }
-    br.close();
+    finally{
+      br.close();
+    }
 
     return jobList;
   }
 
-  public static List<DiffJobData> loadCSV(String csvFile, Integer[] selection) throws IOException{
+  public static List<DiffJobData> loadCSV(String csvFile, Integer[] selection) throws IOException {
     List<DiffJobData> allJobs = loadCSV(csvFile);
     List<DiffJobData> selectedJobs = new LinkedList<>();
-    for(Integer id : selection){
+    for (Integer id : selection) {
       selectedJobs.add(allJobs.get(id));
     }
     return selectedJobs;
