@@ -65,6 +65,7 @@ public class ControlFlowNormalizer {
   }
 
   private void normalizeConstructor(PhpClass c){
+    System.out.println(c.getClassName());
     Map<String, Set<String>> varMap = c.getAttributeMap();
 
     String classConstructor = c.getClassName() + "::__construct";
@@ -222,10 +223,10 @@ public class ControlFlowNormalizer {
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
           //Get function return type and add it to variable map
-//          System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
-//          space++;
+          System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
+          space++;
           Set<String> functionReturn = normalize(f, functionVariables);
-//          space--;
+          space--;
           if (functionReturn != null) {
             addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
           }

@@ -47,4 +47,13 @@ public class DiffJobDataLoader {
 
     return jobList;
   }
+
+  public static List<DiffJobData> loadCSV(String csvFile, Integer[] selection) throws IOException{
+    List<DiffJobData> allJobs = loadCSV(csvFile);
+    List<DiffJobData> selectedJobs = new LinkedList<>();
+    for(Integer id : selection){
+      selectedJobs.add(allJobs.get(id));
+    }
+    return selectedJobs;
+  }
 }

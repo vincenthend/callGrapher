@@ -81,30 +81,30 @@ public class ProjectData {
     return controlFlowGraph;
   }
 
-  public void normalizeFunction(){
-    for (PhpFunction phpFunction : functionMap.values()){
+  public void normalizeFunction() {
+    for (PhpFunction phpFunction : functionMap.values()) {
       try {
-        Logger.info("Normalizing "+phpFunction.getCalledName());
+        Logger.info("Normalizing " + phpFunction.getCalledName());
         PhpFunction normalizedFunc = phpFunction.clone();
         ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
         normalizer.normalize(phpFunction);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } catch (CloneNotSupportedException e) {
-        Logger.error("Failed to normalize "+phpFunction.getCalledName());
+        Logger.error("Failed to normalize " + phpFunction.getCalledName());
       }
     }
   }
 
-  public void normalizeFunction(List<String> functionNames){
-    for (String functionName : functionNames){
+  public void normalizeFunction(List<String> functionNames) {
+    for (String functionName : functionNames) {
       normalizeFunction(functionName);
     }
   }
 
-  public void normalizeFunction(String functionName){
+  public void normalizeFunction(String functionName) {
     try {
       PhpFunction function = getFunction(functionName);
-      if(function != null){
+      if (function != null) {
         Logger.info("Normalizing " + function.getCalledName());
         PhpFunction normalizedFunc = function.clone();
         ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
@@ -115,8 +115,8 @@ public class ProjectData {
       }
     } catch (CloneNotSupportedException e) {
       Logger.error("Failed to clone");
-    } catch (IllegalStateException ex){
-      System.out.println("Function "+functionName+"doesn't exist");
+    } catch (IllegalStateException ex) {
+      System.out.println("Function " + functionName + "doesn't exist");
       normalizedFunctions.put(functionName, null);
       throw new IllegalStateException();
     }
