@@ -39,6 +39,7 @@ public class FlowAnalyzer {
         function.setControlFlowGraph(visitor.visit(tree));
       } catch (Exception e){
         Logger.error("Fail to parse "+function);
+        e.printStackTrace();
         function.setControlFlowGraph(new ControlFlowGraph());
       }
     }

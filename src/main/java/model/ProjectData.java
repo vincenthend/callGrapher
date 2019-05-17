@@ -8,7 +8,6 @@ import org.jgrapht.Graphs;
 import util.builder.ControlFlowNormalizer;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,33 +80,13 @@ public class ProjectData {
     return controlFlowGraph;
   }
 
-  public void normalizeFunction() {
-    for (PhpFunction phpFunction : functionMap.values()) {
-      try {
-        Logger.info("Normalizing " + phpFunction.getCalledName());
-        PhpFunction normalizedFunc = phpFunction.clone();
-        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
-        normalizer.normalize(phpFunction);
-        normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
-      } catch (CloneNotSupportedException e) {
-        Logger.error("Failed to normalize " + phpFunction.getCalledName());
-      }
-    }
-  }
-
-  public void normalizeFunction(List<String> functionNames) {
-    for (String functionName : functionNames) {
-      normalizeFunction(functionName);
-    }
-  }
-
-  public void normalizeFunction(String functionName) {
+  public void normalizeFunction(String functionName, int maxDepth) {
     try {
       PhpFunction function = getFunction(functionName);
       if (function != null) {
         Logger.info("Normalizing " + function.getCalledName());
         PhpFunction normalizedFunc = function.clone();
-        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this);
+        ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this, maxDepth);
         normalizer.normalize(normalizedFunc);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } else {
@@ -116,7 +95,7 @@ public class ProjectData {
     } catch (CloneNotSupportedException e) {
       Logger.error("Failed to clone");
     } catch (IllegalStateException ex) {
-      System.out.println("Function " + functionName + "doesn't exist");
+      Logger.error("Function " + functionName + " doesn't exist");
       normalizedFunctions.put(functionName, null);
       throw new IllegalStateException();
     }

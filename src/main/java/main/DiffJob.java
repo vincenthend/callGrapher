@@ -18,9 +18,10 @@ import java.util.Map;
 
 public class DiffJob implements Runnable {
   private DiffJobData diffJobData;
+  private int maxDepth;
   private static Map<String, Object> resourceLock = new HashMap<>();
 
-  public DiffJob(DiffJobData diffJobData) {
+  public DiffJob(DiffJobData diffJobData, int maxDepth) {
     if (diffJobData.getFileList().isEmpty()
       || diffJobData.getRoot() == null
       || diffJobData.getShownFunction() == null
@@ -29,12 +30,14 @@ public class DiffJob implements Runnable {
       throw new IllegalArgumentException("Incomplete job data");
     } else {
       this.diffJobData = diffJobData;
+      this.maxDepth = maxDepth;
       resourceLock.put(diffJobData.getRoot(), new Object());
     }
   }
 
   @Override
   public void run() {
+    Logger.info("Job "+diffJobData.getId()+" assigned to TID "+Thread.currentThread().getId());
     try {
       diffCommit();
     } catch (IOException e) {
@@ -48,10 +51,10 @@ public class DiffJob implements Runnable {
   private ControlFlowGraphAnalyzer checkoutAndAnalyze(String root, String hash) throws IOException, InterruptedException {
     synchronized (resourceLock.get(root)) {
       // Clean directory
-      ProcessBuilder cleaner = new ProcessBuilder("git", "checkout", "");
+      ProcessBuilder cleaner = new ProcessBuilder("git", "clean", "-xfd");
       cleaner.directory(new File(diffJobData.getRoot()));
       cleaner.start().waitFor();
-      cleaner = new ProcessBuilder("git", "clean", "-xfd");
+      cleaner = new ProcessBuilder("git", "checkout", ".");
       cleaner.directory(new File(diffJobData.getRoot()));
       cleaner.start().waitFor();
 
@@ -86,7 +89,7 @@ public class DiffJob implements Runnable {
       analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
       analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
     }
-    analyzerOld.normalizeFunction(diffJobData.getShownFunction());
+    analyzerOld.normalizeFunction(diffJobData.getShownFunction(), maxDepth);
     PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
     ControlFlowGraph cfgOld = null;
     if (oldFunc != null) {
@@ -102,7 +105,7 @@ public class DiffJob implements Runnable {
       analyzerNew.getProjectData().getFunctionMap().remove(removedFunc);
       analyzerNew.getProjectData().getNormalizedFunction(removedFunc);
     }
-    analyzerNew.normalizeFunction(diffJobData.getShownFunction());
+    analyzerNew.normalizeFunction(diffJobData.getShownFunction(), maxDepth);
     PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
     ControlFlowGraph cfgNew = null;
     if (newFunc != null) {

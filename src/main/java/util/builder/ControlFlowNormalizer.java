@@ -1,16 +1,9 @@
 package util.builder;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import logger.Logger;
 import model.ProjectData;
 import model.graph.ControlFlowGraph;
-import model.graph.statement.AssignmentStatement;
-import model.graph.statement.FunctionCallStatement;
-import model.graph.statement.PhpStatement;
-import model.graph.statement.ReturnStatement;
-import model.graph.statement.StatementType;
+import model.graph.statement.*;
 import model.php.PhpClass;
 import model.php.PhpFunction;
 import org.jgrapht.Graphs;
@@ -18,11 +11,16 @@ import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
 import util.iterator.ControlFlowDepthFirstIterator;
 
+import java.util.*;
+import java.util.Map.Entry;
+
 public class ControlFlowNormalizer {
   private ProjectData projectData;
-  private static int space = 0;
-  public ControlFlowNormalizer(ProjectData projectData) {
+  private int maxDepth;
+
+  public ControlFlowNormalizer(ProjectData projectData, int maxDepth) {
     this.projectData = projectData;
+    this.maxDepth = maxDepth;
   }
 
   /**
@@ -30,29 +28,34 @@ public class ControlFlowNormalizer {
    *
    * @return Set of possible return value
    */
-  public Set<String> normalize(PhpFunction function) {
-    return normalize(function, new HashMap<>());
+  public void normalize(PhpFunction function) {
+    normalize(function, new HashMap<>(), 0);
   }
 
-  public Set<String> normalize(PhpFunction currentFunction, Map<String, Set<String>> functionVar){
+  /**
+   * Normalizes a function defined in the constructor by tracking assignment.
+   *
+   * @return Set of possible return value
+   */
+  private Set<String> normalize(PhpFunction currentFunction, Map<String, Set<String>> functionVar, int depth) {
     Map<String, Set<String>> varList = functionVar;
     Set<String> returnType = new HashSet<>();
 
-    if(currentFunction.getClassName() != null && !currentFunction.getFunctionName().equals("__construct")){
+    if (currentFunction.getClassName() != null && !currentFunction.getFunctionName().equals("__construct")) {
       // Normalize class constructor
-      if(!projectData.getClass(currentFunction.getClassName()).isConstructorNorm()) {
-        normalizeConstructor(projectData.getClass(currentFunction.getClassName()));
+      if (!projectData.getClass(currentFunction.getClassName()).isConstructorNorm()) {
+        normalizeConstructor(projectData.getClass(currentFunction.getClassName()), depth);
       }
       mergeVariableMap(varList, projectData.getClass(currentFunction.getClassName()).getAttributeMap());
     }
-    addVariableType(varList,"$this", currentFunction.getClassName());
+    addVariableType(varList, "$this", currentFunction.getClassName());
     ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(currentFunction.getControlFlowGraph());
     Iterator<PhpStatement> iterator = cfgd.iterator();
     while (iterator.hasNext()) {
       PhpStatement statement = iterator.next();
       if (statement.getStatementType() == StatementType.FUNCTION_CALL) {
         // If function call is found, normalize statement and merge the return type to current
-        varList = normalizeFunctionCall(currentFunction, varList, statement);
+        varList = normalizeFunctionCall(currentFunction, varList, statement, depth);
       } else if (statement.getStatementType() == StatementType.RETURN) {
         // If return is found, take note of the returned type
         ReturnStatement returnStatement = (ReturnStatement) statement;
@@ -64,19 +67,18 @@ public class ControlFlowNormalizer {
     return returnType;
   }
 
-  private void normalizeConstructor(PhpClass c){
-    System.out.println(c.getClassName());
+  private void normalizeConstructor(PhpClass c, int depth) {
     Map<String, Set<String>> varMap = c.getAttributeMap();
 
     String classConstructor = c.getClassName() + "::__construct";
     PhpFunction constructorFunction = projectData.getFunctionMap().get(classConstructor);
 
     // Add constructor parameters
-    if(constructorFunction != null) {
-      if(constructorFunction.getParameters() != null) {
+    if (constructorFunction != null) {
+      if (constructorFunction.getParameters() != null) {
         for (Entry<String, String> entry : constructorFunction.getParameters().entrySet()) {
           // If parameter has typehint
-          if(entry.getKey() != null) {
+          if (entry.getKey() != null) {
             Set<String> type = new HashSet();
             type.add(entry.getValue());
             varMap.put(entry.getKey(), type);
@@ -85,24 +87,24 @@ public class ControlFlowNormalizer {
       }
 
       ControlFlowGraphDominators cfgd = new ControlFlowGraphDominators(
-          constructorFunction.getControlFlowGraph());
+        constructorFunction.getControlFlowGraph());
       Iterator<PhpStatement> iterator = cfgd.iterator();
       while (iterator.hasNext()) {
         PhpStatement statement = iterator.next();
         if (statement.getStatementType() == StatementType.FUNCTION_CALL) {
           // If function call is found, normalize statement and merge the return type to current
-          varMap = normalizeFunctionCall(constructorFunction, varMap, statement);
-        } else if(statement.getStatementType() == StatementType.ASSIGNMENT){
+          varMap = normalizeFunctionCall(constructorFunction, varMap, statement, depth);
+        } else if (statement.getStatementType() == StatementType.ASSIGNMENT) {
           AssignmentStatement assignment = (AssignmentStatement) statement;
           Deque<String> assignedTypeStack = new ArrayDeque<>();
           Deque<String> finishedTypeStack = new ArrayDeque<>();
-          if(assignment.getAssignedType() != null) {
+          if (assignment.getAssignedType() != null) {
             assignedTypeStack.push(assignment.getAssignedType());
           }
-            // Handle chain call
+          // Handle chain call
           while (!assignedTypeStack.isEmpty()) {
             String assignedType = assignedTypeStack.pop();
-            if(assignedType != null) {
+            if (assignedType != null) {
               if (assignedType.startsWith("$")) {
                 Set<String> varTypes = getVariableType(varMap, assignedType);
                 if (varTypes != null) {
@@ -124,6 +126,7 @@ public class ControlFlowNormalizer {
 
   /**
    * Populate variable map for all assignment statement before this function call.
+   *
    * @param funcCall current function call
    * @return variable map
    */
@@ -164,9 +167,10 @@ public class ControlFlowNormalizer {
 
   /**
    * Normalizes a function call statement.
+   *
    * @param callStatement
    */
-  public Map<String, Set<String>> normalizeFunctionCall(PhpFunction currentFunction, Map<String, Set<String>> previousVarMap, PhpStatement callStatement) {
+  public Map<String, Set<String>> normalizeFunctionCall(PhpFunction currentFunction, Map<String, Set<String>> previousVarMap, PhpStatement callStatement, int depth) {
     // Initialize variable map with constructor defined variables
     FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
     Map<String, Set<String>> initialVarMap;
@@ -209,7 +213,7 @@ public class ControlFlowNormalizer {
     }
 
     // For each possible functions, add the return to variable map,
-    if(!functionList.isEmpty()){
+    if (!functionList.isEmpty()) {
       // Remove connection between successor and funccall
       List<PhpStatement> succList = Graphs.successorListOf(currentFunction.getControlFlowGraph().getGraph(), funcCall);
       for (PhpStatement succ : succList) {
@@ -222,29 +226,29 @@ public class ControlFlowNormalizer {
           f = function.clone();
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
-          //Get function return type and add it to variable map
-          System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
-          space++;
-          Set<String> functionReturn = normalize(f, functionVariables);
-          space--;
-          if (functionReturn != null) {
-            addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
-          }
-
-          ControlFlowGraph funcCfg = f.getControlFlowGraph();
-
-          //Append CFG to func call and successor
-          currentFunction.getControlFlowGraph().appendGraph(funcCall, funcCfg);
-          for (PhpStatement lastVert : funcCfg.getLastVertices()) {
-            for (PhpStatement succ : succList) {
-              currentFunction.getControlFlowGraph().getGraph().addEdge(lastVert, succ);
+          // Get function return type and add it to variable map
+          // System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
+          if (depth <= maxDepth || maxDepth < 0) {
+            Set<String> functionReturn = normalize(f, functionVariables, depth++);
+            if (functionReturn != null) {
+              addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
             }
-          }
 
-          // Add last vertices if funccall is the last statement
-          if(succList.isEmpty()){
-            currentFunction.getControlFlowGraph().getLastVertices().remove(funcCall);
-            currentFunction.getControlFlowGraph().getLastVertices().addAll(funcCfg.getLastVertices());
+            ControlFlowGraph funcCfg = f.getControlFlowGraph();
+
+            //Append CFG to func call and successor
+            currentFunction.getControlFlowGraph().appendGraph(funcCall, funcCfg);
+            for (PhpStatement lastVert : funcCfg.getLastVertices()) {
+              for (PhpStatement succ : succList) {
+                currentFunction.getControlFlowGraph().getGraph().addEdge(lastVert, succ);
+              }
+            }
+
+            // Add last vertices if funccall is the last statement
+            if (succList.isEmpty()) {
+              currentFunction.getControlFlowGraph().getLastVertices().remove(funcCall);
+              currentFunction.getControlFlowGraph().getLastVertices().addAll(funcCfg.getLastVertices());
+            }
           }
         } catch (CloneNotSupportedException e) {
           Logger.error("Failed to clone");
@@ -337,17 +341,9 @@ public class ControlFlowNormalizer {
     return variableMap;
   }
 
-  private Map<String, Set<String>> copyVariableStack(Map<String, Set<String>> original) {
-    Map<String, Set<String>> copy = new HashMap<>();
-    for (Map.Entry<String, Set<String>> entry : original.entrySet()) {
-      copy.put(entry.getKey(), new HashSet<>(entry.getValue()));
-    }
-    return copy;
-  }
-
-  private void mergeVariableMap(Map<String, Set<String>> m1, Map<String, Set<String>> m2){
-    for(Entry<String, Set<String>> variable : m2.entrySet()){
-      if(m1.containsKey(variable.getKey())){
+  private void mergeVariableMap(Map<String, Set<String>> m1, Map<String, Set<String>> m2) {
+    for (Entry<String, Set<String>> variable : m2.entrySet()) {
+      if (m1.containsKey(variable.getKey())) {
         m1.get(variable.getKey()).addAll(variable.getValue());
       } else {
         m1.put(variable.getKey(), variable.getValue());
