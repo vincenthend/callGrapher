@@ -10,6 +10,7 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 import util.builder.ControlFlowGraphTranslator;
 
@@ -20,31 +21,41 @@ public class ControlFlowGraphDiff {
   private static final float BETA = 1;
   private static final float GAMMA = 1;
 
-  public ControlFlowBlockGraph diffGraph(ControlFlowGraph g1, ControlFlowGraph g2) {
+  private ControlFlowGraph g1;
+  private ControlFlowGraph g2;
+  private ControlFlowBlockGraph blockGraphOld;
+  private ControlFlowBlockGraph blockGraphNew;
+  private BidiMap<PhpBasicBlock, PhpBasicBlock> mapping;
+  private SimilarityTable similarityTable;
+
+
+  public ControlFlowGraphDiff(ControlFlowGraph g1, ControlFlowGraph g2){
+    this.g1 = g1;
+    this.g2 = g2;
+
+    if(g1 != null){
+      blockGraphOld = new ControlFlowGraphTranslator().translateToBlockGraph(g1);
+    }
+    if(g2 != null){
+      blockGraphNew = new ControlFlowGraphTranslator().translateToBlockGraph(g2);
+    }
+    computeSimilarityTable();
+    matchBasicBlock();
+  }
+
+  public ControlFlowBlockGraph diffGraph() {
     if (g1 != null && g2 != null) {
-      ControlFlowBlockGraph b1 = new ControlFlowGraphTranslator().translateToBlockGraph(g1);
-      ControlFlowBlockGraph b2 = new ControlFlowGraphTranslator().translateToBlockGraph(g2);
-
-      SimilarityTable similarityTable = computeSimilarityTable(b1, b2);
-      BidiMap<PhpBasicBlock, PhpBasicBlock> blockMatchingMap = matchBasicBlock(similarityTable);
-
-      return diffBlockControlFlowGraph(blockMatchingMap, b1, b2);
+      return diffBlockControlFlowGraph();
     } else if (g1 == null) {
-      return new ControlFlowGraphTranslator().translateToBlockGraph(g2);
+      return blockGraphNew.cloneObject();
     } else {
-      return new ControlFlowGraphTranslator().translateToBlockGraph(g1);
+      return blockGraphOld.cloneObject();
     }
   }
 
-  public ControlFlowBlockGraph diffGraphAnnotate(ControlFlowGraph g1, ControlFlowGraph g2) {
+  public ControlFlowBlockGraph diffGraphAnnotate() {
     if (g1 != null && g2 != null) {
-      ControlFlowBlockGraph b1 = new ControlFlowGraphTranslator().translateToBlockGraph(g1);
-      ControlFlowBlockGraph b2 = new ControlFlowGraphTranslator().translateToBlockGraph(g2);
-
-      SimilarityTable similarityTable = computeSimilarityTable(b1, b2);
-      BidiMap<PhpBasicBlock, PhpBasicBlock> blockMatchingMap = matchBasicBlock(similarityTable);
-
-      return annotateBlockControlFlowGraph(blockMatchingMap, b1, b2);
+      return markChangedBlock();
     } else if (g1 == null) {
       ControlFlowBlockGraph cfgb = new ControlFlowGraphTranslator().translateToBlockGraph(g2);
       DepthFirstIterator<PhpBasicBlock, DefaultEdge> iterator = new DepthFirstIterator<>(cfgb.getGraph());
@@ -98,12 +109,10 @@ public class ControlFlowGraphDiff {
   /**
    * Compute the similarity table between two graphs.
    *
-   * @param blockGraphOld old/source graph
-   * @param blockGraphNew new / destination
    * @return {@link SimilarityTable} between the two graphs.
    */
-  private SimilarityTable computeSimilarityTable(ControlFlowBlockGraph blockGraphOld, ControlFlowBlockGraph blockGraphNew) {
-    SimilarityTable similarityTable = new SimilarityTable(blockGraphOld, blockGraphNew);
+  private void computeSimilarityTable() {
+    similarityTable = new SimilarityTable(blockGraphOld, blockGraphNew);
     Set<PhpBasicBlock> blockSetOld = blockGraphOld.getGraph().vertexSet();
     Set<PhpBasicBlock> blockSetNew = blockGraphNew.getGraph().vertexSet();
 
@@ -145,92 +154,117 @@ public class ControlFlowGraphDiff {
         similarityTable.setSimilarity(blockOld, blockNew, similarity);
       }
     }
-
-    return similarityTable;
   }
 
 
   /**
    * Match basic blocks from control flow graph using similarityTable computed.
    *
-   * @param similarityTable computed similarityTable
    * @return mapping between basic blocks.
    */
-  private BidiMap<PhpBasicBlock, PhpBasicBlock> matchBasicBlock(SimilarityTable similarityTable) {
-    BidiMap<PhpBasicBlock, PhpBasicBlock> blockMapping = new DualHashBidiMap<>();
+  private void matchBasicBlock() {
+    mapping = new DualHashBidiMap<>();
     Queue<BlockSimilarity> similarities = similarityTable.getSortedSimilarity();
 
     // Match blocks by iterating queue
     while (!similarities.isEmpty()) {
       BlockSimilarity blockSim = similarities.remove();
-      if (!blockMapping.containsKey(blockSim.getOldBlock()) && !blockMapping.containsValue(blockSim.getNewBlock())) {
-        blockMapping.put(blockSim.getOldBlock(), blockSim.getNewBlock());
+      if (!mapping.containsKey(blockSim.getOldBlock()) && !mapping.containsValue(blockSim.getNewBlock())) {
+        mapping.put(blockSim.getOldBlock(), blockSim.getNewBlock());
+      }
+    }
+  }
+
+  private ControlFlowBlockGraph diffBlockControlFlowGraph() {
+    ControlFlowBlockGraph markedGraph = markChangedBlock();
+    Set<PhpBasicBlock> vertexSet = markedGraph.getGraph().vertexSet();
+    PhpBasicBlock[] vertices = vertexSet.toArray(new PhpBasicBlock[vertexSet.size()]);
+    for(int i = 0; i < vertices.length; i++){
+      if(!vertices[i].isChanged()){
+        markedGraph.getGraph().removeVertex(vertices[i]);
       }
     }
 
-    return blockMapping;
+    return markedGraph;
   }
 
-  private ControlFlowBlockGraph diffBlockControlFlowGraph(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew) {
-    ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(gOld);
+  private ControlFlowBlockGraph markChangedBlock() {
+    ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(blockGraphOld);
+    Set<PhpBasicBlock> changedNode = new HashSet<>();
 
-    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<>(gOld.getGraph());
-    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorNew = new DepthFirstIterator<>(gNew.getGraph());
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<>(blockGraphOld.getGraph());
+    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorNew = new DepthFirstIterator<>(blockGraphNew.getGraph());
 
     // Traverse old graph
     while (iteratorOld.hasNext()) {
       PhpBasicBlock blockOld = iteratorOld.next();
       PhpBasicBlock blockNew = mapping.getOrDefault(blockOld, null);
       if (blockNew != null) {
-        boolean changed = isBasicBlockChanged(mapping, gOld, gNew, blockOld, blockNew);
-        if (!changed) {
-          blockGraph.getGraph().removeVertex(blockOld);
-        } else {
+        if(isBasicBlockChanged(blockOld, blockNew)) {
           blockOld.setChanged(true);
+          changedNode.add(blockOld);
         }
       } else {
         blockOld.setChanged(true);
+        changedNode.add(blockOld);
       }
     }
 
+    // Find added block in the future
     while (iteratorNew.hasNext()) {
       PhpBasicBlock blockNew = iteratorNew.next();
       PhpBasicBlock blockOld = mapping.getKey(blockNew);
       if (blockOld == null) {
         Set<PhpBasicBlock> neighborBlockSet = new HashSet<>();
-        neighborBlockSet.addAll(Graphs.successorListOf(gNew.getGraph(),blockNew));
-        neighborBlockSet.addAll(Graphs.predecessorListOf(gNew.getGraph(),blockNew));
+        neighborBlockSet.addAll(Graphs.successorListOf(blockGraphNew.getGraph(),blockNew));
+        neighborBlockSet.addAll(Graphs.predecessorListOf(blockGraphNew.getGraph(),blockNew));
         for (PhpBasicBlock block : neighborBlockSet) {
           PhpBasicBlock neighborBlock = mapping.getKey(block);
           if(neighborBlock != null){
             neighborBlock.setChanged(true);
+            changedNode.add(neighborBlock);
           }
         }
       }
     }
 
-    return blockGraph;
+//    markChangedClosure(changedNode);
+
+    return blockGraph.cloneObject();
   }
 
-  private ControlFlowBlockGraph annotateBlockControlFlowGraph(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew) {
-    ControlFlowBlockGraph blockGraph = new ControlFlowBlockGraph(gOld);
+  private void markChangedClosure(Set<PhpBasicBlock> blockSet){
+    if(!blockSet.isEmpty()) {
+      List<Set<PhpBasicBlock>> reachableNodeList = new ArrayList<>();
+      for (PhpBasicBlock block : blockSet) {
+        BreadthFirstIterator<PhpBasicBlock, DefaultEdge> bfs = new BreadthFirstIterator<>(blockGraphOld.getGraph(), block);
+        Set<PhpBasicBlock> reachableSet = new HashSet<>();
+        while (bfs.hasNext()) {
+          reachableSet.add(bfs.next());
+        }
+        reachableNodeList.add(reachableSet);
+      }
 
-    DepthFirstIterator<PhpBasicBlock, DefaultEdge> iteratorOld = new DepthFirstIterator<>(gOld.getGraph());
+      // Compute intersection
+      Set<PhpBasicBlock> closure = new HashSet<>();
+      for(Set<PhpBasicBlock> reachableSet : reachableNodeList){
+        Set<PhpBasicBlock> temp = new HashSet<>();
+        temp.addAll(reachableNodeList.get(0));
+        for(Set<PhpBasicBlock> reachableSet2 : reachableNodeList) {
+          if(reachableSet2 != reachableSet) {
+            temp.retainAll(reachableSet2);
+            closure.addAll(temp);
+          }
+        }
+      }
 
-    // Traverse old graph
-    while (iteratorOld.hasNext()) {
-      PhpBasicBlock blockOld = iteratorOld.next();
-      PhpBasicBlock blockNew = mapping.getOrDefault(blockOld, null);
-      if (blockNew != null) {
-        blockOld.setChanged(isBasicBlockChanged(mapping, gOld, gNew, blockOld, blockNew));
-      } else {
-        blockOld.setChanged(true);
+      for(PhpBasicBlock block : closure){
+        block.setChanged(true);
       }
     }
-    return blockGraph;
   }
 
-  private boolean isBasicBlockChanged(BidiMap<PhpBasicBlock, PhpBasicBlock> mapping, ControlFlowBlockGraph gOld, ControlFlowBlockGraph gNew, PhpBasicBlock blockOld, PhpBasicBlock blockNew) {
+  private boolean isBasicBlockChanged(PhpBasicBlock blockOld, PhpBasicBlock blockNew) {
     boolean isChanged = true;
     List<PhpStatement> stateOld = blockOld.getBlockStatements();
     List<PhpStatement> stateNew = blockNew.getBlockStatements();
@@ -242,35 +276,35 @@ public class ControlFlowGraphDiff {
         contentSame &= stateOld.get(i).toString().equals(stateNew.get(i).toString());
       }
 
-      if (contentSame) {
-        // Collect all parent & child node
-        Set<PhpBasicBlock> neighborsOldList = new HashSet<>();
-        neighborsOldList.addAll(Graphs.neighborListOf(gOld.getGraph(), blockOld));
-        // Check for same parent&child node
-        boolean sameNeighborContent = true;
-        for (PhpBasicBlock oldNeighborBlock : neighborsOldList) {
-          PhpBasicBlock newNeighborsBlock = mapping.getOrDefault(oldNeighborBlock, null);
-          if (newNeighborsBlock != null) {
-            List<PhpStatement> stateNeighNew = newNeighborsBlock.getBlockStatements();
-            List<PhpStatement> stateNeighOld = oldNeighborBlock.getBlockStatements();
-
-
-            if (stateNeighNew.size() == stateNeighOld.size()) {
-              for (int j = 0; j < stateNeighOld.size(); j++) {
-                sameNeighborContent &= stateNeighOld.get(j).toString().equals(stateNeighNew.get(j).toString());
-              }
-            } else {
-              sameNeighborContent = false;
-            }
-          }
-        }
-
-        if (sameNeighborContent) {
+      if (contentSame && isNeighborChanged(blockOld)) {
           isChanged = false;
-        }
       }
     }
 
     return isChanged;
+  }
+
+  private boolean isNeighborChanged(PhpBasicBlock blockOld){
+    // Collect all parent & child node
+    Set<PhpBasicBlock> neighborsOldList = new HashSet<>();
+    neighborsOldList.addAll(Graphs.neighborListOf(blockGraphOld.getGraph(), blockOld));
+    // Check for same parent&child node
+    boolean sameNeighborContent = true;
+    for (PhpBasicBlock oldNeighborBlock : neighborsOldList) {
+      PhpBasicBlock newNeighborsBlock = mapping.getOrDefault(oldNeighborBlock, null);
+      if (newNeighborsBlock != null) {
+        List<PhpStatement> stateNeighNew = newNeighborsBlock.getBlockStatements();
+        List<PhpStatement> stateNeighOld = oldNeighborBlock.getBlockStatements();
+
+        if (stateNeighNew.size() == stateNeighOld.size()) {
+          for (int j = 0; j < stateNeighOld.size(); j++) {
+            sameNeighborContent &= stateNeighOld.get(j).toString().equals(stateNeighNew.get(j).toString());
+          }
+        } else {
+          sameNeighborContent = false;
+        }
+      }
+    }
+    return sameNeighborContent;
   }
 }

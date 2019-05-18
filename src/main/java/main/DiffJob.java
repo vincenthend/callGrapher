@@ -112,12 +112,12 @@ public class DiffJob implements Runnable {
       cfgNew = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
     }
 
-    ControlFlowGraphDiff diff = new ControlFlowGraphDiff();
+    ControlFlowGraphDiff diff = new ControlFlowGraphDiff(cfgOld, cfgNew);
     ControlFlowBlockGraph diffGraph;
     if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
-      diffGraph = diff.diffGraph(cfgOld, cfgNew);
+      diffGraph = diff.diffGraph();
     } else {
-      diffGraph = diff.diffGraphAnnotate(cfgOld, cfgNew);
+      diffGraph = diff.diffGraphAnnotate();
     }
 
     //

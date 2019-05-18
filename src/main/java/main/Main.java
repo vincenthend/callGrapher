@@ -18,20 +18,20 @@ import java.util.concurrent.Executors;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {3};
+    Integer[] jobSelection = {0,1,2,3,4,5,6,8};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
-//    ExecutorService executorService = Executors.newFixedThreadPool(4);
-//    for (DiffJobData diffJobData : jobList) {
-//      Logger.info("Starting job with ID : " + diffJobData.getId());
-//      executorService.submit(new DiffJob(diffJobData, 2));
-//    }
-//    executorService.shutdown();
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
+    for (DiffJobData diffJobData : jobList) {
+      Logger.info("Starting job with ID : " + diffJobData.getId());
+      executorService.submit(new DiffJob(diffJobData, 2));
+    }
+    executorService.shutdown();
 
     // SINGULAR DEBUG
-    jobList.get(0).getDiffJobOptions().setShownInterface("diff");
-    new DiffJob(jobList.get(0), 2).diffCommit();
+//    jobList.get(0).getDiffJobOptions().setShownInterface("diff");
+//    new DiffJob(jobList.get(0), 0).diffCommit();
 
     // DEBUG GUI
 //    jobList.get(2).getDiffJobOptions().setShownInterface("cfgOld");

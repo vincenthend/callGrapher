@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 public class PhpBasicBlock {
+  private int id;
   private boolean changed;
   private LinkedList<PhpStatement> blockStatements;
 
@@ -15,12 +16,16 @@ public class PhpBasicBlock {
     changed = false;
   }
 
-  public PhpBasicBlock cloneObject(){
-    PhpBasicBlock p = new PhpBasicBlock();
-    for(PhpStatement s : blockStatements) {
-      p.addStatement(s.cloneObject());
+  public PhpBasicBlock(PhpBasicBlock b){
+    blockStatements = new LinkedList<>();
+    for(PhpStatement s : b.blockStatements) {
+      addStatement(s.cloneObject());
     }
-    return p;
+    changed = b.changed;
+  }
+
+  public PhpBasicBlock cloneObject(){
+    return new PhpBasicBlock(this);
   }
 
   public void addStatement(PhpStatement statement) {
@@ -51,5 +56,9 @@ public class PhpBasicBlock {
 
   public void setChanged(boolean changed) {
     this.changed = changed;
+  }
+
+  public boolean isChanged() {
+    return changed;
   }
 }
