@@ -24,7 +24,6 @@ public class FlowAnalyzer {
 
   public void analyze(PhpFunction function) {
     if (function.getCode() != null) {
-      Logger.info("Visiting " + function.getCalledName());
       PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData, projectData.getClass(function.getClassName()));
 
       // Read parser

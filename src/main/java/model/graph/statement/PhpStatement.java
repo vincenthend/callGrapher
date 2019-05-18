@@ -2,7 +2,7 @@ package model.graph.statement;
 
 import model.graph.statement.block.PhpBasicBlock;
 
-abstract public class PhpStatement implements Cloneable {
+abstract public class PhpStatement {
   protected int statementId;
   protected StatementType statementType;
   protected String statementContent;
@@ -14,19 +14,18 @@ abstract public class PhpStatement implements Cloneable {
     this.statementId = 0;
   }
 
+  PhpStatement(PhpStatement phpStatement){
+    this.statementType = phpStatement.statementType;
+    this.statementId = phpStatement.statementId;
+    this.statementContent = phpStatement.statementContent;
+  }
+
+  public abstract PhpStatement cloneObject();
+
   @Override
   public String toString() {
 //    return "["+ statementId +"] ["+this.statementType.toString() + "]";
     return "["+this.statementType.toString() + "]";
-  }
-
-  @Override
-  public PhpStatement clone() throws CloneNotSupportedException {
-    PhpStatement phpStatement = (PhpStatement) super.clone();
-    phpStatement.statementType = this.statementType;
-    phpStatement.statementContent = this.statementContent;
-    phpStatement.statementId = this.statementId;
-    return phpStatement;
   }
 
   public StatementType getStatementType() {

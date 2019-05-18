@@ -73,8 +73,6 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
       PhpFunction function = new PhpFunction(functionName, className, code, parameters);
       projectData.addFunction(function);
       c.getFunctionMap().put(functionName, function);
-
-      Logger.info("Function Member " + function.getCalledName() + " found");
     } else if(!ctx.variableInitializer().isEmpty()){
       for(PhpParser.VariableInitializerContext varContext : ctx.variableInitializer()) {
         CharStream input = ctx.start.getInputStream();
@@ -112,8 +110,6 @@ public class PhpDeclarationListener extends PhpParserBaseListener {
     // Add function to project data
     PhpFunction function = new PhpFunction(functionName, null, code, parameters);
     projectData.addFunction(function);
-
-    Logger.info("PhpFunction " + function.getCalledName() + " found");
   }
 
   @Override

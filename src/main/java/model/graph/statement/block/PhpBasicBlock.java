@@ -15,6 +15,14 @@ public class PhpBasicBlock {
     changed = false;
   }
 
+  public PhpBasicBlock cloneObject(){
+    PhpBasicBlock p = new PhpBasicBlock();
+    for(PhpStatement s : blockStatements) {
+      p.addStatement(s.cloneObject());
+    }
+    return p;
+  }
+
   public void addStatement(PhpStatement statement) {
     blockStatements.add(statement);
   }

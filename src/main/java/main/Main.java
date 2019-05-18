@@ -18,19 +18,20 @@ import java.util.concurrent.Executors;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {0,1,2,3,4,5,6,8};
+    Integer[] jobSelection = {3};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
-    ExecutorService executorService = Executors.newFixedThreadPool(4);
-    for (DiffJobData diffJobData : jobList) {
-      Logger.info("Starting job with ID : " + diffJobData.getId());
-      executorService.submit(new DiffJob(diffJobData, -1));
-    }
-    executorService.shutdown();
+//    ExecutorService executorService = Executors.newFixedThreadPool(4);
+//    for (DiffJobData diffJobData : jobList) {
+//      Logger.info("Starting job with ID : " + diffJobData.getId());
+//      executorService.submit(new DiffJob(diffJobData, 2));
+//    }
+//    executorService.shutdown();
 
     // SINGULAR DEBUG
-//    new DiffJob(jobList.get(0)).diffCommit();
+    jobList.get(0).getDiffJobOptions().setShownInterface("diff");
+    new DiffJob(jobList.get(0), 2).diffCommit();
 
     // DEBUG GUI
 //    jobList.get(2).getDiffJobOptions().setShownInterface("cfgOld");
@@ -57,17 +58,17 @@ public class Main {
       analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
       analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
     }
-//    analyzerOld.normalizeFunction(shownFunction, -1);
-    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getFunction(shownFunction).getControlFlowGraph();
+    analyzerOld.normalizeFunction(shownFunction, -1);
+    ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction).getControlFlowGraph();
 
-    GraphView view = new GraphView(cfgOld);
+//    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
 //    GraphView view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
-    view.show();
+//    view.show();
 
-//    String fileName = String.format("%03d", diffJobData.getId());
-//    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
-//    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
-//    ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
+    String fileName = String.format("%03d", diffJobData.getId());
+    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
+    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
+    ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul",exportFormat);
   }
 }

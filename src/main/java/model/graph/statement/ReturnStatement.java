@@ -7,15 +7,18 @@ public class ReturnStatement extends PhpStatement {
     this.returnedVar = returnedVar;
   }
 
+  public ReturnStatement(ReturnStatement r){
+    super(r);
+    this.returnedVar = r.returnedVar;
+  }
+
   public String getReturnedVar() {
     return returnedVar;
   }
 
   @Override
-  public ReturnStatement clone() throws CloneNotSupportedException {
-    ReturnStatement statement = (ReturnStatement) super.clone();
-    statement.returnedVar = this.returnedVar;
-    return statement;
+  public PhpStatement cloneObject() {
+    return new ReturnStatement(this);
   }
 
   @Override

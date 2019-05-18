@@ -1,6 +1,5 @@
 package util.builder;
 
-import logger.Logger;
 import model.ProjectData;
 import model.graph.ControlFlowGraph;
 import model.graph.statement.*;
@@ -172,91 +171,88 @@ public class ControlFlowNormalizer {
    */
   public Map<String, Set<String>> normalizeFunctionCall(PhpFunction currentFunction, Map<String, Set<String>> previousVarMap, PhpStatement callStatement, int depth) {
     // Initialize variable map with constructor defined variables
-    FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
-    Map<String, Set<String>> initialVarMap;
-    Map<String, Set<String>> returnVarMap;
+    if (depth < maxDepth || maxDepth < 0) {
+      FunctionCallStatement funcCall = (FunctionCallStatement) callStatement;
+      Map<String, Set<String>> initialVarMap;
+      Map<String, Set<String>> returnVarMap;
 
-    initialVarMap = new HashMap<>();
-    returnVarMap = new HashMap<>();
+      initialVarMap = new HashMap<>();
+      returnVarMap = new HashMap<>();
 
-    mergeVariableMap(initialVarMap, populateAssignment(currentFunction, funcCall));
-    mergeVariableMap(initialVarMap, previousVarMap);
-    mergeVariableMap(returnVarMap, previousVarMap);
+      mergeVariableMap(initialVarMap, populateAssignment(currentFunction, funcCall));
+      mergeVariableMap(initialVarMap, previousVarMap);
+      mergeVariableMap(returnVarMap, previousVarMap);
 
-    // List all possible types
-    Set<String> possibleTypes = getVariableType(initialVarMap, funcCall.getCallerVariable());
-    List<PhpFunction> functionList = new ArrayList<>();
+      // List all possible types
+      Set<String> possibleTypes = getVariableType(initialVarMap, funcCall.getCallerVariable());
+      List<PhpFunction> functionList = new ArrayList<>();
 
-    // List all possible function for this statement
-    // Handle if it has a possible type, if it is a local function, or if the class name has been defined
-    for (String type : possibleTypes) {
-      PhpFunction f;
-      f = projectData.getFunction(type + "::" + funcCall.getFunction().getFunctionName());
-      // If f is found and f is not the same function (recursive) add it to functionList
+      // List all possible function for this statement
+      // Handle if it has a possible type, if it is a local function, or if the class name has been defined
+      for (String type : possibleTypes) {
+        PhpFunction f;
+        f = projectData.getFunction(type + "::" + funcCall.getFunction().getFunctionName());
+        // If f is found and f is not the same function (recursive) add it to functionList
+        if (f != null && !f.getCalledName().equals(currentFunction.getCalledName())) {
+          functionList.add(f);
+        }
+      }
+
+      // if function has no class name
+      PhpFunction f = projectData.getFunction(funcCall.getFunction().getFunctionName());
       if (f != null && !f.getCalledName().equals(currentFunction.getCalledName())) {
         functionList.add(f);
       }
-    }
 
-    // if function has no class name
-    PhpFunction f = projectData.getFunction(funcCall.getFunction().getFunctionName());
-    if (f != null && !f.getCalledName().equals(currentFunction.getCalledName())) {
-      functionList.add(f);
-    }
-
-    // if class name has been found from the start
-    if (funcCall.getFunction().getClassName() != null) {
-      f = projectData.getFunction(funcCall.getFunction().getCalledName());
-      if (f != null && !f.getCalledName().equals(currentFunction.getCalledName())) {
-        functionList.add(f);
-      }
-    }
-
-    // For each possible functions, add the return to variable map,
-    if (!functionList.isEmpty()) {
-      // Remove connection between successor and funccall
-      List<PhpStatement> succList = Graphs.successorListOf(currentFunction.getControlFlowGraph().getGraph(), funcCall);
-      for (PhpStatement succ : succList) {
-        currentFunction.getControlFlowGraph().getGraph().removeEdge(funcCall, succ);
+      // if class name has been found from the start
+      if (funcCall.getFunction().getClassName() != null) {
+        f = projectData.getFunction(funcCall.getFunction().getCalledName());
+        if (f != null && !f.getCalledName().equals(currentFunction.getCalledName())) {
+          functionList.add(f);
+        }
       }
 
-      for (PhpFunction function : functionList) {
-        // Clone and normalize functions
-        try {
-          f = function.clone();
+      // For each possible functions, add the return to variable map,
+      if (!functionList.isEmpty()) {
+        // Remove connection between successor and funccall
+        List<PhpStatement> succList = Graphs.successorListOf(currentFunction.getControlFlowGraph().getGraph(), funcCall);
+        for (PhpStatement succ : succList) {
+          currentFunction.getControlFlowGraph().getGraph().removeEdge(funcCall, succ);
+        }
+
+        for (PhpFunction function : functionList) {
+          // Clone and normalize functions
+          f = function.cloneObject();
           Map<String, Set<String>> functionVariables = remapVariables(initialVarMap, funcCall, f);
 
           // Get function return type and add it to variable map
           // System.out.println(space+" - Normalize "+f.getCalledName()+" from "+currentFunction.getCalledName());
-          if (depth <= maxDepth || maxDepth < 0) {
-            Set<String> functionReturn = normalize(f, functionVariables, depth++);
-            if (functionReturn != null) {
-              addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
-            }
+          Set<String> functionReturn = normalize(f, functionVariables, depth++);
+          if (functionReturn != null) {
+            addVariableType(returnVarMap, callStatement.getStatementContent(), functionReturn);
+          }
 
-            ControlFlowGraph funcCfg = f.getControlFlowGraph();
+          ControlFlowGraph funcCfg = f.getControlFlowGraph();
 
-            //Append CFG to func call and successor
-            currentFunction.getControlFlowGraph().appendGraph(funcCall, funcCfg);
-            for (PhpStatement lastVert : funcCfg.getLastVertices()) {
-              for (PhpStatement succ : succList) {
-                currentFunction.getControlFlowGraph().getGraph().addEdge(lastVert, succ);
-              }
-            }
-
-            // Add last vertices if funccall is the last statement
-            if (succList.isEmpty()) {
-              currentFunction.getControlFlowGraph().getLastVertices().remove(funcCall);
-              currentFunction.getControlFlowGraph().getLastVertices().addAll(funcCfg.getLastVertices());
+          //Append CFG to func call and successor
+          currentFunction.getControlFlowGraph().appendGraph(funcCall, funcCfg);
+          for (PhpStatement lastVert : funcCfg.getLastVertices()) {
+            for (PhpStatement succ : succList) {
+              currentFunction.getControlFlowGraph().getGraph().addEdge(lastVert, succ);
             }
           }
-        } catch (CloneNotSupportedException e) {
-          Logger.error("Failed to clone");
+
+          // Add last vertices if funccall is the last statement
+          if (succList.isEmpty()) {
+            currentFunction.getControlFlowGraph().getLastVertices().remove(funcCall);
+            currentFunction.getControlFlowGraph().getLastVertices().addAll(funcCfg.getLastVertices());
+          }
         }
       }
+      return returnVarMap;
+    } else {
+      return previousVarMap;
     }
-
-    return returnVarMap;
   }
 
   /**

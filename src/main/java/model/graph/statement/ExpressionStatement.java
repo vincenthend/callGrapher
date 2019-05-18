@@ -7,15 +7,18 @@ public class ExpressionStatement extends PhpStatement {
     this.expressionType = expressionType;
   }
 
-  @Override
-  public String toString() {
-    return super.toString()+" "+getStatementContent()+" ["+expressionType+"]";
+  public ExpressionStatement(ExpressionStatement e){
+    super(e);
+    this.expressionType = e.expressionType;
   }
 
   @Override
-  public ExpressionStatement clone() throws CloneNotSupportedException {
-    ExpressionStatement statement = (ExpressionStatement) super.clone();
-    statement.expressionType = this.expressionType;
-    return statement;
+  public PhpStatement cloneObject() {
+    return new ExpressionStatement(this.expressionType, this.statementContent);
+  }
+
+  @Override
+  public String toString() {
+    return super.toString()+" "+getStatementContent()+" ["+expressionType+"]";
   }
 }

@@ -6,6 +6,15 @@ public class BranchStatement extends PhpStatement {
     super(StatementType.BRANCH, code);
   }
 
+  public BranchStatement(BranchStatement b){
+    super(b);
+  }
+
+  @Override
+  public PhpStatement cloneObject() {
+    return new BranchStatement(this);
+  }
+
   @Override
   public String toString() {
     return super.toString() + " " + statementContent;

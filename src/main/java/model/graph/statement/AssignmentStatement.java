@@ -12,17 +12,21 @@ public class AssignmentStatement extends PhpStatement {
     this.assignEach = false;
   }
 
-  @Override
-  public String toString() {
-    return super.toString()+" "+assignedVariable+" = "+assignedType;
+  public AssignmentStatement(AssignmentStatement a){
+    super(a);
+    this.assignedVariable = a.assignedVariable;
+    this.assignedType = a.assignedType;
+    this.assignEach = a.assignEach;
   }
 
   @Override
-  public AssignmentStatement clone() throws CloneNotSupportedException {
-    AssignmentStatement statement = (AssignmentStatement) super.clone();
-    statement.assignedType = this.assignedType;
-    statement.assignedVariable = this.assignedVariable;
-    return statement;
+  public AssignmentStatement cloneObject() {
+    return new AssignmentStatement(this);
+  }
+
+  @Override
+  public String toString() {
+    return super.toString()+" "+assignedVariable+" = "+assignedType;
   }
 
   public String getAssignedVariable() {

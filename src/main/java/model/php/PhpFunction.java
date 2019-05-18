@@ -2,12 +2,13 @@ package model.php;
 
 import model.graph.ControlFlowGraph;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * PhpClass PhpFunction, contains data about a function
  */
-public class PhpFunction implements Comparable<PhpFunction>, Cloneable{
+public class PhpFunction implements Comparable<PhpFunction>{
   private String functionName;
   private String code;
   private String className;
@@ -20,6 +21,23 @@ public class PhpFunction implements Comparable<PhpFunction>, Cloneable{
     this.className = className;
     this.code = code;
     this.parameters = parameters;
+  }
+
+  public PhpFunction(PhpFunction f){
+    this.functionName = f.functionName;
+    this.className = f.className;
+    this.code = f.code;
+    if(f.parameters != null) {
+      this.parameters = new HashMap<>();
+      for (Map.Entry<String, String> param : f.parameters.entrySet()) {
+        this.parameters.put(param.getKey(), param.getValue());
+      }
+    }
+    this.controlFlowGraph = f.controlFlowGraph.cloneObject();
+  }
+
+  public PhpFunction cloneObject(){
+    return new PhpFunction(this);
   }
 
   public String getCode() {
@@ -76,12 +94,5 @@ public class PhpFunction implements Comparable<PhpFunction>, Cloneable{
   @Override
   public String toString() {
     return getCalledName();
-  }
-
-  @Override
-  public PhpFunction clone() throws CloneNotSupportedException {
-    PhpFunction cloned = new PhpFunction(functionName, className, code, parameters);
-    cloned.controlFlowGraph = controlFlowGraph.clone();
-    return cloned;
   }
 }

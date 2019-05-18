@@ -18,6 +18,19 @@ public class FunctionCallStatement extends PhpStatement {
     this.callerVariable = callerVariable;
   }
 
+  public FunctionCallStatement(FunctionCallStatement f){
+    super(f);
+    this.function = f.function;
+    this.parameterList = new LinkedList<>();
+    this.parameterList.addAll(f.parameterList);
+    this.callerVariable = f.callerVariable;
+  }
+
+  @Override
+  public PhpStatement cloneObject() {
+    return new FunctionCallStatement(this);
+  }
+
   public PhpFunction getFunction() {
     return function;
   }
@@ -33,12 +46,5 @@ public class FunctionCallStatement extends PhpStatement {
   @Override
   public String toString() {
     return super.toString() + " " + function.getCalledName();
-  }
-
-  @Override
-  public FunctionCallStatement clone() throws CloneNotSupportedException {
-    FunctionCallStatement statement = (FunctionCallStatement) super.clone();
-    statement.function = function;
-    return statement;
   }
 }

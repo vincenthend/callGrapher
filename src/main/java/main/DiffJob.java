@@ -141,10 +141,10 @@ public class DiffJob implements Runnable {
         view = new GraphView(new ControlFlowGraphDominators(cfgNew));
         break;
       case "oldBlock":
-        view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
+        view = new GraphView(cfgOld.getFlowBlockGraph());
         break;
       case "newBlock":
-        view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgNew));
+        view = new GraphView(cfgNew.getFlowBlockGraph());
         break;
       default:
         view = null;
@@ -161,11 +161,14 @@ public class DiffJob implements Runnable {
     String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
     if (cfgOld != null) {
       ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
+      ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
     }
     if (cfgNew != null) {
       ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
+      ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
     }
     ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
     ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
+    ControlFlowExporter.exportDot(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff");
   }
 }

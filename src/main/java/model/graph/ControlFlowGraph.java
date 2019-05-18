@@ -16,6 +16,7 @@ public class ControlFlowGraph implements Cloneable {
   private Graph<PhpStatement, DefaultEdge> graph;
   private Set<PhpStatement> lastVertices;
   private PhpStatement firstVertex;
+  private ControlFlowBlockGraph flowBlockGraph;
   private int maxId;
 
   public ControlFlowGraph() {
@@ -23,6 +24,31 @@ public class ControlFlowGraph implements Cloneable {
     firstVertex = null;
     lastVertices = new HashSet<>();
     maxId = 0;
+  }
+
+  public ControlFlowGraph(ControlFlowGraph c){
+    // Clone graph
+    Graph<PhpStatement, DefaultEdge> graphClone = new DefaultDirectedGraph<>(DefaultEdge.class);
+    Map<PhpStatement, PhpStatement> map = new HashMap<>();
+    for (PhpStatement p : c.graph.vertexSet()) {
+      PhpStatement cloneStatement = p.cloneObject();
+      map.put(p, cloneStatement);
+      graphClone.addVertex(cloneStatement);
+    }
+    for (DefaultEdge e : c.graph.edgeSet()) {
+      PhpStatement sourceStat = c.graph.getEdgeSource(e);
+      PhpStatement targetStat = c.graph.getEdgeTarget(e);
+      graphClone.addEdge(map.get(sourceStat), map.get(targetStat));
+    }
+    this.graph = graphClone;
+
+    this.firstVertex = map.get(c.firstVertex);
+    this.lastVertices = new HashSet<>();
+    for (PhpStatement l : c.lastVertices) {
+      this.lastVertices.add(map.get(l));
+    }
+
+    this.maxId = c.maxId;
   }
 
   public Graph<PhpStatement, DefaultEdge> getGraph() {
@@ -157,31 +183,15 @@ public class ControlFlowGraph implements Cloneable {
     }
   }
 
-  @Override
-  public ControlFlowGraph clone() throws CloneNotSupportedException {
-    ControlFlowGraph cfg = (ControlFlowGraph) super.clone();
+  public ControlFlowGraph cloneObject(){
+    return new ControlFlowGraph(this);
+  }
 
-    Graph<PhpStatement, DefaultEdge> graphClone = new DefaultDirectedGraph<>(DefaultEdge.class);
-    Map<PhpStatement, PhpStatement> map = new HashMap<>();
-    for (PhpStatement p : graph.vertexSet()) {
-      PhpStatement cloneStatement = p.clone();
-      map.put(p, cloneStatement);
-      graphClone.addVertex(cloneStatement);
-    }
+  public ControlFlowBlockGraph getFlowBlockGraph() {
+    return flowBlockGraph;
+  }
 
-    for (DefaultEdge e : graph.edgeSet()) {
-      PhpStatement sourceStat = graph.getEdgeSource(e);
-      PhpStatement targetStat = graph.getEdgeTarget(e);
-      graphClone.addEdge(map.get(sourceStat), map.get(targetStat));
-    }
-
-    cfg.graph = graphClone;
-    cfg.firstVertex = map.get(firstVertex);
-    cfg.lastVertices = new HashSet<>();
-    for (PhpStatement l : lastVertices) {
-      cfg.lastVertices.add(map.get(l));
-    }
-
-    return cfg;
+  public void setFlowBlockGraph(ControlFlowBlockGraph flowBlockGraph) {
+    this.flowBlockGraph = flowBlockGraph;
   }
 }

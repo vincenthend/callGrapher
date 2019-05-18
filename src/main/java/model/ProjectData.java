@@ -85,15 +85,13 @@ public class ProjectData {
       PhpFunction function = getFunction(functionName);
       if (function != null) {
         Logger.info("Normalizing " + function.getCalledName());
-        PhpFunction normalizedFunc = function.clone();
+        PhpFunction normalizedFunc = function.cloneObject();
         ControlFlowNormalizer normalizer = new ControlFlowNormalizer(this, maxDepth);
         normalizer.normalize(normalizedFunc);
         normalizedFunctions.put(normalizedFunc.getCalledName(), normalizedFunc);
       } else {
         throw new IllegalStateException();
       }
-    } catch (CloneNotSupportedException e) {
-      Logger.error("Failed to clone");
     } catch (IllegalStateException ex) {
       Logger.error("Function " + functionName + " doesn't exist");
       normalizedFunctions.put(functionName, null);
