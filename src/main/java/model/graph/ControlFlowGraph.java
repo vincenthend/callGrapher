@@ -183,6 +183,28 @@ public class ControlFlowGraph implements Cloneable {
     }
   }
 
+  public void replaceEdge(PhpStatement statement, PhpStatement replacement){
+    graph.addVertex(replacement);
+
+    Set<DefaultEdge> outgoingEdge = graph.outgoingEdgesOf(statement);
+    for(DefaultEdge edge : outgoingEdge){
+      graph.addEdge(replacement, graph.getEdgeTarget(edge));
+    }
+    Set<DefaultEdge> incomingEdge = graph.incomingEdgesOf(statement);
+    for(DefaultEdge edge : incomingEdge){
+      graph.addEdge(graph.getEdgeSource(edge),replacement);
+    }
+
+    graph.removeVertex(statement);
+    if(firstVertex == statement){
+      firstVertex = replacement;
+    }
+    if(lastVertices.contains(statement)){
+      lastVertices.remove(statement);
+      lastVertices.add(replacement);
+    }
+  }
+
   public ControlFlowGraph cloneObject(){
     return new ControlFlowGraph(this);
   }

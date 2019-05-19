@@ -24,7 +24,7 @@ public class FlowAnalyzer {
 
   public void analyze(PhpFunction function) {
     if (function.getCode() != null) {
-      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData, projectData.getClass(function.getClassName()));
+      PhpMethodParserVisitor visitor = new PhpMethodParserVisitor(projectData);
 
       // Read parser
       String input = "<?php " + function.getCode() + "?>";

@@ -62,6 +62,11 @@ public class ControlFlowGraphAnalyzer {
     FlowAnalyzer flowAnalyzer = new FlowAnalyzer(projectData);
     flowAnalyzer.analyzeAll();
 
+    // Abstracting function
+    Logger.info("Abstracting function");
+    AbstractionAnalyzer abstractionAnalyzer = new AbstractionAnalyzer(projectData);
+    abstractionAnalyzer.analyzeAll();
+
     // Reduce function if empty
     Map<String, PhpFunction> functionMap = projectData.getFunctionMap();
     List<String> removeList = new ArrayList<>();

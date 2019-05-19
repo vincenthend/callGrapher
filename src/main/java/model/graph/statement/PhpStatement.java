@@ -8,13 +8,13 @@ abstract public class PhpStatement {
   protected String statementContent;
   protected PhpBasicBlock basicBlock;
 
-  PhpStatement(StatementType type, String code) {
+  public PhpStatement(StatementType type, String code) {
     this.statementType = type;
     this.statementContent = code;
     this.statementId = 0;
   }
 
-  PhpStatement(PhpStatement phpStatement){
+  public PhpStatement(PhpStatement phpStatement) {
     this.statementType = phpStatement.statementType;
     this.statementId = phpStatement.statementId;
     this.statementContent = phpStatement.statementContent;
@@ -25,7 +25,7 @@ abstract public class PhpStatement {
   @Override
   public String toString() {
 //    return "["+ statementId +"] ["+this.statementType.toString() + "]";
-    return "["+this.statementType.toString() + "]";
+    return "[" + this.statementType.toString() + "]";
   }
 
   public StatementType getStatementType() {

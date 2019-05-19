@@ -1,5 +1,6 @@
 package util.iterator;
 
+import logger.Logger;
 import model.graph.ControlFlowGraph;
 import model.graph.statement.PhpStatement;
 import org.jgrapht.Graph;
@@ -53,6 +54,7 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   @Override
   public PhpStatement next() {
     currentStatement = statementStack.pop();
+    Logger.error(currentStatement.toString());
     if(!parentStack.isEmpty()){
       currentParent = parentStack.pop();
     }

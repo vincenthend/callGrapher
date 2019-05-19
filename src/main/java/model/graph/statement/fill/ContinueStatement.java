@@ -1,4 +1,7 @@
-package model.graph.statement;
+package model.graph.statement.fill;
+
+import model.graph.statement.PhpStatement;
+import model.graph.statement.StatementType;
 
 public class ContinueStatement extends PhpStatement {
   public ContinueStatement() {

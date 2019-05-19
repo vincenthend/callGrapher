@@ -5,7 +5,8 @@ import grammar.PhpParserBaseVisitor;
 import model.ProjectData;
 import model.graph.ControlFlowGraph;
 import model.graph.statement.*;
-import model.php.PhpClass;
+import model.graph.statement.fill.BreakStatement;
+import model.graph.statement.fill.ContinueStatement;
 import model.php.PhpFunction;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGraph> {
   private ProjectData projectData;
 
-  public PhpMethodParserVisitor(ProjectData p, PhpClass currentClass) {
+  public PhpMethodParserVisitor(ProjectData p) {
     super();
     this.projectData = p;
   }
@@ -55,16 +56,19 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
-    graph.addStatement(new BranchStatement(code));
 
-    ControlFlowGraph parentheseGraph;
+    ControlFlowGraph parenthesesGraph;
     ControlFlowGraph statementGraph;
 
     // Visit conditions and append branch conditions
-    parentheseGraph = visit(ctx.parenthesis().expression());
-    graph.appendGraph(parentheseGraph);
+    parenthesesGraph = visit(ctx.parenthesis().expression());
+
+    BranchStatement branchStatement = new BranchStatement(code, new ArrayList<>(parenthesesGraph.getGraph().vertexSet()));
+    graph.addStatement(branchStatement);
+    graph.appendGraph(parenthesesGraph);
 
     PhpStatement branchPoint = graph.getLastVertices().iterator().next();
+
 //    PhpStatement branch_point = new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT);
 //    graph.addStatement(branch_point);
 
@@ -78,27 +82,27 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     if (!ctx.elseIfStatement().isEmpty()) {
       for (PhpParser.ElseIfStatementContext e : ctx.elseIfStatement()) {
         // Visit elseif's condition and append to previous conditions
-        parentheseGraph = new ControlFlowGraph();
-        parentheseGraph.appendGraph(visit(e.parenthesis().expression()));
+        parenthesesGraph = new ControlFlowGraph();
+        parenthesesGraph.appendGraph(visit(e.parenthesis().expression()));
 //        par_graph.addStatement(new BranchStatement(BranchStatement.BranchStatementType.BRANCH_POINT));
 
         // Visit block and append to conditions
         statementGraph = visit(e.statement());
-        parentheseGraph.appendGraph(statementGraph);
+        parenthesesGraph.appendGraph(statementGraph);
 
-        graph.appendGraph(branchPoint, parentheseGraph);
+        graph.appendGraph(branchPoint, parenthesesGraph);
       }
     } else if (!ctx.elseIfColonStatement().isEmpty()) {
       for (PhpParser.ElseIfColonStatementContext e : ctx.elseIfColonStatement()) {
         // Visit elseif's condition and append to previous conditions
-        parentheseGraph = new ControlFlowGraph();
-        parentheseGraph.appendGraph(visit(e.parenthesis().expression()));
+        parenthesesGraph = new ControlFlowGraph();
+        parenthesesGraph.appendGraph(visit(e.parenthesis().expression()));
 
         // Visit block and append to conditions
         statementGraph = visit(e.innerStatementList());
-        parentheseGraph.appendGraph(statementGraph);
+        parenthesesGraph.appendGraph(statementGraph);
 
-        graph.appendGraph(branchPoint, parentheseGraph);
+        graph.appendGraph(branchPoint, parenthesesGraph);
       }
     }
 
@@ -124,16 +128,16 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     CharStream input = ctx.start.getInputStream();
     Interval interval = new Interval(ctx.parenthesis().expression().start.getStartIndex(), ctx.parenthesis().expression().stop.getStopIndex());
     String code = input.getText(interval);
-    graph.addStatement(new BranchStatement(code));
 
     // Append condition as branchPoint
-    graph.appendGraph(visit(ctx.parenthesis().expression()));
+    ControlFlowGraph parenthesesGraph = visit(ctx.parenthesis().expression());
+    graph.addStatement(new BranchStatement(code, new ArrayList<>(parenthesesGraph.getGraph().vertexSet())));
+    graph.appendGraph(parenthesesGraph);
     PhpStatement branchPoint = graph.getLastVertices().iterator().next();
 
     // Get switch condition
     if (!ctx.switchBlock().isEmpty()) {
       ControlFlowGraph switchGraph = new ControlFlowGraph();
-      List<PhpStatement> caseStatements = new ArrayList<>();
 
       List<ParseTree> defaultParsedStatement = new LinkedList<>();
       boolean foundDefault = false;
@@ -217,7 +221,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
 
   @Override
   public ControlFlowGraph visitForStatement(PhpParser.ForStatementContext ctx) {
-    ControlFlowGraph init = null;
+    ControlFlowGraph init;
     ControlFlowGraph expression = null;
     ControlFlowGraph update = null;
     if (ctx.forInit() != null) {
