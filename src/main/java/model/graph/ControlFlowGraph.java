@@ -26,7 +26,7 @@ public class ControlFlowGraph implements Cloneable {
     maxId = 0;
   }
 
-  public ControlFlowGraph(ControlFlowGraph c){
+  public ControlFlowGraph(ControlFlowGraph c) {
     // Clone graph
     Graph<PhpStatement, DefaultEdge> graphClone = new DefaultDirectedGraph<>(DefaultEdge.class);
     Map<PhpStatement, PhpStatement> map = new HashMap<>();
@@ -183,29 +183,52 @@ public class ControlFlowGraph implements Cloneable {
     }
   }
 
-  public void replaceEdge(PhpStatement statement, PhpStatement replacement){
+  public void replaceStatement(PhpStatement statement, PhpStatement replacement) {
     graph.addVertex(replacement);
 
     Set<DefaultEdge> outgoingEdge = graph.outgoingEdgesOf(statement);
-    for(DefaultEdge edge : outgoingEdge){
+    for (DefaultEdge edge : outgoingEdge) {
       graph.addEdge(replacement, graph.getEdgeTarget(edge));
     }
     Set<DefaultEdge> incomingEdge = graph.incomingEdgesOf(statement);
-    for(DefaultEdge edge : incomingEdge){
-      graph.addEdge(graph.getEdgeSource(edge),replacement);
+    for (DefaultEdge edge : incomingEdge) {
+      graph.addEdge(graph.getEdgeSource(edge), replacement);
     }
 
     graph.removeVertex(statement);
-    if(firstVertex == statement){
+    if (firstVertex == statement) {
       firstVertex = replacement;
     }
-    if(lastVertices.contains(statement)){
+    if (lastVertices.contains(statement)) {
       lastVertices.remove(statement);
       lastVertices.add(replacement);
     }
   }
 
-  public ControlFlowGraph cloneObject(){
+  public void removeStatement(PhpStatement statement) {
+    if (firstVertex != statement) {
+      Set<DefaultEdge> outgoingEdge = graph.outgoingEdgesOf(statement);
+      Set<DefaultEdge> incomingEdge = graph.incomingEdgesOf(statement);
+      for (DefaultEdge inEdge : incomingEdge) {
+        for (DefaultEdge outEdge : outgoingEdge) {
+          graph.addEdge(graph.getEdgeSource(inEdge), graph.getEdgeTarget(outEdge));
+        }
+      }
+
+      graph.removeVertex(statement);
+
+      if (lastVertices.contains(statement)) {
+        lastVertices.remove(statement);
+      }
+      if (lastVertices.isEmpty()) {
+        for (DefaultEdge inEdge : incomingEdge) {
+          lastVertices.add(graph.getEdgeSource(inEdge));
+        }
+      }
+    }
+  }
+
+  public ControlFlowGraph cloneObject() {
     return new ControlFlowGraph(this);
   }
 

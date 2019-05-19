@@ -2,6 +2,7 @@ package analyzer;
 
 import model.ProjectData;
 import model.graph.ControlFlowGraph;
+import model.graph.statement.AssignmentStatement;
 import model.graph.statement.PhpStatement;
 import model.graph.statement.special.SpecialStatement;
 import model.php.PhpFunction;
@@ -26,6 +27,7 @@ public class AbstractionAnalyzer {
       ControlFlowGraph cfg = function.getControlFlowGraph();
       DepthFirstIterator<PhpStatement, DefaultEdge> iterator = new DepthFirstIterator<>(cfg.getGraph());
       List<SpecialStatement> changeList = new ArrayList<>();
+      List<PhpStatement> assignmentList = new ArrayList<>();
       while(iterator.hasNext()){
         PhpStatementPredictor predictor = new PhpStatementPredictor(cfg);
         PhpStatement statement = iterator.next();
@@ -33,10 +35,17 @@ public class AbstractionAnalyzer {
         if(specialStatement != null){
           changeList.add(specialStatement);
         }
+        if(statement instanceof AssignmentStatement){
+          assignmentList.add(statement);
+        }
+      }
+
+      for(PhpStatement statement : assignmentList){
+        cfg.removeStatement(statement);
       }
 
       for(SpecialStatement statement : changeList) {
-        cfg.replaceEdge(statement.getOriginalStatement(), statement);
+        cfg.replaceStatement(statement.getOriginalStatement(), statement);
       }
     }
   }

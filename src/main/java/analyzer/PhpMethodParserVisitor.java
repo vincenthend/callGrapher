@@ -468,7 +468,8 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
       hasArgs = ctx.chain().memberAccess(memberSize - 1).actualArguments() != null;
     }
     if (ctx.chain().chainBase() != null && hasArgs) {
-      ControlFlowGraph graph = visitExpression(ctx, "chain");
+//      ControlFlowGraph graph = visitExpression(ctx, "chain");
+      ControlFlowGraph graph = new ControlFlowGraph();
       graph.appendGraph(childGraph);
       return graph;
     } else {
@@ -553,7 +554,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitSpecialWordExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }*/
+  }
 
   @Override
   public ControlFlowGraph visitArrayCreationExpression(PhpParser.ArrayCreationExpressionContext ctx) {
@@ -561,7 +562,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitArrayCreationExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }
+  } */
 
   @Override
   public ControlFlowGraph visitNewExpression(PhpParser.NewExpressionContext ctx) {
@@ -634,7 +635,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     ControlFlowGraph childGraph = super.visitPostfixIncDecExpression(ctx);
     graph.appendGraph(childGraph);
     return graph;
-  }
+  }*/
 
   @Override
   public ControlFlowGraph visitIncludeExpression(PhpParser.IncludeExpressionContext ctx) {
@@ -644,6 +645,7 @@ public class PhpMethodParserVisitor extends PhpParserBaseVisitor<ControlFlowGrap
     return graph;
   }
 
+  /*
   @Override
   public ControlFlowGraph visitCastExpression(PhpParser.CastExpressionContext ctx) {
     ControlFlowGraph graph = visitExpression(ctx, "cast");

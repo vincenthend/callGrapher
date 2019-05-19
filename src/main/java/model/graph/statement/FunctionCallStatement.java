@@ -6,15 +6,17 @@ import model.php.PhpFunction;
 import predictor.PhpFunctionPredictor;
 import predictor.PhpVariablePredictor;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class FunctionCallStatement extends PhpStatement {
   private PhpFunction function;
   private String callerVariable;
   private List<String> parameterList;
   private PredictedFunctionType functionType;
-  private List<PredictedVariableContent> variableContent;
+  private Set<PredictedVariableContent> variableContent;
 
   public FunctionCallStatement(PhpFunction function, List<String> parameterList, String callerVariable, String code) {
     super(StatementType.FUNCTION_CALL, code);
@@ -23,7 +25,7 @@ public class FunctionCallStatement extends PhpStatement {
     this.parameterList.addAll(parameterList);
     this.callerVariable = callerVariable;
     this.functionType = PhpFunctionPredictor.predictFunctionType(function);
-    this.variableContent = PhpVariablePredictor.predictVariableContent(parameterList);
+    this.variableContent = new HashSet<>(PhpVariablePredictor.predictVariableContent(parameterList));
   }
 
   public FunctionCallStatement(FunctionCallStatement f){
@@ -57,12 +59,23 @@ public class FunctionCallStatement extends PhpStatement {
     return functionType;
   }
 
-  public List<PredictedVariableContent> getVariableContent() {
+  public Set<PredictedVariableContent> getVariableContent() {
     return variableContent;
   }
 
   @Override
   public String toString() {
-    return super.toString() + " " + function.getCalledName() + " " + functionType + "["+ variableContent +"]";
+    StringBuilder sb = new StringBuilder();
+    sb.append(super.toString());
+    if(functionType == PredictedFunctionType.BUILT_IN){
+      sb.append(function.getCalledName());
+    } else {
+      sb.append(functionType);
+    }
+
+    if(!variableContent.isEmpty()){
+      sb.append(variableContent);
+    }
+    return sb.toString();
   }
 }

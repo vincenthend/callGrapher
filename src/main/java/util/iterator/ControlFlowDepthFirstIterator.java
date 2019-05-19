@@ -54,7 +54,6 @@ public class ControlFlowDepthFirstIterator implements Iterator<PhpStatement> {
   @Override
   public PhpStatement next() {
     currentStatement = statementStack.pop();
-    Logger.error(currentStatement.toString());
     if(!parentStack.isEmpty()){
       currentParent = parentStack.pop();
     }
