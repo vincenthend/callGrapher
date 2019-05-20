@@ -178,5 +178,9 @@ public class DiffJob implements Runnable {
     }
     ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
     ControlFlowExporter.exportDot(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff");
+
+    diffJobData.setDiffGraph(cfgDiff);
+    diffJobData.setOldGraph(cfgOld);
+    diffJobData.setNewGraph(cfgNew);
   }
 }

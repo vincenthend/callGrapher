@@ -8,28 +8,51 @@ import model.php.PhpFunction;
 import predictor.PhpFunctionPredictor;
 import util.ControlFlowExporter;
 import util.DiffJobDataLoader;
+import util.FlowGraphMatcher;
 import util.builder.ControlFlowGraphTranslator;
 import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {0,1,2,3,4,5,6,8};
+    Integer[] jobSelection = {0,1,3,4,5,6,8,10,11,12};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
+
+    List<Future<?>> futures = new ArrayList<Future<?>>();
 
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     for (DiffJobData diffJobData : jobList) {
       Logger.info("Starting job with ID : " + diffJobData.getId());
-      executorService.submit(new DiffJob(diffJobData, 1));
+      futures.add(executorService.submit(new DiffJob(diffJobData, 1)));
     }
     executorService.shutdown();
+
+    for(Future<?> future : futures) {
+      future.get();
+    }
+
+    // Do Something
+    Logger.info("Hello!");
+    StringBuilder sb = new StringBuilder();
+    for(DiffJobData job : jobList){
+      for(DiffJobData testCase : jobList){
+        FlowGraphMatcher matcher = new FlowGraphMatcher(testCase.getDiffGraph(),job.getOldGraph());
+        sb.append(matcher.countGraphSimilarity());
+        sb.append(" ");
+      }
+      sb.append("\n");
+    }
+    Logger.info(sb.toString());
+
 
     // SINGULAR DEBUG
 //    jobList.get(0).getDiffJobOptions().setShownInterface("diff");

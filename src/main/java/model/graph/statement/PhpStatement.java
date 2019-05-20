@@ -51,4 +51,8 @@ abstract public class PhpStatement {
   public void setStatementId(int statementId) {
     this.statementId = statementId;
   }
+
+  public float similarTo(PhpStatement statement){
+    return toString().equals(statement.toString()) ? 1 : 0;
+  }
 }

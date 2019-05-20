@@ -3,7 +3,7 @@ package util.diff;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
 import model.graph.similarity.BlockSimilarity;
-import model.graph.similarity.SimilarityTable;
+import model.graph.similarity.BlockSimilarityTable;
 import model.graph.statement.PhpStatement;
 import model.graph.statement.block.PhpBasicBlock;
 import org.apache.commons.collections4.BidiMap;
@@ -26,7 +26,7 @@ public class ControlFlowGraphDiff {
   private ControlFlowBlockGraph blockGraphOld;
   private ControlFlowBlockGraph blockGraphNew;
   private BidiMap<PhpBasicBlock, PhpBasicBlock> mapping;
-  private SimilarityTable similarityTable;
+  private BlockSimilarityTable blockSimilarityTable;
 
 
   public ControlFlowGraphDiff(ControlFlowGraph g1, ControlFlowGraph g2){
@@ -109,10 +109,10 @@ public class ControlFlowGraphDiff {
   /**
    * Compute the similarity table between two graphs.
    *
-   * @return {@link SimilarityTable} between the two graphs.
+   * @return {@link BlockSimilarityTable} between the two graphs.
    */
   private void computeSimilarityTable() {
-    similarityTable = new SimilarityTable(blockGraphOld, blockGraphNew);
+    blockSimilarityTable = new BlockSimilarityTable(blockGraphOld, blockGraphNew);
     Set<PhpBasicBlock> blockSetOld = blockGraphOld.getGraph().vertexSet();
     Set<PhpBasicBlock> blockSetNew = blockGraphNew.getGraph().vertexSet();
 
@@ -151,20 +151,20 @@ public class ControlFlowGraphDiff {
         float simM2 = countSimilarity(combinedOldChild, combinedNewChild);
 
         float similarity = (ALPHA * simM + BETA * simM1 + GAMMA * simM2) / (ALPHA + BETA + GAMMA);
-        similarityTable.setSimilarity(blockOld, blockNew, similarity);
+        blockSimilarityTable.setSimilarity(blockOld, blockNew, similarity);
       }
     }
   }
 
 
   /**
-   * Match basic blocks from control flow graph using similarityTable computed.
+   * Match basic blocks from control flow graph using blockSimilarityTable computed.
    *
    * @return mapping between basic blocks.
    */
   private void matchBasicBlock() {
     mapping = new DualHashBidiMap<>();
-    Queue<BlockSimilarity> similarities = similarityTable.getSortedSimilarity();
+    Queue<BlockSimilarity> similarities = blockSimilarityTable.getSortedSimilarity();
 
     // Match blocks by iterating queue
     while (!similarities.isEmpty()) {

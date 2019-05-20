@@ -1,5 +1,7 @@
 package model;
 
+import model.graph.ControlFlowGraph;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +14,9 @@ public class DiffJobData {
   private String shownFunction;
   private List<String> unnormalizedFunction;
   private DiffJobOptions diffJobOptions;
+  private ControlFlowGraph oldGraph;
+  private ControlFlowGraph newGraph;
+  private ControlFlowGraph diffGraph;
 
   public DiffJobData(int id) {
     this.id = id;
@@ -78,6 +83,30 @@ public class DiffJobData {
 
   public List<String> getUnnormalizedFunction() {
     return unnormalizedFunction;
+  }
+
+  public ControlFlowGraph getDiffGraph() {
+    return diffGraph;
+  }
+
+  public void setDiffGraph(ControlFlowGraph diffGraph) {
+    this.diffGraph = diffGraph;
+  }
+
+  public ControlFlowGraph getOldGraph() {
+    return oldGraph;
+  }
+
+  public void setOldGraph(ControlFlowGraph oldGraph) {
+    this.oldGraph = oldGraph;
+  }
+
+  public ControlFlowGraph getNewGraph() {
+    return newGraph;
+  }
+
+  public void setNewGraph(ControlFlowGraph newGraph) {
+    this.newGraph = newGraph;
   }
 
   public class DiffJobOptions {

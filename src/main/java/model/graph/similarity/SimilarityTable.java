@@ -1,36 +1,39 @@
 package model.graph.similarity;
 
-import model.graph.ControlFlowBlockGraph;
-import model.graph.statement.block.PhpBasicBlock;
+import model.graph.ControlFlowGraph;
+import model.graph.statement.PhpStatement;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class SimilarityTable {
   private float[][] similarityMatrix;
-  private Map<PhpBasicBlock, Integer> oldBlockMap;
-  private Map<Integer, PhpBasicBlock> oldBlockId;
-  private Map<PhpBasicBlock, Integer> newBlockMap;
-  private Map<Integer, PhpBasicBlock> newBlockId;
+  private Map<PhpStatement, Integer> oldStatementMap;
+  private Map<Integer, PhpStatement> oldStatementId;
+  private Map<PhpStatement, Integer> newStatementMap;
+  private Map<Integer, PhpStatement> newStatementId;
   private int nbOldVertex;
   private int nbNewVertex;
 
-  public SimilarityTable(ControlFlowBlockGraph cfgOld, ControlFlowBlockGraph cfgNew) {
-    this.oldBlockMap = new LinkedHashMap<>();
-    this.newBlockMap = new LinkedHashMap<>();
-    this.oldBlockId = new LinkedHashMap<>();
-    this.newBlockId = new LinkedHashMap<>();
+  public SimilarityTable(ControlFlowGraph cfgOld, ControlFlowGraph cfgNew) {
+    this.oldStatementMap = new LinkedHashMap<>();
+    this.newStatementMap = new LinkedHashMap<>();
+    this.oldStatementId = new LinkedHashMap<>();
+    this.newStatementId = new LinkedHashMap<>();
 
     // Map matrix ID and block
     int n = 0;
-    for(PhpBasicBlock block : cfgOld.getGraph().vertexSet()){
-      oldBlockMap.put(block,n);
-      oldBlockId.put(n,block);
+    for(PhpStatement statement: cfgOld.getGraph().vertexSet()){
+      oldStatementMap.put(statement,n);
+      oldStatementId.put(n,statement);
       n++;
     }
     n = 0;
-    for(PhpBasicBlock block : cfgNew.getGraph().vertexSet()){
-      newBlockMap.put(block,n);
-      newBlockId.put(n,block);
+    for(PhpStatement statement : cfgNew.getGraph().vertexSet()){
+      newStatementMap.put(statement,n);
+      newStatementId.put(n,statement);
       n++;
     }
 
@@ -44,18 +47,18 @@ public class SimilarityTable {
     }
   }
 
-  public void setSimilarity(PhpBasicBlock blockOld, PhpBasicBlock blockNew, float similarity) {
-    int idxOld = oldBlockMap.getOrDefault(blockOld, -1);
-    int idxNew = newBlockMap.getOrDefault(blockNew, -1);
+  public void setSimilarity(PhpStatement blockOld, PhpStatement blockNew, float similarity) {
+    int idxOld = oldStatementMap.getOrDefault(blockOld, -1);
+    int idxNew = newStatementMap.getOrDefault(blockNew, -1);
     if (idxOld != -1 && idxNew != -1) {
       // Set similarity value
       similarityMatrix[idxOld][idxNew] = similarity;
     }
   }
 
-  public float getSimilarity(PhpBasicBlock blockOld, PhpBasicBlock blockNew) {
-    int idxOld = oldBlockMap.getOrDefault(blockOld, -1);
-    int idxNew = newBlockMap.getOrDefault(blockNew, -1);
+  public float getSimilarity(PhpStatement blockOld, PhpStatement blockNew) {
+    int idxOld = oldStatementMap.getOrDefault(blockOld, -1);
+    int idxNew = newStatementMap.getOrDefault(blockNew, -1);
     if (idxOld != -1 && idxNew != -1) {
       // Set similarity value
       return similarityMatrix[idxOld][idxNew];
@@ -64,8 +67,8 @@ public class SimilarityTable {
     }
   }
 
-  public Queue<BlockSimilarity> getSortedSimilarity(){
-    PriorityQueue<BlockSimilarity> similarityData = new PriorityQueue<>((o1, o2) -> {
+  public Queue<StatementSimilarity> getSortedSimilarity(){
+    PriorityQueue<StatementSimilarity> similarityData = new PriorityQueue<>((o1, o2) -> {
       if(o1.getSimilarity() >= o2.getSimilarity()){
         return -1;
       } else {
@@ -74,7 +77,7 @@ public class SimilarityTable {
     });
     for (int i = 0; i < nbOldVertex; i++) {
       for (int j = 0; j < nbNewVertex; j++) {
-        similarityData.add(new BlockSimilarity(oldBlockId.get(i),newBlockId.get(j),similarityMatrix[i][j]));
+        similarityData.add(new StatementSimilarity(oldStatementId.get(i), newStatementId.get(j),similarityMatrix[i][j]));
       }
     }
     return similarityData;
