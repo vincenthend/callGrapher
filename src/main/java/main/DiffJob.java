@@ -1,5 +1,6 @@
 package main;
 
+import analyzer.AbstractionAnalyzer;
 import analyzer.ControlFlowGraphAnalyzer;
 import logger.Logger;
 import model.DiffJobData;
@@ -120,6 +121,11 @@ public class DiffJob implements Runnable {
       diffGraph = diff.diffGraphAnnotate();
     }
 
+    // Abstracting function
+    ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
+    Logger.info("Abstracting function");
+    AbstractionAnalyzer.analyze(cfgDiff);
+
     //
     // UI Shown
     //
@@ -132,7 +138,7 @@ public class DiffJob implements Runnable {
         view = new GraphView(cfgNew);
         break;
       case "diff":
-        view = new GraphView(diffGraph);
+        view = new GraphView(cfgDiff);
         break;
       case "oldDom":
         view = new GraphView(new ControlFlowGraphDominators(cfgOld));
@@ -145,6 +151,9 @@ public class DiffJob implements Runnable {
         break;
       case "newBlock":
         view = new GraphView(cfgNew.getFlowBlockGraph());
+        break;
+      case "diffBlock":
+        view = new GraphView(diffGraph);
         break;
       default:
         view = null;
@@ -167,7 +176,6 @@ public class DiffJob implements Runnable {
       ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
       ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
     }
-    ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
     ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
     ControlFlowExporter.exportDot(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff");
   }

@@ -228,7 +228,7 @@ public class ControlFlowGraphDiff {
       }
     }
 
-//    markChangedClosure(changedNode);
+    markChangedClosure(changedNode);
 
     return blockGraph.cloneObject();
   }

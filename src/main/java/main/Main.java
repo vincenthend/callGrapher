@@ -24,20 +24,19 @@ public class Main {
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
-//    ExecutorService executorService = Executors.newFixedThreadPool(4);
-//    for (DiffJobData diffJobData : jobList) {
-//      Logger.info("Starting job with ID : " + diffJobData.getId());
-//      executorService.submit(new DiffJob(diffJobData, 0));
-//    }
-//    executorService.shutdown();
+    ExecutorService executorService = Executors.newFixedThreadPool(4);
+    for (DiffJobData diffJobData : jobList) {
+      Logger.info("Starting job with ID : " + diffJobData.getId());
+      executorService.submit(new DiffJob(diffJobData, 1));
+    }
+    executorService.shutdown();
 
     // SINGULAR DEBUG
 //    jobList.get(0).getDiffJobOptions().setShownInterface("diff");
-//    new DiffJob(jobList.get(0), 0).diffCommit();
+//    new DiffJob(jobList.get(0), 1).diffCommit();
 
     // DEBUG GUI
-    jobList.get(0).getDiffJobOptions().setShownInterface("cfgOld");
-    drawGraph(jobList.get(0));
+//    drawGraph(jobList.get(0));
 
     // DEBUG PREDICTOR
 //    System.out.println(PhpFunctionPredictor.predictFunctionType(new PhpFunction("array_key_exists",null,"",null)));
@@ -67,9 +66,9 @@ public class Main {
     analyzerOld.normalizeFunction(shownFunction, 0);
     ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction).getControlFlowGraph();
 
-    GraphView view = new GraphView(cfgOld);
+//    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-//    GraphView view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
+    GraphView view = new GraphView(new ControlFlowGraphTranslator().translateToBlockGraph(cfgOld));
     view.show();
 
     String fileName = String.format("%03d", diffJobData.getId());
