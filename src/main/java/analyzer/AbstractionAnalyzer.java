@@ -16,12 +16,12 @@ public class AbstractionAnalyzer {
   }
 
   public static void analyze(ControlFlowGraph cfg) {
-    Iterator<PhpStatement> iterator = cfg.getGraph().vertexSet().iterator();
+    List<PhpStatement> vertexList = new ArrayList<>(cfg.getGraph().vertexSet());
     List<SpecialStatement> changeList = new ArrayList<>();
     List<PhpStatement> assignmentList = new ArrayList<>();
-    while (iterator.hasNext()) {
+    for (int i = 0; i < vertexList.size(); i++) {
       PhpStatementPredictor predictor = new PhpStatementPredictor(cfg);
-      PhpStatement statement = iterator.next();
+      PhpStatement statement = vertexList.get(i);
       SpecialStatement specialStatement = predictor.predictStatement(statement);
       if (specialStatement != null) {
         changeList.add(specialStatement);
