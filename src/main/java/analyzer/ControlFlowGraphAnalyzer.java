@@ -53,10 +53,6 @@ public class ControlFlowGraphAnalyzer {
       }
     }
 
-    Logger.info("==== Method list ====");
-    Logger.info(projectData.toString());
-    Logger.info("");
-
     // Create control flow graph for all functions
     Logger.info("Generating control flow graph");
     FlowAnalyzer flowAnalyzer = new FlowAnalyzer(projectData);
@@ -67,7 +63,6 @@ public class ControlFlowGraphAnalyzer {
     List<String> removeList = new ArrayList<>();
     for (Map.Entry<String, PhpFunction> functionEntry : functionMap.entrySet()) {
       if (functionEntry.getValue().getControlFlowGraph().getFirstVertex() == null) {
-        Logger.info("Function " + functionEntry.getValue().getCalledName() + " is empty, removing...");
         removeList.add(functionEntry.getValue().getCalledName());
       }
     }

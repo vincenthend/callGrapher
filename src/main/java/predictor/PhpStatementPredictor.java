@@ -4,6 +4,7 @@ import model.graph.ControlFlowGraph;
 import model.graph.statement.BranchStatement;
 import model.graph.statement.FunctionCallStatement;
 import model.graph.statement.PhpStatement;
+import model.graph.statement.StatementType;
 import model.graph.statement.special.SpecialStatement;
 import model.graph.statement.special.ValidationStatement;
 import org.jgrapht.graph.DefaultEdge;
@@ -13,7 +14,6 @@ import predictor.type.PredictedVariableType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class PhpStatementPredictor {
   private ControlFlowGraph cfg;
@@ -40,9 +40,9 @@ public class PhpStatementPredictor {
   }
 
   private ValidationStatement predictValidation(BranchStatement branchStatement) {
-    List<PhpStatement> conditionStatements = branchStatement.getConditionStatements();
+    List<PhpStatement> branchConditionStatements = branchStatement.getConditionStatements();
     boolean isValidation = false;
-    for (PhpStatement st : conditionStatements) {
+    for (PhpStatement st : branchConditionStatements) {
       if (st instanceof FunctionCallStatement && ((FunctionCallStatement) st).getFunctionType() == PredictedFunctionType.VALIDATION) {
         isValidation = true;
       }
@@ -51,7 +51,7 @@ public class PhpStatementPredictor {
       boolean isInputVal = false;
       List<PredictedVariableContent> variableTypes = new ArrayList<>();
 
-      for (PhpStatement st : conditionStatements) {
+      for (PhpStatement st : branchConditionStatements) {
         if (st instanceof FunctionCallStatement && ((FunctionCallStatement) st).getFunctionType() == PredictedFunctionType.VALIDATION) {
           FunctionCallStatement f = (FunctionCallStatement) st;
           variableTypes = PhpVariablePredictor.predictVariableContent(f.getParameterMap());
@@ -60,13 +60,25 @@ public class PhpStatementPredictor {
           }
         }
       }
+
+      List<PhpStatement> removeConditionStatements = new ArrayList<>();
+      PhpStatement removeRoot = branchStatement;
       for (int i = 0; i < branchStatement.getConditionStatements().size(); i++) {
-        List<DefaultEdge> out = new ArrayList<>(cfg.getGraph().outgoingEdgesOf(branchStatement));
+        List<DefaultEdge> out = new ArrayList<>(cfg.getGraph().outgoingEdgesOf(removeRoot));
+        boolean found = false;
         for (int j = 0; j < out.size(); j++) {
-          PhpStatement target = cfg.getGraph().getEdgeTarget(out.get(j));
-          cfg.removeStatement(target);
+          PhpStatement childStatement = cfg.getGraph().getEdgeTarget(out.get(j));
+          if (found == false && childStatement.getStatementType() == StatementType.FUNCTION_CALL && ((FunctionCallStatement) childStatement).getFunctionType() == PredictedFunctionType.VALIDATION) {
+            found = true;
+            removeRoot = childStatement;
+            removeConditionStatements.add(childStatement);
+          }
         }
       }
+      for(PhpStatement st : removeConditionStatements){
+        cfg.removeStatement(st);
+      }
+
       return new ValidationStatement(branchStatement, isInputVal, variableTypes);
     }
 

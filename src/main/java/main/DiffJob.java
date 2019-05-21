@@ -169,14 +169,14 @@ public class DiffJob implements Runnable {
     String exportPath = diffJobData.getDiffJobOptions().getExportPath();
     String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
     if (cfgOld != null) {
-      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
+//      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
       ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
     }
     if (cfgNew != null) {
-      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
+//      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
       ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
     }
-    ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
+//    ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
     ControlFlowExporter.exportDot(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff");
 
     diffJobData.setDiffGraph(cfgDiff);

@@ -50,7 +50,8 @@ public class DeclarationAnalyzer {
     try{
       parser.htmlDocument();
     } catch(Exception e){
-      Logger.error(e.getMessage());
+      Logger.error("Parse Error : "+e.getMessage());
+      e.printStackTrace();
     }
   }
 

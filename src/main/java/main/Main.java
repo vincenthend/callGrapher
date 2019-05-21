@@ -1,20 +1,17 @@
 package main;
 
+import analyzer.AbstractionAnalyzer;
 import analyzer.ControlFlowGraphAnalyzer;
 import logger.Logger;
 import model.DiffJobData;
 import model.graph.ControlFlowGraph;
-import model.php.PhpFunction;
-import predictor.PhpFunctionPredictor;
 import util.ControlFlowExporter;
 import util.DiffJobDataLoader;
 import util.FlowGraphMatcher;
 import util.builder.ControlFlowGraphTranslator;
-import util.diff.ControlFlowGraphDiff;
 import view.GraphView;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,7 +20,8 @@ import java.util.concurrent.Future;
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {0,1,3,4,5,6,8,10,11,12};
+    Integer[] jobSelection = {0,1,3,4,5,6,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,27,31,32,33,34,36,37,38,39,41,42,43,44,45,46,47,48,49,50,51,52,53,54,56,57,58,59,60,61,62,66,67};
+//    Integer[] jobSelection = {21};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
@@ -34,18 +32,22 @@ public class Main {
       futures.add(executorService.submit(new DiffJob(diffJobData, 1)));
     }
     executorService.shutdown();
-    for(Future<?> future : futures) {
-      future.get();
+    while(!executorService.isTerminated()){
+      //wait
     }
 
-//    // Scoring
+    // Scoring
     Logger.info("Testing for Vulnerability");
     StringBuilder sb = new StringBuilder();
-    for(DiffJobData job : jobList){
-      for(DiffJobData testCase : jobList){
-        FlowGraphMatcher matcher = new FlowGraphMatcher(testCase.getDiffGraph(),job.getOldGraph());
-        sb.append(matcher.countGraphSimilarity());
-        if(jobList.get(jobList.size()-1) != testCase){
+    for (DiffJobData job : jobList) {
+      for (DiffJobData testCase : jobList) {
+        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getDiffGraph());
+        try {
+          sb.append(matcher.countGraphSimilarity());
+        } catch (Exception e){
+          sb.append(-1);
+        }
+        if (jobList.get(jobList.size() - 1) != testCase) {
           sb.append("\t");
         }
       }
@@ -82,12 +84,15 @@ public class Main {
 
     ControlFlowGraphAnalyzer analyzerOld = new ControlFlowGraphAnalyzer();
     analyzerOld.analyzeControlFlowGraph(pathOld);
-    for(String removedFunc : diffJobData.getUnnormalizedFunction()){
+    for (String removedFunc : diffJobData.getUnnormalizedFunction()) {
       analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
       analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
     }
     analyzerOld.normalizeFunction(shownFunction, 0);
     ControlFlowGraph cfgOld = analyzerOld.getProjectData().getNormalizedFunction(shownFunction).getControlFlowGraph();
+
+//    Logger.info("Abstracting function");
+//    AbstractionAnalyzer.analyze(cfgOld);
 
 //    GraphView view = new GraphView(cfgOld);
 //    GraphView view = new GraphView(new ControlFlowGraphDominators(cfgOld));
@@ -97,6 +102,6 @@ public class Main {
     String fileName = String.format("%03d", diffJobData.getId());
     String exportPath = diffJobData.getDiffJobOptions().getExportPath();
     String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
-    ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul",exportFormat);
+    ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
   }
 }

@@ -1,5 +1,6 @@
 package model.graph;
 
+import logger.Logger;
 import model.graph.statement.PhpStatement;
 import model.graph.statement.StatementType;
 import org.jgrapht.Graph;
@@ -209,9 +210,13 @@ public class ControlFlowGraph implements Cloneable {
     if (firstVertex != statement) {
       Set<DefaultEdge> outgoingEdge = graph.outgoingEdgesOf(statement);
       Set<DefaultEdge> incomingEdge = graph.incomingEdgesOf(statement);
+
+      // Reattach neighbor
       for (DefaultEdge inEdge : incomingEdge) {
         for (DefaultEdge outEdge : outgoingEdge) {
-          graph.addEdge(graph.getEdgeSource(inEdge), graph.getEdgeTarget(outEdge));
+          if(graph.getEdgeSource(inEdge) != graph.getEdgeTarget(outEdge)) {
+            graph.addEdge(graph.getEdgeSource(inEdge), graph.getEdgeTarget(outEdge));
+          }
         }
       }
 
