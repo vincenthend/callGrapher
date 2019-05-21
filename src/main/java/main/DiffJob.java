@@ -59,7 +59,7 @@ public class DiffJob implements Runnable {
       cleaner.directory(new File(diffJobData.getRoot()));
       cleaner.start().waitFor();
 
-      ProcessBuilder builder = new ProcessBuilder("git", "checkout", hash.trim());
+      ProcessBuilder builder = new ProcessBuilder("git", "checkout", "-f", hash.trim());
       builder.directory(new File(diffJobData.getRoot()));
       Process p = builder.start();
       InputStream stdout = p.getErrorStream();

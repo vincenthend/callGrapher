@@ -27,27 +27,27 @@ public class Main {
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
-    List<Future<?>> futures = new ArrayList<Future<?>>();
-
+    List<Future<?>> futures = new ArrayList<>();
     ExecutorService executorService = Executors.newFixedThreadPool(4);
     for (DiffJobData diffJobData : jobList) {
       Logger.info("Starting job with ID : " + diffJobData.getId());
       futures.add(executorService.submit(new DiffJob(diffJobData, 1)));
     }
     executorService.shutdown();
-
     for(Future<?> future : futures) {
       future.get();
     }
 
-    // Do Something
-    Logger.info("Hello!");
+//    // Scoring
+    Logger.info("Testing for Vulnerability");
     StringBuilder sb = new StringBuilder();
     for(DiffJobData job : jobList){
       for(DiffJobData testCase : jobList){
         FlowGraphMatcher matcher = new FlowGraphMatcher(testCase.getDiffGraph(),job.getOldGraph());
         sb.append(matcher.countGraphSimilarity());
-        sb.append(" ");
+        if(jobList.get(jobList.size()-1) != testCase){
+          sb.append("\t");
+        }
       }
       sb.append("\n");
     }
