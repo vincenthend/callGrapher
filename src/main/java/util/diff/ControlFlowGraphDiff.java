@@ -100,7 +100,7 @@ public class ControlFlowGraphDiff {
     Set<String> unionSet = new HashSet<>(oldStatementSet);
     unionSet.addAll(newStatementSet);
     if (unionSet.isEmpty()) {
-      return 0;
+      return 1;
     } else {
       return (float) intersectSet.size() / (float) unionSet.size();
     }

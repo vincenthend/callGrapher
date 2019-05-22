@@ -16,7 +16,8 @@ public class DiffJobData {
   private DiffJobOptions diffJobOptions;
   private ControlFlowGraph oldGraph;
   private ControlFlowGraph newGraph;
-  private ControlFlowGraph diffGraph;
+  private ControlFlowGraph diffGraphOld;
+  private ControlFlowGraph diffGraphNew;
 
   public DiffJobData(int id) {
     this.id = id;
@@ -85,12 +86,20 @@ public class DiffJobData {
     return unnormalizedFunction;
   }
 
-  public ControlFlowGraph getDiffGraph() {
-    return diffGraph;
+  public ControlFlowGraph getDiffGraphOld() {
+    return diffGraphOld;
   }
 
-  public void setDiffGraph(ControlFlowGraph diffGraph) {
-    this.diffGraph = diffGraph;
+  public void setDiffGraphOld(ControlFlowGraph diffGraph) {
+    this.diffGraphOld = diffGraph;
+  }
+
+  public ControlFlowGraph getDiffGraphNew() {
+    return diffGraphNew;
+  }
+
+  public void setDiffGraphNew(ControlFlowGraph diffGraphNew) {
+    this.diffGraphNew = diffGraphNew;
   }
 
   public ControlFlowGraph getOldGraph() {

@@ -49,16 +49,9 @@ public class DiffJob implements Runnable {
     }
   }
 
-  private ControlFlowGraphAnalyzer checkoutAndAnalyze(String root, String hash) throws IOException, InterruptedException {
+  private ControlFlowGraph checkoutAndAnalyze(String root, String hash) throws IOException, InterruptedException {
+    ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();
     synchronized (resourceLock.get(root)) {
-      // Clean directory
-      ProcessBuilder cleaner = new ProcessBuilder("git", "clean", "-xfd");
-      cleaner.directory(new File(diffJobData.getRoot()));
-      cleaner.start().waitFor();
-      cleaner = new ProcessBuilder("git", "checkout", ".");
-      cleaner.directory(new File(diffJobData.getRoot()));
-      cleaner.start().waitFor();
-
       ProcessBuilder builder = new ProcessBuilder("git", "checkout", "-f", hash.trim());
       builder.directory(new File(diffJobData.getRoot()));
       Process p = builder.start();
@@ -72,9 +65,20 @@ public class DiffJob implements Runnable {
       p.waitFor();
       Logger.info(stringBuilder.toString());
 
-      ControlFlowGraphAnalyzer analyzer = new ControlFlowGraphAnalyzer();
       analyzer.analyzeControlFlowGraph(diffJobData.getFileList());
-      return analyzer;
+    }
+
+    for (String removedFunc : diffJobData.getUnnormalizedFunction()) {
+      analyzer.getProjectData().getFunctionMap().remove(removedFunc);
+      analyzer.getProjectData().getNormalizedFunction(removedFunc);
+    }
+    analyzer.normalizeFunction(diffJobData.getShownFunction(), maxDepth);
+    PhpFunction oldFunc = analyzer.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
+
+    if (oldFunc != null) {
+      return analyzer.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
+    } else {
+      return null;
     }
   }
 
@@ -84,83 +88,49 @@ public class DiffJob implements Runnable {
     //
     Logger.info("Root is set to " + diffJobData.getRoot());
     Logger.info("Checkout to vulnerable commit " + diffJobData.getVulHash());
-
-    ControlFlowGraphAnalyzer analyzerOld = checkoutAndAnalyze(diffJobData.getRoot(), diffJobData.getVulHash());
-    for (String removedFunc : diffJobData.getUnnormalizedFunction()) {
-      analyzerOld.getProjectData().getFunctionMap().remove(removedFunc);
-      analyzerOld.getProjectData().getNormalizedFunction(removedFunc);
-    }
-    analyzerOld.normalizeFunction(diffJobData.getShownFunction(), maxDepth);
-    PhpFunction oldFunc = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
-    ControlFlowGraph cfgOld = null;
-    if (oldFunc != null) {
-      cfgOld = analyzerOld.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
-    }
+    ControlFlowGraph cfgOld = checkoutAndAnalyze(diffJobData.getRoot(), diffJobData.getVulHash());
+    diffJobData.setOldGraph(cfgOld);
 
     //
     // Analyze non vulnerable code
     //
     Logger.info("Checkout to unvulnerable commit " + diffJobData.getUnvulHash());
-    ControlFlowGraphAnalyzer analyzerNew = checkoutAndAnalyze(diffJobData.getRoot(), diffJobData.getUnvulHash());
-    for (String removedFunc : diffJobData.getUnnormalizedFunction()) {
-      analyzerNew.getProjectData().getFunctionMap().remove(removedFunc);
-      analyzerNew.getProjectData().getNormalizedFunction(removedFunc);
-    }
-    analyzerNew.normalizeFunction(diffJobData.getShownFunction(), maxDepth);
-    PhpFunction newFunc = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction());
-    ControlFlowGraph cfgNew = null;
-    if (newFunc != null) {
-      cfgNew = analyzerNew.getProjectData().getNormalizedFunction(diffJobData.getShownFunction()).getControlFlowGraph();
+    ControlFlowGraph cfgNew = checkoutAndAnalyze(diffJobData.getRoot(), diffJobData.getUnvulHash());
+    diffJobData.setNewGraph(cfgNew);
+
+
+    ControlFlowGraphDiff diffOld = new ControlFlowGraphDiff(cfgOld, cfgNew);
+    ControlFlowBlockGraph diffBlockOld;
+    if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
+      diffBlockOld = diffOld.diffGraph();
+    } else {
+      diffBlockOld = diffOld.diffGraphAnnotate();
     }
 
-    ControlFlowGraphDiff diff = new ControlFlowGraphDiff(cfgOld, cfgNew);
-    ControlFlowBlockGraph diffGraph;
+    ControlFlowGraphDiff diffNew = new ControlFlowGraphDiff(cfgNew, cfgOld);
+    ControlFlowBlockGraph diffBlockNew;
     if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
-      diffGraph = diff.diffGraph();
+      diffBlockNew = diffNew.diffGraph();
     } else {
-      diffGraph = diff.diffGraphAnnotate();
+      diffBlockNew = diffNew.diffGraphAnnotate();
     }
 
     // Abstracting function
-    ControlFlowGraph cfgDiff = new ControlFlowGraphTranslator().translateToFlowGraph(diffGraph);
+    ControlFlowGraph cfgDiffOld = new ControlFlowGraphTranslator().translateToFlowGraph(diffBlockOld);
+    ControlFlowGraph cfgDiffNew = new ControlFlowGraphTranslator().translateToFlowGraph(diffBlockNew);
+    diffJobData.setDiffGraphOld(cfgDiffOld);
+    diffJobData.setDiffGraphNew(cfgDiffNew);
     Logger.info("Abstracting function");
-    AbstractionAnalyzer.analyze(cfgDiff);
+
+    AbstractionAnalyzer.analyze(cfgDiffOld);
+    AbstractionAnalyzer.analyze(cfgDiffNew);
+    AbstractionAnalyzer.analyze(cfgOld);
+    AbstractionAnalyzer.analyze(cfgNew);
 
     //
     // UI Shown
     //
-    GraphView view;
-    switch (diffJobData.getDiffJobOptions().getShownInterface()) {
-      case "old":
-        view = new GraphView(cfgOld);
-        break;
-      case "new":
-        view = new GraphView(cfgNew);
-        break;
-      case "diff":
-        view = new GraphView(cfgDiff);
-        break;
-      case "oldDom":
-        view = new GraphView(new ControlFlowGraphDominators(cfgOld));
-        break;
-      case "newDom":
-        view = new GraphView(new ControlFlowGraphDominators(cfgNew));
-        break;
-      case "oldBlock":
-        view = new GraphView(cfgOld.getFlowBlockGraph());
-        break;
-      case "newBlock":
-        view = new GraphView(cfgNew.getFlowBlockGraph());
-        break;
-      case "diffBlock":
-        view = new GraphView(diffGraph);
-        break;
-      default:
-        view = null;
-    }
-    if (view != null) {
-      view.show();
-    }
+    showGraph();
 
     //
     //  Export Image
@@ -169,18 +139,51 @@ public class DiffJob implements Runnable {
     String exportPath = diffJobData.getDiffJobOptions().getExportPath();
     String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
     if (cfgOld != null) {
-//      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
+      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
       ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
     }
     if (cfgNew != null) {
-//      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
+      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
       ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
     }
-//    ControlFlowExporter.exportGVImage(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff", exportFormat);
-    ControlFlowExporter.exportDot(cfgDiff.getGraph(), exportPath, fileName + "-graphDiff");
+    ControlFlowExporter.exportGVImage(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld", exportFormat);
+    ControlFlowExporter.exportDot(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld");
+    ControlFlowExporter.exportGVImage(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew", exportFormat);
+    ControlFlowExporter.exportDot(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew");
+  }
 
-    diffJobData.setDiffGraph(cfgDiff);
-    diffJobData.setOldGraph(cfgOld);
-    diffJobData.setNewGraph(cfgNew);
+  private void showGraph(){
+    GraphView view;
+    switch (diffJobData.getDiffJobOptions().getShownInterface()) {
+      case "old":
+        view = new GraphView(diffJobData.getOldGraph());
+        break;
+      case "new":
+        view = new GraphView(diffJobData.getNewGraph());
+        break;
+      case "diff":
+        view = new GraphView(diffJobData.getDiffGraphOld());
+        break;
+      case "oldDom":
+        view = new GraphView(new ControlFlowGraphDominators(diffJobData.getOldGraph()));
+        break;
+      case "newDom":
+        view = new GraphView(new ControlFlowGraphDominators(diffJobData.getNewGraph()));
+        break;
+      case "oldBlock":
+        view = new GraphView(diffJobData.getOldGraph().getFlowBlockGraph());
+        break;
+      case "newBlock":
+        view = new GraphView(diffJobData.getNewGraph().getFlowBlockGraph());
+        break;
+      case "diffBlock":
+        view = new GraphView(diffJobData.getDiffGraphOld().getFlowBlockGraph());
+        break;
+      default:
+        view = null;
+    }
+    if (view != null) {
+      view.show();
+    }
   }
 }

@@ -57,7 +57,7 @@ public class FlowGraphMatcher {
     Set<String> unionSet = new HashSet<>(oldStatementSet);
     unionSet.addAll(newStatementSet);
     if (unionSet.isEmpty()) {
-      return 0;
+      return 1;
     } else {
       return (float) intersectSet.size() / (float) unionSet.size();
     }
@@ -137,7 +137,7 @@ public class FlowGraphMatcher {
     matchBasicBlock();
     Set<PhpStatement> valueSet = mapping.values();
     float sum = 0;
-    int n = Integer.min(graphOld.getGraph().vertexSet().size() , graphNew.getGraph().vertexSet().size());
+    int n = graphNew.getGraph().vertexSet().size();
     for(PhpStatement blockNew : valueSet){
       PhpStatement blockOld = mapping.getKey(blockNew);
       sum += similarityTable.getSimilarity(blockOld, blockNew);
