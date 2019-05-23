@@ -54,7 +54,7 @@ public class FlowGraphMatcher {
     Set<String> intersectSet = new HashSet<>(oldStatementSet);
     intersectSet.retainAll(newStatementSet);
 
-    Set<String> unionSet = new HashSet<>(oldStatementSet);
+    Set<String> unionSet = new HashSet<>();
     unionSet.addAll(newStatementSet);
     if (unionSet.isEmpty()) {
       return 1;

@@ -20,6 +20,7 @@ public class Main {
   public static void main(String[] args) throws Exception {
 //    Integer[] jobSelection = {0,1,3,4,5,6,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,27,31,32,33,34,36,37,38,39,41,42,43,44,45,46,47,48,49,50,51,52,53,54,56,57,58,59,60,61,62,66,67};
     Integer[] jobSelection = {0,1,3,5,8,13,14,15,16,17,18,20,21,22,23,24,25,31,32,33,34,36,37,38};
+//    Integer[] jobSelection = {20,38};
     List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
     Logger.info("Found " + jobList.size() + " job(s)");
 
