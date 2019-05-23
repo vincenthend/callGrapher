@@ -11,11 +11,9 @@ import util.FlowGraphMatcher;
 import util.builder.ControlFlowGraphTranslator;
 import view.GraphView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Main {
 
@@ -40,7 +38,7 @@ public class Main {
     StringBuilder sb = new StringBuilder();
     for (DiffJobData job : jobList) {
       for (DiffJobData testCase : jobList) {
-        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getDiffGraphOld());
+        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getDiffGraphOld());
         try {
           sb.append(matcher.countGraphSimilarity());
         } catch (Exception e){
@@ -58,7 +56,7 @@ public class Main {
     sb = new StringBuilder();
     for (DiffJobData job : jobList) {
       for (DiffJobData testCase : jobList) {
-        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getDiffGraphNew());
+        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getDiffGraphNew());
         try {
           sb.append(matcher.countGraphSimilarity());
         } catch (Exception e){

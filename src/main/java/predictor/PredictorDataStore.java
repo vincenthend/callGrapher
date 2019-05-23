@@ -14,7 +14,7 @@ public class PredictorDataStore {
   public static final String[] FUNCTION_SESSION_SET = {"login", "log_in", "register", "remember"};
   public static final String[] FUNCTION_SESSION_UNSET = {"logout", "log_out"};
   public static final String[] FUNCTION_DATA_CREATE = {"insert", "input", "add", "create"};
-  public static final String[] FUNCTION_DATA_RETRIEVE = {"get"};
+  public static final String[] FUNCTION_DATA_RETRIEVE = {"get","retrieve","fetch"};
   public static final String[] FUNCTION_DATA_UPDATE = {"update", "set"};
   public static final String[] FUNCTION_DATA_DELETE = {"remove", "delete", "clear"};
   public static final String[] FUNCTION_STATUS = {"enabled", "logged", "available", "confirmed", "active", "suspended", "banned"};

@@ -1,5 +1,6 @@
 package predictor;
 
+import org.apache.commons.lang3.StringUtils;
 import predictor.type.PredictedFunctionType;
 import model.php.PhpFunction;
 
@@ -10,7 +11,9 @@ public class PhpFunctionPredictor {
     String functionName = f.getFunctionName();
     if (Arrays.stream(PredictorDataStore.FUNCTION_BUILTIN).parallel().anyMatch(functionName::equals)) {
       return PredictedFunctionType.BUILT_IN;
-    } else if (Arrays.stream(PredictorDataStore.FUNCTION_VALIDATION).parallel().anyMatch(functionName::contains)) {
+    }
+    functionName = StringUtils.lowerCase(functionName);
+    if (Arrays.stream(PredictorDataStore.FUNCTION_VALIDATION).parallel().anyMatch(functionName::contains)) {
       return PredictedFunctionType.VALIDATION;
     } else if (Arrays.stream(PredictorDataStore.FUNCTION_SESSION_SET).parallel().anyMatch(functionName::contains)) {
       return PredictedFunctionType.SESSION_SET;
