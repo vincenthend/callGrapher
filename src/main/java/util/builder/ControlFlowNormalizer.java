@@ -8,6 +8,7 @@ import model.php.PhpFunction;
 import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.EdgeReversedGraph;
+import predictor.type.PredictedFunctionType;
 import util.iterator.ControlFlowDepthFirstIterator;
 
 import java.util.*;

@@ -1,10 +1,8 @@
 package predictor;
 
 import model.graph.ControlFlowGraph;
-import model.graph.statement.BranchStatement;
-import model.graph.statement.FunctionCallStatement;
-import model.graph.statement.PhpStatement;
-import model.graph.statement.StatementType;
+import model.graph.statement.*;
+import model.graph.statement.special.IncludeStatement;
 import model.graph.statement.special.SpecialStatement;
 import model.graph.statement.special.ValidationStatement;
 import org.jgrapht.graph.DefaultEdge;
@@ -26,6 +24,8 @@ public class PhpStatementPredictor {
     SpecialStatement returnStatement = null;
     if (statement instanceof BranchStatement) {
       returnStatement = predictStatement((BranchStatement) statement);
+    } else if (statement instanceof ExpressionStatement){
+      returnStatement = predictStatement((ExpressionStatement) statement);
     }
     return returnStatement;
   }
@@ -34,6 +34,23 @@ public class PhpStatementPredictor {
     SpecialStatement validationStatement = predictValidation(branchStatement);
     if (validationStatement != null) {
       return validationStatement;
+    } else {
+      return null;
+    }
+  }
+
+  public SpecialStatement predictStatement(ExpressionStatement expressionStatement) {
+    SpecialStatement includeStatement = predictInclude(expressionStatement);
+    if (includeStatement != null) {
+      return includeStatement;
+    } else {
+      return null;
+    }
+  }
+
+  private IncludeStatement predictInclude(ExpressionStatement expressionStatement) {
+    if(expressionStatement.getExpressionType().equals("include") ){
+      return new IncludeStatement(expressionStatement);
     } else {
       return null;
     }

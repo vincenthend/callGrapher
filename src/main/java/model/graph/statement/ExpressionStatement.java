@@ -17,6 +17,10 @@ public class ExpressionStatement extends PhpStatement {
     return new ExpressionStatement(this.expressionType, this.statementContent);
   }
 
+  public String getExpressionType() {
+    return expressionType;
+  }
+
   @Override
   public String toString() {
     return super.toString()+" "+getStatementContent()+" ["+expressionType+"]";

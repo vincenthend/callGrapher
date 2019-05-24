@@ -1,6 +1,7 @@
 package model.graph.statement.special;
 
 import model.graph.statement.BranchStatement;
+import model.graph.statement.PhpStatement;
 import predictor.PhpVariablePredictor;
 import predictor.type.PredictedVariableContent;
 
@@ -24,6 +25,21 @@ public class ValidationStatement extends SpecialStatement {
     this.originalStatement = s.originalStatement;
     this.inputValidation = s.inputValidation;
     this.variableTypes = s.variableTypes;
+  }
+
+  @Override
+  public float similarTo(PhpStatement statement) {
+    if(statement instanceof ValidationStatement) {
+      ValidationStatement val = (ValidationStatement) statement;
+      boolean varType = variableTypes.containsAll(val.variableTypes);
+      boolean input = true;
+      if(!this.inputValidation && val.inputValidation){
+        input = false;
+      }
+      return varType && input ? 1 : 0;
+    } else {
+      return 0;
+    }
   }
 
   @Override

@@ -2,7 +2,9 @@ package analyzer;
 
 import model.graph.ControlFlowGraph;
 import model.graph.statement.AssignmentStatement;
+import model.graph.statement.ExpressionStatement;
 import model.graph.statement.PhpStatement;
+import model.graph.statement.ReturnStatement;
 import model.graph.statement.special.SpecialStatement;
 import model.graph.statement.special.ValidationStatement;
 import org.jgrapht.graph.DefaultEdge;
@@ -26,13 +28,15 @@ public class AbstractionAnalyzer {
       if (specialStatement != null) {
         changeList.put(statement, specialStatement);
       }
-      if (statement instanceof AssignmentStatement) {
+      if (statement instanceof AssignmentStatement || statement instanceof ReturnStatement || statement instanceof ExpressionStatement) {
         assignmentList.add(statement);
       }
     }
 
     for (PhpStatement statement : assignmentList) {
-      cfg.removeStatement(statement);
+      if(!changeList.containsKey(statement)) {
+        cfg.removeStatement(statement);
+      }
     }
 
     for (Map.Entry<PhpStatement, SpecialStatement> entry : changeList.entrySet()) {

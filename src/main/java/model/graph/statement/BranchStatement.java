@@ -34,6 +34,6 @@ public class BranchStatement extends PhpStatement {
 
   @Override
   public String toString() {
-    return super.toString() + " " + statementContent;
+    return super.toString();
   }
 }
