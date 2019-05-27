@@ -16,6 +16,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import logger.Logger;
+import model.graph.ControlFlowGraph;
 import model.graph.statement.PhpStatement;
 import org.jgrapht.Graph;
 import org.jgrapht.ext.JGraphXAdapter;
@@ -133,6 +134,22 @@ public class ControlFlowExporter {
     try {
       FileWriter fileWriter = new FileWriter(new File(path + name +".dot"));
       exporter.exportGraph(graph, fileWriter);
+      Logger.info("Graph exported succesfully to "+path);
+    } catch (Exception e) {
+      Logger.error("Failed to export graph");
+    }
+  }
+
+  public static void exportObject(ControlFlowGraph graph, String path, String name) {
+    //Save Image
+    Logger.info("Exporting graph, please wait...");
+    try {
+      FileOutputStream file = new FileOutputStream(new File(path + name +".cfg"));
+      ObjectOutputStream out = new ObjectOutputStream(file);
+      out.writeObject(graph);
+
+      out.close();
+      file.close();
       Logger.info("Graph exported succesfully to "+path);
     } catch (Exception e) {
       Logger.error("Failed to export graph");

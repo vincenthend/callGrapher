@@ -8,16 +8,17 @@ import org.jgrapht.Graphs;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ControlFlowGraph implements Cloneable {
+public class ControlFlowGraph implements Cloneable, Serializable {
   private Graph<PhpStatement, DefaultEdge> graph;
   private Set<PhpStatement> lastVertices;
   private PhpStatement firstVertex;
-  private ControlFlowBlockGraph flowBlockGraph;
+  transient private ControlFlowBlockGraph flowBlockGraph;
   private int maxId;
 
   public ControlFlowGraph() {

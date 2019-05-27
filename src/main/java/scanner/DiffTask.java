@@ -1,4 +1,4 @@
-package main;
+package scanner;
 
 import analyzer.AbstractionAnalyzer;
 import analyzer.ControlFlowGraphAnalyzer;
@@ -17,12 +17,12 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DiffJob implements Runnable {
+public class DiffTask implements Runnable {
   private DiffJobData diffJobData;
   private int maxDepth;
   private static Map<String, Object> resourceLock = new HashMap<>();
 
-  public DiffJob(DiffJobData diffJobData, int maxDepth) {
+  public DiffTask(DiffJobData diffJobData, int maxDepth) {
     if (diffJobData.getFileList().isEmpty()
       || diffJobData.getRoot() == null
       || diffJobData.getShownFunction() == null
@@ -101,7 +101,7 @@ public class DiffJob implements Runnable {
 
     ControlFlowGraphDiff diffOld = new ControlFlowGraphDiff(cfgOld, cfgNew);
     ControlFlowBlockGraph diffBlockOld;
-    if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
+    if (!diffJobData.getJobOptions().isAnnotateDiff()) {
       diffBlockOld = diffOld.diffGraph();
     } else {
       diffBlockOld = diffOld.diffGraphAnnotate();
@@ -109,7 +109,7 @@ public class DiffJob implements Runnable {
 
     ControlFlowGraphDiff diffNew = new ControlFlowGraphDiff(cfgNew, cfgOld);
     ControlFlowBlockGraph diffBlockNew;
-    if (!diffJobData.getDiffJobOptions().isAnnotateDiff()) {
+    if (!diffJobData.getJobOptions().isAnnotateDiff()) {
       diffBlockNew = diffNew.diffGraph();
     } else {
       diffBlockNew = diffNew.diffGraphAnnotate();
@@ -136,25 +136,30 @@ public class DiffJob implements Runnable {
     //  Export Image
     //
     String fileName = String.format("%03d", diffJobData.getId());
-    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
-    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
-    if (cfgOld != null) {
-      ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
-      ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
+    String exportPath = diffJobData.getJobOptions().getExportPath();
+    ControlFlowExporter.exportObject(cfgDiffOld, exportPath, fileName + "_model_vuln");
+    ControlFlowExporter.exportObject(cfgDiffNew, exportPath, fileName + "_model_fixed");
+
+    String exportFormat = diffJobData.getJobOptions().getExportFormat();
+    if(exportFormat.equals("obj")) {
+      if (cfgOld != null) {
+        ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
+        ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");
+      }
+      if (cfgNew != null) {
+        ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
+        ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
+      }
+      ControlFlowExporter.exportGVImage(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld", exportFormat);
+      ControlFlowExporter.exportDot(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld");
+      ControlFlowExporter.exportGVImage(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew", exportFormat);
+      ControlFlowExporter.exportDot(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew");
     }
-    if (cfgNew != null) {
-      ControlFlowExporter.exportGVImage(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul", exportFormat);
-      ControlFlowExporter.exportDot(cfgNew.getGraph(), exportPath, fileName + "-graphNonvul");
-    }
-    ControlFlowExporter.exportGVImage(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld", exportFormat);
-    ControlFlowExporter.exportDot(cfgDiffOld.getGraph(), exportPath, fileName + "-graphDiffOld");
-    ControlFlowExporter.exportGVImage(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew", exportFormat);
-    ControlFlowExporter.exportDot(cfgDiffNew.getGraph(), exportPath, fileName + "-graphDiffNew");
   }
 
   private void showGraph(){
     GraphView view;
-    switch (diffJobData.getDiffJobOptions().getShownInterface()) {
+    switch (diffJobData.getJobOptions().getShownInterface()) {
       case "old":
         view = new GraphView(diffJobData.getOldGraph());
         break;

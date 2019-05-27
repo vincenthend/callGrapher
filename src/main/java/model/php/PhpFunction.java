@@ -2,13 +2,14 @@ package model.php;
 
 import model.graph.ControlFlowGraph;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * PhpClass PhpFunction, contains data about a function
  */
-public class PhpFunction implements Comparable<PhpFunction>{
+public class PhpFunction implements Comparable<PhpFunction>, Serializable{
   private String functionName;
   private String code;
   private String className;

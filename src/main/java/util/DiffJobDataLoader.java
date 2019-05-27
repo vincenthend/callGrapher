@@ -42,8 +42,8 @@ public class DiffJobDataLoader {
           }
         }
 
-        jobData.getDiffJobOptions().setExportPath("D:\\cfg");
-        jobData.getDiffJobOptions().setShownInterface("none");
+        jobData.getJobOptions().setExportPath("../model/");
+        jobData.getJobOptions().setShownInterface("none");
         jobList.add(jobData);
       }
     }

@@ -1,92 +1,34 @@
 package main;
 
-import analyzer.AbstractionAnalyzer;
 import analyzer.ControlFlowGraphAnalyzer;
-import logger.Logger;
 import model.DiffJobData;
+import model.JobData;
 import model.graph.ControlFlowGraph;
+import scanner.VulnerabilityScanner;
 import util.ControlFlowExporter;
-import util.DiffJobDataLoader;
-import util.FlowGraphMatcher;
 import util.builder.ControlFlowGraphTranslator;
 import view.GraphView;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Main {
 
   public static void main(String[] args) throws Exception {
-    Integer[] jobSelection = {0,1,3,5,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,32,33,34,36,37,38,39,41,42,43,44,46,47,48,49,50,51,52,53,54,56,57,58,59,60,61,62,66,67};
-//    Integer[] jobSelection = {0,1,3,5,8,10,11,12,13,14,15,16};
-//    Integer[] jobSelection = {0,1,3,5,8,13,14,15,16,17,18,20,21,22,23,24,25,31,32,33,34,36,37,38};
-//    Integer[] jobSelection = {11};
-    Integer[] checkSelection = {70};
-    List<DiffJobData> jobList = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", jobSelection);
-    List<DiffJobData> checkJob = DiffJobDataLoader.loadCSV("D:\\cfg\\job.csv", checkSelection);
-    Logger.info("Found " + jobList.size() + " job(s)");
+    // Generate Model
+//    VulnerabilityScanner.generateModel();
 
-    ExecutorService executorService = Executors.newFixedThreadPool(4);
-    for (DiffJobData diffJobData : jobList) {
-      Logger.info("Starting job with ID : " + diffJobData.getId());
-      executorService.submit(new DiffJob(diffJobData, 1));
-    }
-    for (DiffJobData diffJobData : checkJob) {
-      Logger.info("Starting job with ID : " + diffJobData.getId());
-      executorService.submit(new DiffJob(diffJobData, 1));
-    }
-    executorService.shutdown();
-    while(!executorService.isTerminated()){
-      //wait
-    }
+    // Scan Files
+    JobData jobData = new JobData(1);
+    jobData.setRoot("../repo/testrepo/");
+    jobData.addFileList("index.php");
+    jobData.setShownFunction("index.php::main");
 
-    // Scoring
-    Logger.info("Testing for Vulnerability");
-    StringBuilder sb = new StringBuilder();
-    for (DiffJobData job : checkJob) {
-      for (DiffJobData testCase : jobList) {
-        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getDiffGraphOld());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getDiffGraphOld());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getOldGraph());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getOldGraph());
-        try {
-          sb.append(matcher.countGraphSimilarity());
-        } catch (Exception e){
-          sb.append(-1);
-        }
-        if (jobList.get(jobList.size() - 1) != testCase) {
-          sb.append("\t");
-        }
-      }
-      sb.append("\n");
-    }
-    Logger.info(sb.toString());
+    VulnerabilityScanner.predictVulnerable(jobData);
 
-    Logger.info("Testing for Unvulnerability");
-    sb = new StringBuilder();
-    for (DiffJobData job : checkJob) {
-      for (DiffJobData testCase : jobList) {
-        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getDiffGraphNew());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getDiffGraphNew());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getOldGraph(),testCase.getNewGraph());
-//        FlowGraphMatcher matcher = new FlowGraphMatcher(job.getNewGraph(),testCase.getNewGraph());
-        try {
-          sb.append(matcher.countGraphSimilarity());
-        } catch (Exception e){
-          sb.append(-1);
-        }
-        if (jobList.get(jobList.size() - 1) != testCase) {
-          sb.append("\t");
-        }
-      }
-      sb.append("\n");
-    }
-    Logger.info(sb.toString());
 
     // SINGULAR DEBUG
 //    jobList.get(0).getDiffJobOptions().setShownInterface("diff");
-//    new DiffJob(jobList.get(0), 1).diffCommit();
+//    new DiffTask(jobList.get(0), 1).diffCommit();
 
     // DEBUG GUI
 //    drawGraph(jobList.get(0));
@@ -128,8 +70,8 @@ public class Main {
     view.show();
 
     String fileName = String.format("%03d", diffJobData.getId());
-    String exportPath = diffJobData.getDiffJobOptions().getExportPath();
-    String exportFormat = diffJobData.getDiffJobOptions().getExportFormat();
+    String exportPath = diffJobData.getJobOptions().getExportPath();
+    String exportFormat = diffJobData.getJobOptions().getExportFormat();
     ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
   }
 }

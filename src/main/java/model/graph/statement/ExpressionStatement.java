@@ -14,7 +14,7 @@ public class ExpressionStatement extends PhpStatement {
 
   @Override
   public PhpStatement cloneObject() {
-    return new ExpressionStatement(this.expressionType, this.statementContent);
+    return new ExpressionStatement(this.expressionType, this.getStatementContent());
   }
 
   public String getExpressionType() {

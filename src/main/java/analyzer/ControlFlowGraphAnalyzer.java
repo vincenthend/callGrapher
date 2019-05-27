@@ -3,6 +3,7 @@ package analyzer;
 import logger.Logger;
 import model.ProjectData;
 import model.php.PhpFunction;
+import util.FolderUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,24 +13,6 @@ import java.util.Map;
 
 public class ControlFlowGraphAnalyzer {
   private ProjectData projectData;
-
-  // TODO Move this from here
-  private List<File> listFilesForFolder(final File file) {
-    List<File> l = new ArrayList<>();
-    if (file.isDirectory()) {
-      File[] files = file.listFiles();
-      if (files != null) {
-        for (final File fileEntry : files) {
-          l.addAll(listFilesForFolder((fileEntry)));
-        }
-      }
-    } else {
-      if (file.getName().endsWith("php")) {
-        l.add(file);
-      }
-    }
-    return l;
-  }
 
 
   //TODO : Refactor this function
@@ -41,7 +24,7 @@ public class ControlFlowGraphAnalyzer {
     // List all functions
     for (String filePath : filePaths) {
       File file = new File(filePath);
-      fileList.addAll(listFilesForFolder(file));
+      fileList.addAll(FolderUtil.listFilesForFolder(file,"php"));
     }
 
     for (File file : fileList) {

@@ -1,12 +1,13 @@
 package model.graph.statement;
 
 import model.graph.statement.block.PhpBasicBlock;
+import java.io.Serializable;
 
-abstract public class PhpStatement {
-  protected int statementId;
-  protected StatementType statementType;
-  protected String statementContent;
-  protected PhpBasicBlock basicBlock;
+abstract public class PhpStatement implements Serializable {
+  private int statementId;
+  private StatementType statementType;
+  private String statementContent;
+  transient private PhpBasicBlock basicBlock;
 
   public PhpStatement(StatementType type, String code) {
     this.statementType = type;
@@ -52,7 +53,7 @@ abstract public class PhpStatement {
     this.statementId = statementId;
   }
 
-  public float similarTo(PhpStatement statement){
+  public float similarTo(PhpStatement statement) {
     return toString().equals(statement.toString()) ? 1 : 0;
   }
 }

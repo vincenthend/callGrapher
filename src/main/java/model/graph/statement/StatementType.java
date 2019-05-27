@@ -1,5 +1,7 @@
 package model.graph.statement;
 
+import java.io.Serializable;
+
 public enum StatementType {
   BRANCH,
   EXPRESSION,
