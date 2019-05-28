@@ -2,9 +2,11 @@ package predictor;
 
 import model.graph.ControlFlowGraph;
 import model.graph.statement.*;
+import model.graph.statement.special.DbQueryStatement;
 import model.graph.statement.special.IncludeStatement;
 import model.graph.statement.special.SpecialStatement;
 import model.graph.statement.special.ValidationStatement;
+import model.php.PhpFunction;
 import org.jgrapht.graph.DefaultEdge;
 import predictor.type.PredictedFunctionType;
 import predictor.type.PredictedVariableContent;
@@ -26,6 +28,8 @@ public class PhpStatementPredictor {
       returnStatement = predictStatement((BranchStatement) statement);
     } else if (statement instanceof ExpressionStatement){
       returnStatement = predictStatement((ExpressionStatement) statement);
+    } else if (statement instanceof FunctionCallStatement){
+      returnStatement = predictStatement((FunctionCallStatement) statement);
     }
     return returnStatement;
   }
@@ -48,9 +52,27 @@ public class PhpStatementPredictor {
     }
   }
 
+  public SpecialStatement predictStatement(FunctionCallStatement functionCallStatement) {
+    SpecialStatement queryStatement = predictQuery(functionCallStatement);
+    if (queryStatement != null) {
+      return queryStatement;
+    } else {
+      return null;
+    }
+  }
+
   private IncludeStatement predictInclude(ExpressionStatement expressionStatement) {
     if(expressionStatement.getExpressionType().equals("include") ){
       return new IncludeStatement(expressionStatement);
+    } else {
+      return null;
+    }
+  }
+
+  private DbQueryStatement predictQuery(FunctionCallStatement functionCall) {
+    String functionName = functionCall.getFunction().getFunctionName();
+    if(functionName.contains("mysql_query") || functionName.contains("mysqli_query") ){
+      return new DbQueryStatement(functionCall.getParameterMap().toString(), functionCall);
     } else {
       return null;
     }
