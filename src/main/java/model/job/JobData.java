@@ -1,4 +1,4 @@
-package model;
+package model.job;
 
 import model.graph.ControlFlowGraph;
 

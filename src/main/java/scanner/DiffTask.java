@@ -3,7 +3,7 @@ package scanner;
 import analyzer.AbstractionAnalyzer;
 import analyzer.ControlFlowGraphAnalyzer;
 import logger.Logger;
-import model.DiffJobData;
+import model.job.DiffJobData;
 import model.graph.ControlFlowBlockGraph;
 import model.graph.ControlFlowGraph;
 import model.php.PhpFunction;
@@ -141,7 +141,7 @@ public class DiffTask implements Runnable {
     ControlFlowExporter.exportObject(cfgDiffNew, exportPath, fileName + "_model_fixed");
 
     String exportFormat = diffJobData.getJobOptions().getExportFormat();
-    if(exportFormat.equals("obj")) {
+    if(!exportFormat.equals("obj")) {
       if (cfgOld != null) {
         ControlFlowExporter.exportGVImage(cfgOld.getGraph(), exportPath, fileName + "-graphVul", exportFormat);
         ControlFlowExporter.exportDot(cfgOld.getGraph(), exportPath, fileName + "-graphVul");

@@ -1,6 +1,6 @@
 package util;
 
-import model.DiffJobData;
+import model.job.DiffJobData;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -44,6 +44,7 @@ public class DiffJobDataLoader {
 
         jobData.getJobOptions().setExportPath("../model/");
         jobData.getJobOptions().setShownInterface("none");
+        jobData.getJobOptions().setExportFormat("svg");
         jobList.add(jobData);
       }
     }
@@ -54,7 +55,7 @@ public class DiffJobDataLoader {
     return jobList;
   }
 
-  public static List<DiffJobData> loadCSV(String csvFile, Integer[] selection) throws IOException {
+  public static List<DiffJobData> loadCSV(String csvFile, List<Integer> selection) throws IOException {
     List<DiffJobData> allJobs = loadCSV(csvFile);
     List<DiffJobData> selectedJobs = new LinkedList<>();
     for (Integer id : selection) {
