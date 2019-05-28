@@ -44,7 +44,7 @@ public class DiffJobDataLoader {
 
         jobData.getJobOptions().setExportPath("../model/");
         jobData.getJobOptions().setShownInterface("none");
-        jobData.getJobOptions().setExportFormat("svg");
+        jobData.getJobOptions().setExportFormat("dot");
         jobList.add(jobData);
       }
     }

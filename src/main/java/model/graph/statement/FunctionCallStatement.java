@@ -73,9 +73,6 @@ public class FunctionCallStatement extends PhpStatement {
       sb.append(functionType);
     }
 
-    if(!variableContent.isEmpty()){
-      sb.append(variableContent);
-    }
     return sb.toString();
   }
 }

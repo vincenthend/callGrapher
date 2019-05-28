@@ -235,25 +235,24 @@ public class ControlFlowGraphDiff {
 
   private void markChangedClosure(Set<PhpBasicBlock> blockSet){
     if(!blockSet.isEmpty()) {
-      List<Set<PhpBasicBlock>> reachableNodeList = new ArrayList<>();
-      for (PhpBasicBlock block : blockSet) {
+      Map<PhpBasicBlock, Set<PhpBasicBlock>> reachableNodeList = new HashMap<>();
+      for (PhpBasicBlock block : blockGraphOld.getGraph().vertexSet()) {
         BreadthFirstIterator<PhpBasicBlock, DefaultEdge> bfs = new BreadthFirstIterator<>(blockGraphOld.getGraph(), block);
         Set<PhpBasicBlock> reachableSet = new HashSet<>();
         while (bfs.hasNext()) {
           reachableSet.add(bfs.next());
         }
-        reachableNodeList.add(reachableSet);
+        reachableNodeList.put(block, reachableSet);
       }
 
       // Compute intersection
       Set<PhpBasicBlock> closure = new HashSet<>();
-      for(Set<PhpBasicBlock> reachableSet : reachableNodeList){
-        Set<PhpBasicBlock> temp = new HashSet<>();
-        temp.addAll(reachableNodeList.get(0));
-        for(Set<PhpBasicBlock> reachableSet2 : reachableNodeList) {
-          if(reachableSet2 != reachableSet) {
-            temp.retainAll(reachableSet2);
-            closure.addAll(temp);
+      for(PhpBasicBlock block : blockSet){
+        for(Map.Entry<PhpBasicBlock, Set<PhpBasicBlock>> entry : reachableNodeList.entrySet()){
+          if(!closure.contains(entry.getKey())) {
+            if (entry.getValue().contains(block)) {
+              closure.add(entry.getKey());
+            }
           }
         }
       }
